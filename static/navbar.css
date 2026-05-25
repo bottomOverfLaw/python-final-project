@@ -1,0 +1,48 @@
+/* NAVBAR */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* NAVBAR LIST */
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  background-color: white;
+
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* NAVBAR ITEMS */
+ul li {
+  margin: 15;
+}
+
+/* NAVBAR LINKS */
+ul li a {
+  display: block;
+  color: black;
+  text-align: center;
+  padding: 16px 20px;
+  text-decoration: none;
+
+  transition: 0.3s;
+}
+
+/* HOVER EFFECT */
+ul li a:hover {
+  background-color: aliceblue;
+}
+
+/* ACTIVE PAGE */
+ul li a.active {
+  background-color: #8ccdff;
+}
+
+.centre{
+    padding-left: 22%;
+}
