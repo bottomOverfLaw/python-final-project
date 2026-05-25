@@ -1,0 +1,24 @@
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="../static/navbar.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div>
+        <nav id="navbarMenu" class="navbar_menu align-centre" role="navigation">
+            <ul>
+                <li><img src="#" alt="logo"></li>
+            </ul>
+            <ul class="centre">
+                <li><a class="{% if current_page == 'home' %}active{% endif %}"
+                        href="/">Home</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="#">Accident Condition</a></li>
+                <li><a href="#">People & Injury</a></li>
+                <li><a href="#">Accident Analysis</a></li>
+                <li><a href="#">People Analysis</a></li>
+            </ul>
+        </nav>
+    </div>
+</body>
+</html>
