@@ -1,17 +1,25 @@
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import sqlite3
 import os
 import urllib.parse
 
+
+
 print("LOADING SERVER CODE")
 DB_NAME = "database/Movies.db"
 
 def render_page(page_title, content_html):
-    """Load base.html and insert title and content."""
     with open("templates/base.html", "r", encoding="utf-8") as f:
         base = f.read()
+
+    with open("templates/navbar.html", "r", encoding="utf-8") as f:
+        navbar = f.read()
+
+    base = base.replace("{{NAVBAR}}", navbar)
     base = base.replace("{{PAGE_TITLE}}", page_title)
     base = base.replace("{{PAGE_CONTENT}}", content_html)
+
     return base
 
 class RequestHandler(BaseHTTPRequestHandler):
@@ -20,7 +28,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         path = parsed_path.path
 
         if path == "/":
-            self.handle_simple_page("About", "templates/2_sample.html")
+            self.handle_simple_page("Home", "templates/2_sample.html")
+        elif path == "/about":
+            self.handle_simple_page("About", "templates/about.html")
         elif path == "/2X":
             self.handle_simple_page("2X Page", "templates/2_X.html")
         elif path.startswith("/static/"):
