@@ -1,25 +1,57 @@
 .card-container {
     display: flex;
+    flex-direction: column; /* stacks cards vertically one under the other */
     gap: 20px;
-    justify-content: center;
-    flex-wrap: wrap; /* allows stacking on small screens */
-    margin: 40px;
+    margin: 40px auto;
+    max-width: 900px;
 }
 
 .card {
-    width: 300px;
+    display: flex;          /* makes image and text sit side by side */
+    flex-direction: row;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    transition: 0.3s;
     border-radius: 5px;
     overflow: hidden;
     background: white;
+    transition: 0.3s;
 }
 
 .card:hover {
     box-shadow: 0 8px 16px rgba(0,0,0,0.3);
 }
 
+.container{
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 img {
-    width: 100%;
-    display: block;
+    width: 250px;           /* fixed width for the image */
+    object-fit: cover;      /* keeps image ratio without stretching */
+}
+
+.horizontal-card-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;  /* two equal columns */
+    gap: 20px;
+    margin: 40px auto;
+    max-width: 900px;
+}
+
+.horizontal-card {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    border-radius: 5px;
+    overflow: hidden;
+    background:  #FFF8F0;
+    transition: 0.3s;
+}
+
+.horizontal-card:hover {
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+}
+
+.horizontal-card-body {
+    padding: 30px;
 }
