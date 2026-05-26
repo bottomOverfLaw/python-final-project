@@ -6,17 +6,17 @@
 <body>
     <div>
         <nav id="navbarMenu" class="navbar_menu align-centre" role="navigation">
-            <ul>
-                <li><img src="#" alt="logo"></li>
+            <ul class="nav-left">
+                <li><img src="../static/images/logo.png" alt="logo"></li>
             </ul>
-            <ul class="centre">
+            <ul class="nav-centre">
                 <li><a class="{% if current_page == 'home' %}active{% endif %}"
                         href="/">Home</a></li>
                 <li><a href="/about">About</a></li>
-                <li><a href="#">Accident Condition</a></li>
-                <li><a href="#">People & Injury</a></li>
-                <li><a href="#">Accident Analysis</a></li>
-                <li><a href="#">People Analysis</a></li>
+                <li><a href="/accident_condition">Accident Condition</a></li>
+                <li><a href="/people_and_injury">People & Injury</a></li>
+                <li><a href="/accident_analysis">Accident Analysis</a></li>
+                <li><a href="/people_analysis">People Analysis</a></li>
             </ul>
         </nav>
     </div>
