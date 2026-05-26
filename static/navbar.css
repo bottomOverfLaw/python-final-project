@@ -1,48 +1,67 @@
 /* NAVBAR */
 nav {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    background-color: rgba(227, 83, 54, 0.5);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* NAVBAR LIST */
+/* NAVBAR LISTS */
 ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
 
-  display: flex;
-  background-color: darkseagreen;
+/* LOGO */
+.nav-left {
+    padding: 0 20px;
+}
 
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+.nav-left img {
+    height: 60px;          /* match this to your navbar height */
+    width: auto;           /* keeps the aspect ratio */
+    display: block;
+    object-fit: contain;   /* prevents cropping */
+}
+
+/* LINKS - centred */
+.nav-centre {
+    flex: 1;            /* takes up remaining space */
+    justify-content: center;
 }
 
 /* NAVBAR ITEMS */
 ul li {
-  margin: 15;
+    margin: 0;          /* fixed: was "margin: 15" which is invalid, needs a unit */
 }
 
 /* NAVBAR LINKS */
 ul li a {
-  display: block;
-  color: black;
-  text-align: center;
-  padding: 16px 20px;
-  text-decoration: none;
-
-  transition: 0.3s;
+    display: block;
+    color: black;
+    text-align: center;
+    padding: 16px 20px;
+    text-decoration: none;
+    transition: 0.3s;
 }
 
 /* HOVER EFFECT */
 ul li a:hover {
-  background-color: aliceblue;
+    background-color: #36afc8;
 }
 
 /* ACTIVE PAGE */
 ul li a.active {
-  background-color: #8ccdff;
+    background-color: #8ccdff;
 }
 
-.centre{
-    padding-left: 22%;
+img {
+  width: 25%;
+  height: 25%;
 }
