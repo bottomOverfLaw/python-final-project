@@ -28,7 +28,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         path = parsed_path.path
 
         if path == "/":
-            self.handle_simple_page("Home", "templates/2_sample.html")
+            self.handle_simple_page("About", "templates/2_sample.html")
         elif path == "/about":
             self.handle_simple_page("About", "templates/about.html")
         elif path == "/2X":
