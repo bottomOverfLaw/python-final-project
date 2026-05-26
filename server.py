@@ -7,7 +7,7 @@ import urllib.parse
 
 
 print("LOADING SERVER CODE")
-DB_NAME = "database/Movies.db"
+DB_NAME = "database/Road_Accidents.db"
 
 def render_page(page_title, content_html):
     with open("templates/base.html", "r", encoding="utf-8") as f:
@@ -28,11 +28,18 @@ class RequestHandler(BaseHTTPRequestHandler):
         path = parsed_path.path
 
         if path == "/":
-            self.handle_simple_page("About", "templates/2_sample.html")
+            self.handle_simple_page("Home", "templates/home.html")
         elif path == "/about":
             self.handle_simple_page("About", "templates/about.html")
-        elif path == "/2X":
-            self.handle_simple_page("2X Page", "templates/2_X.html")
+        elif path == "/accident_condition":
+            self.handle_simple_page("Accident Condition", "templates/accident_condition.html")
+        elif path == "/people_and_injury":
+            self.handle_simple_page("People and Injury", "templates/people_and_injury.html")
+        elif path == "/accident_analysis":
+            self.handle_simple_page("Accident Analysis", "templates/accident_analysis.html")
+        elif path == "/people_analysis":
+            self.handle_simple_page("People Analysis", "templates/people_analysis.html")
+            
         elif path.startswith("/static/"):
             self.handle_static(path)
         else:
