@@ -1,0 +1,56 @@
+ /* Main wrapper to keep the webpage content aligned nicely */
+    .page-wrapper {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Container for the 4 boxes directly below the heading */
+    .box-container {
+      display: flex;
+      justify-content: space-between; /* Aligns boxes side-by-side */
+      gap: 16px;                      /* Spaces the boxes evenly */
+      width: 100%;
+      margin-top: 24px;               /* Pushes the boxes down below the heading */
+      box-sizing: border-box;
+    }
+
+    /* Individual box styling */
+    .interactive-box {
+      flex: 1;                        /* Forces all 4 boxes to be the same width */
+      background-color: #ffffff;      
+      border: 1px solid #ccc;         
+      border-radius: 6px;             
+      padding: 16px;                  
+      text-align: center;             
+      outline: none;                  
+      transition: all 0.2s ease;      
+    }
+
+    /* Interactive states */
+    .interactive-box:hover {
+      border-color: #ab8585;          
+      transform: translateY(-2px);  
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);  
+    }
+
+
+    .interactive-box:focus {
+      border-color: #333333;
+      background-color: #fafafa;      
+    }
+
+    /* Text elements inside the boxes */
+    .text-top {
+      display: block;                 
+      font-size: 18px;
+      font-weight: bold;
+      color: #333333;
+      margin-bottom: 8px;             
+    }
+
+    .text-bottom {
+      display: block;
+      font-size: 14px;
+      color: #666666;
+    }
