@@ -55,3 +55,31 @@ img {
 .horizontal-card-body {
     padding: 30px;
 }
+
+.horizontal-card-container-sm{
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px auto;
+    max-width: 700px;
+    flex-wrap: wrap;
+}
+
+.horizontal-card-sm {
+    width: 250px;
+
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    border-radius: 5px;
+    overflow: hidden;
+    background: #FFF8F0;
+
+    transition: 0.3s;
+}
+
+.horizontal-card-sm:hover {
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+}
+
+.horizontal-card-body-sm {
+    padding: 12px;
+}

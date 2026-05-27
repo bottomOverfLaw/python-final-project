@@ -1,0 +1,284 @@
+<link rel="stylesheet" href="../static/people_injury.css">
+<div class="page-wrapper">
+ 
+        <!-- ── SECTION 1: INJURY OUTCOME SUMMARY ── -->
+        <section class="dashboard-section">
+            <h2 class="section-title">Injury outcome summary:</h2>
+ 
+            <div class="section-body">
+ 
+                <!-- LEFT FILTER -->
+                <div class="filter-panel">
+                    <div class="filter-dropdown">
+                        <button class="filter-toggle">Injury level <span>&#8964;</span></button>
+                        <div class="filter-content">
+                            <div class="checkbox-group">
+                                <label><input type="checkbox"> fatal</label>
+                                <label><input type="checkbox"> serious</label>
+                                <label><input type="checkbox"> other injury</label>
+                                <label><input type="checkbox"> no injury</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="btn-apply">apply</button>
+                        <button class="btn-cancel">cancel</button>
+                    </div>
+                </div>
+ 
+                <!-- BAR CHART -->
+                <div class="chart-container">
+                    <div class="bar-chart">
+                        <div class="y-axis">
+                            <span>100%</span><span>90%</span><span>80%</span>
+                            <span>70%</span><span>60%</span><span>50%</span>
+                            <span>40%</span><span>30%</span><span>20%</span>
+                            <span>10%</span><span>0%</span>
+                        </div>
+                        <div class="bar-wrapper">
+                            <div class="stacked-bar">
+                                <div class="bar-segment seg-green"  style="height: 17%"><span>72,749</span></div>
+                                <div class="bar-segment seg-yellow" style="height: 44%"><span>183,471</span></div>
+                                <div class="bar-segment seg-orange" style="height: 39%"><span>154,582</span></div>
+                            </div>
+                            <div class="bar-total">413,966</div>
+                        </div>
+                    </div>
+                    <div class="bar-legend">
+                        <span class="legend-dot orange"></span> Inj level3
+                        <span class="legend-dot yellow"></span> Inj level2
+                        <span class="legend-dot green"></span> Inj level1
+                    </div>
+                </div>
+ 
+                <!-- PICTOGRAM / SEGMENTED TOGGLE -->
+                <div class="pictogram-panel">
+                    <div class="chart-toggle">
+                        <button class="toggle-btn active" id="btnPictogram">Pictogram Chart</button>
+                        <button class="toggle-btn" id="btnSegmented">Segmented Chart</button>
+                    </div>
+                    <p class="chart-note">Each icon represents 1 person. Each age group total = 100 people (average)</p>
+ 
+                    <div class="pictogram-legend">
+                        <span class="dot fatal"></span> FATAL
+                        <span class="dot serious"></span> SERIOUS
+                        <span class="dot other"></span> OTHER INJURY
+                    </div>
+ 
+                    <!-- Age group rows -->
+                    <div class="age-rows">
+                        <div class="age-row">
+                            <div class="age-label">16–17<br><small>(100 people)</small></div>
+                            <div class="icon-grid" id="grid-1617"></div>
+                        </div>
+                        <div class="age-row">
+                            <div class="age-label">18–21<br><small>(100 people)</small></div>
+                            <div class="icon-grid" id="grid-1821"></div>
+                        </div>
+                        <div class="age-row">
+                            <div class="age-label">70+<br><small>(100 people)</small></div>
+                            <div class="icon-grid" id="grid-70plus"></div>
+                        </div>
+                    </div>
+                </div>
+ 
+                <!-- RIGHT FILTER -->
+                <div class="filter-panel">
+                    <div class="filter-group">
+                        <!-- DROPDOWN 1 -->
+                        <div class="filter-dropdown">
+                            <button class="filter-toggle">Injury level <span>&#8964;</span></button>
+                            <div class="filter-content">
+                                <div class="checkbox-group">
+                                    <label><input type="checkbox"> fatal</label>
+                                    <label><input type="checkbox"> serious</label>
+                                    <label><input type="checkbox"> other injury</label>
+                                    <label><input type="checkbox"> no injury</label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- DROPDOWN 2 -->
+                        <div class="filter-dropdown">
+                            <button class="filter-toggle">Age group <span>&#8964;</span></button>
+                            <div class="filter-content">
+                                <div class="checkbox-group">
+                                    <label><input type="checkbox"> 0-4</label>
+                                    <label><input type="checkbox"> 18-21</label>
+                                    <label><input type="checkbox"> 70+</label>
+                                    <label><input type="checkbox"> Unknown</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-buttons">
+                            <button class="btn-apply">apply</button>
+                            <button class="btn-cancel">cancel</button>
+                        </div>
+                    </div>
+                </div>
+ 
+            </div>
+        </section>
+ 
+        <!-- ── SECTION 2: EJECTED AND TAKEN TO HOSPITAL ── -->
+        <section class="dashboard-section">
+            <h2 class="section-title">Ejected and taken to the hospital:</h2>
+ 
+            <div class="section-body table-section">
+ 
+                <!-- LEFT FILTER -->
+                <div class="filter-panel">
+                    <div class="filter-icon">&#9663; Filter</div>
+                    <div class="filter-group">
+                        <div class="filter-static-label">Ejected:</div>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox"> Yes</label>
+                            <label><input type="checkbox"> No</label>
+                        </div>
+                        <div class="filter-static-label mt-10">Taken to the hospital:</div>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox"> Yes</label>
+                            <label><input type="checkbox"> No</label>
+                        </div>
+                        <label class="filter-label mt-10">Age group <span>&#8964;</span></label>
+                        <label class="filter-label mt-6">Type of person <span>&#8964;</span></label>
+                        <div class="checkbox-group mt-6">
+                            <label><input type="checkbox"> 0-4</label>
+                            <label><input type="checkbox"> 18-21</label>
+                            <label><input type="checkbox"> 70+</label>
+                            <label><input type="checkbox"> Unknown</label>
+                        </div>
+                        <div class="checkbox-group mt-6">
+                            <label><input type="checkbox"> driver</label>
+                            <label><input type="checkbox"> passenger</label>
+                            <label><input type="checkbox"> pedestrian</label>
+                            <label><input type="checkbox"> unknown</label>
+                        </div>
+                    </div>
+                </div>
+ 
+                <!-- TABLE -->
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Ejected</th>
+                                <th>Taken to the hospital</th>
+                                <th>Age group</th>
+                                <th>Type of person</th>
+                                <th>Total count <span class="sort-arrow">&#8964;</span></th>
+                                <th>% Fatality <span class="sort-arrow">&#8964;</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Yes</td>
+                                <td>Yes</td>
+                                <td>18-21</td>
+                                <td>driver</td>
+                                <td>1,204</td>
+                                <td>24%</td>
+                            </tr>
+                            <tr class="row-highlight">
+                                <td>No</td>
+                                <td>Yes</td>
+                                <td>40-43</td>
+                                <td>passenger</td>
+                                <td>5,801</td>
+                                <td>4%</td>
+                            </tr>
+                            <tr>
+                                <td>No</td>
+                                <td>No</td>
+                                <td>Unknown</td>
+                                <td>Unknown</td>
+                                <td>14,500</td>
+                                <td>0.8%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+ 
+            </div>
+        </section>
+ 
+</div>
+
+<script>
+    // - DROPDOWNS -
+const dropdowns = document.querySelectorAll(".filter-dropdown");
+dropdowns.forEach(dropdown => {
+    const toggle = dropdown.querySelector(".filter-toggle");
+    toggle.addEventListener("click", () => {
+        dropdown.classList.toggle("active");
+    });
+});
+// ── PICTOGRAM DATA (fatal%, serious%, other%, none%) ──
+const ageGroupData = {
+    "grid-1617": { fatal: 5,  serious: 30, other: 40 },
+    "grid-1821": { fatal: 8,  serious: 35, other: 35 },
+    "grid-70plus": { fatal: 20, serious: 40, other: 25 },
+};
+
+function buildIconGrid(gridId, data) {
+    const container = document.getElementById(gridId);
+    if (!container) return;
+    container.innerHTML = "";
+
+    const total = 100;
+    const counts = {
+        fatal:   data.fatal,
+        serious: data.serious,
+        other:   data.other,
+        none:    total - data.fatal - data.serious - data.other
+    };
+
+    for (const [type, count] of Object.entries(counts)) {
+        for (let i = 0; i < count; i++) {
+            const span = document.createElement("span");
+            span.classList.add("person-icon", type);
+            span.textContent = "♟";
+            container.appendChild(span);
+        }
+    }
+}
+
+// Build all grids on load
+Object.keys(ageGroupData).forEach(id => buildIconGrid(id, ageGroupData[id]));
+
+// ── TOGGLE BUTTONS ──
+const btnPictogram = document.getElementById("btnPictogram");
+const btnSegmented = document.getElementById("btnSegmented");
+
+btnPictogram.addEventListener("click", () => {
+    btnPictogram.classList.add("active");
+    btnSegmented.classList.remove("active");
+    // In a real app, swap chart type here
+});
+
+btnSegmented.addEventListener("click", () => {
+    btnSegmented.classList.add("active");
+    btnPictogram.classList.remove("active");
+});
+
+// ── SORTABLE TABLE ──
+document.querySelectorAll(".sort-arrow").forEach((arrow, colIndex) => {
+    let asc = true;
+    arrow.addEventListener("click", () => {
+        const table = document.querySelector(".data-table tbody");
+        const rows = Array.from(table.querySelectorAll("tr"));
+        // Offset by 4 because first 4 columns have no sort arrow
+        const actualCol = colIndex + 4;
+
+        rows.sort((a, b) => {
+            const aVal = a.cells[actualCol].textContent.replace(/[,%]/g, "").trim();
+            const bVal = b.cells[actualCol].textContent.replace(/[,%]/g, "").trim();
+            return asc
+                ? parseFloat(aVal) - parseFloat(bVal)
+                : parseFloat(bVal) - parseFloat(aVal);
+        });
+
+        asc = !asc;
+        rows.forEach(row => table.appendChild(row));
+    });
+});
+</script>
