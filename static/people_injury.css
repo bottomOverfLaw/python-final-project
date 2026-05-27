@@ -1,0 +1,392 @@
+/* ── BASE ── */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── PAGE WRAPPER ── */
+.page-wrapper {
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* ── SECTION ── */
+.dashboard-section {
+    background: #FFF8F0;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(227, 83, 54, 0.15);
+    padding: 20px;
+}
+
+.section-title {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #e3c8b0;
+    padding-bottom: 8px;
+}
+
+/* ── SECTION BODY (flex row) ── */
+.section-body {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+/* ── FILTER PANEL ── */
+.filter-panel {
+    min-width: 130px;
+    max-width: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+}
+
+.filter-icon {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.filter-dropdown{
+    width: 100%;
+}
+
+.filter-dropdown.active .filter-content {
+    display: block;
+}
+
+.filter-toggle {
+    width: 100%;
+
+    border: 1px solid #ccc;
+    border-radius: 4px;
+
+    background: #f0e8dc;
+
+    padding: 6px 8px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    cursor: pointer;
+
+    transition: background 0.2s;
+}
+
+.filter-toggle:hover {
+    background: #e8dccd;
+}
+
+.filter-label {
+    font-size: 12px;
+    font-weight: 600;
+    background: #f0e8dc;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 3px 8px;
+    display: block;
+}
+
+.filter-content {
+    display: none;
+
+    margin-top: 4px;
+
+    border: 1px solid #ddd;
+    border-radius: 4px;
+
+    background: white;
+
+    padding: 8px;
+}
+
+.filter-static-label {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-apply, .btn-cancel {
+    font-size: 11px;
+    padding: 3px 8px;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    cursor: pointer;
+    background: #f5f5f5;
+}
+
+.btn-apply:hover { background: #36afc8; color: white; }
+.btn-cancel:hover { background: #e35336; color: white; }
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 12px;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.mt-10 { margin-top: 10px; }
+.mt-6  { margin-top: 6px; }
+
+/* ── BAR CHART ── */
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 160px;
+}
+
+.bar-chart {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    height: 220px;
+}
+
+.y-axis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 210px;
+    text-align: right;
+    font-size: 10px;
+    color: #777;
+}
+
+.bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.stacked-bar {
+    display: flex;
+    flex-direction: column-reverse; /* bottom segment first */
+    width: 80px;
+    height: 210px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.bar-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: white;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+.bar-segment:hover { opacity: 0.85; }
+
+.seg-orange { background-color: #e35336; }
+.seg-yellow { background-color: #f0b429; }
+.seg-green  { background-color: #57b894; }
+
+.bar-total {
+    font-size: 11px;
+    color: #555;
+    font-weight: 600;
+}
+
+.bar-legend {
+    display: flex;
+    gap: 10px;
+    font-size: 11px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.legend-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 3px;
+}
+
+.legend-dot.orange { background: #e35336; }
+.legend-dot.yellow { background: #f0b429; }
+.legend-dot.green  { background: #57b894; }
+
+/* ── PICTOGRAM PANEL ── */
+.pictogram-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chart-toggle {
+    display: flex;
+    gap: 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+    width: fit-content;
+}
+
+.toggle-btn {
+    padding: 5px 14px;
+    font-size: 11px;
+    border: none;
+    background: #f0e8dc;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.toggle-btn.active {
+    background: #36afc8;
+    color: white;
+}
+
+.chart-note {
+    font-size: 10px;
+    color: #888;
+}
+
+.pictogram-legend {
+    display: flex;
+    gap: 14px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
+.dot.fatal   { background: #e35336; }
+.dot.serious { background: #f0b429; }
+.dot.other   { background: #36afc8; }
+
+/* ── AGE ROWS ── */
+.age-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.age-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.age-label {
+    min-width: 70px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: right;
+    line-height: 1.4;
+}
+
+.age-label small {
+    font-weight: 400;
+    color: #888;
+}
+
+.icon-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    max-width: 320px;
+}
+
+.person-icon {
+    font-size: 11px;
+    line-height: 1;
+}
+
+.person-icon.fatal   { color: #e35336; }
+.person-icon.serious { color: #f0b429; }
+.person-icon.other   { color: #36afc8; }
+.person-icon.none    { color: #ccc; }
+
+.ai-note {
+    font-size: 10px;
+    color: #aaa;
+    font-style: italic;
+}
+
+/* ── TABLE SECTION ── */
+.table-section {
+    align-items: flex-start;
+}
+
+.table-wrapper {
+    flex: 1;
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.data-table thead tr {
+    background-color: #36afc8;
+    color: white;
+}
+
+.data-table th {
+    padding: 10px 14px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.sort-arrow {
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+.data-table td {
+    padding: 10px 14px;
+    text-align: center;
+    border-bottom: 1px solid #e8ddd0;
+}
+
+.data-table tbody tr:hover {
+    background-color: #fdeee8;
+}
+
+.row-highlight {
+    background-color: #d6eef5;
+}
+
+.row-highlight:hover {
+    background-color: #c5e5f0 !important;
+}
+
