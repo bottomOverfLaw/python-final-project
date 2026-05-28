@@ -1,0 +1,35 @@
+:root {
+
+    /* ── BRAND / NAVBAR ── */
+    --colour-navbar:        rgba(227, 83, 54, 0.5);  /* navbar background */
+    --colour-primary:       #e35336;                 /* orange-red (fatal, cancel, logo accent) */
+    --colour-primary-dark:  #006884;                 /* dark teal (navbar hover) */
+    --colour-primary-light: #8ccdff;                 /* light blue (active page) */
+    --colour-teal:          #36afc8;                 /* teal (apply hover, toggle active) */
+
+    /* ── PAGE BACKGROUND ── */
+    --colour-bg-page:       #F5F5DC;                 /* beige page background */
+    --colour-bg-card:       #FFF8F0;                 /* warm white card background */
+    --colour-bg-button:     #f5f5f5;                 /* default button background */
+    --colour-bg-filter:     #f0e8dc;                 /* filter label background */
+    --colour-bg-hover:      #e8dccd;                 /* filter toggle hover */
+
+    /* ── CHART SEGMENTS / INJURY LEVELS ── */
+    --colour-fatal:         #e35336;                 /* fatal / injury level 3 (orange-red) */
+    --colour-serious:       #f0b429;                 /* serious / injury level 2 (yellow) */
+    --colour-other:         #57b894;                 /* other injury / injury level 1 (green) */
+
+    /* ── BORDERS & SHADOWS ── */
+    --colour-border:        #e3c8b0;                 /* section border / divider */
+    --colour-border-light:  #aaa;                    /* button border */
+    --colour-shadow:        rgba(227, 83, 54, 0.15); /* card box shadow */
+
+    /* ── TEXT ── */
+    --colour-text:          #333;                    /* main text */
+    --colour-text-muted:    #555;                    /* secondary text */
+    --colour-text-faint:    #777;                    /* axis labels, hints */
+    --colour-text-disabled: #ccc;                    /* inactive icons */
+    --colour-text-white:    #ffffff;                 /* text on dark backgrounds */
+
+    
+}
