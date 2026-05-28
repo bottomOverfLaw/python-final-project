@@ -54,3 +54,112 @@
       font-size: 14px;
       color: #666666;
     }
+
+      new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Region 1', 'Region 2', 'Region 3'],
+      datasets: [{
+        label: 'Accident number',
+        data: [61.2, 60.8, 61.5],
+        backgroundColor: ['#534AB7', '#1D9E75', '#D85A30'],
+        borderRadius: 4,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: { display: false }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: '#666', font: { size: 12 } }
+        },
+        y: {
+          min: 60.0,
+          max: 62.0,
+          ticks: {
+            color: '#666',
+            font: { size: 11 },
+            stepSize: 0.4,
+            callback: function(v) { return v.toFixed(1); }
+          },
+          grid: { color: 'rgba(0,0,0,0.06)' }
+        }
+      }
+    }
+  });
+
+
+  var segments = [
+    { label: 'Vehicle1', value: 32, color: '#1D9E75' },
+    { label: 'Vehicle2', value: 24, color: '#534AB7' },
+    { label: 'Vehicle3', value: 18, color: '#9B8DD4' },
+    { label: 'Vehicle4', value: 15, color: '#D85A30' },
+    { label: 'Vehicle5', value: 11, color: '#185FA5' }
+  ];
+
+  var legendEl = document.getElementById('pieLegend');
+  segments.forEach(function(d) {
+    var item = document.createElement('div');
+    item.className = 'pie-legend-item';
+    item.innerHTML =
+      '<span class="pie-legend-sq" style="background:' + d.color + '"></span>' +
+      '<span class="pie-legend-lbl">' + d.label + '</span>' +
+      '<span class="pie-legend-val">' + d.value + '%</span>';
+    legendEl.appendChild(item);
+  });
+
+  var pieCanvas = document.getElementById('pieChart');
+  var tooltip   = document.getElementById('pieTooltip');
+  var ttName    = document.getElementById('tt-name');
+  var ttPct     = document.getElementById('tt-pct');
+
+  new Chart(pieCanvas, {
+    type: 'pie',
+    data: {
+      labels: segments.map(function(d) { return d.label; }),
+      datasets: [{
+        data:            segments.map(function(d) { return d.value; }),
+        backgroundColor: segments.map(function(d) { return d.color; }),
+        borderColor:     '#ffffff',
+        borderWidth:     2,
+        hoverOffset:     10
+      }]
+    },
+    options: {
+      responsive: false,
+      plugins: {
+        legend:  { display: false },
+        tooltip: { enabled: false },
+        datalabels: {
+          color: '#ffffff',
+          font:  { size: 11, weight: '500' },
+          formatter: function(val, ctx) {
+            return ctx.chart.data.labels[ctx.dataIndex];
+          },
+          textShadowBlur:  4,
+          textShadowColor: 'rgba(0,0,0,0.5)'
+        }
+      },
+      onHover: function(evt, els) {
+        if (els.length) {
+          var i = els[0].index;
+          ttName.textContent = segments[i].label;
+          ttPct.textContent  = segments[i].value + '% of total';
+          var pr = pieCanvas.parentElement.getBoundingClientRect();
+          tooltip.style.left    = (evt.native.clientX - pr.left + 14) + 'px';
+          tooltip.style.top     = (evt.native.clientY - pr.top  - 40) + 'px';
+          tooltip.style.opacity = '1';
+          pieCanvas.style.cursor = 'pointer';
+        } else {
+          tooltip.style.opacity  = '0';
+          pieCanvas.style.cursor = 'default';
+        }
+      }
+    }
+  });

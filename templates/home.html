@@ -1,43 +1,354 @@
 <link rel="stylesheet" href="../static/home.css">
+
+<style>
+  /* ── Reset & base ── */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── 4 Boxes ── */
+  .box-container {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .interactive-box {
+    flex: 1;
+    min-width: 140px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    user-select: none;
+    cursor: default;
+  }
+
+  .text-top {
+    font-size: 22px;
+    font-weight: 700;
+    color: #534AB7;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .text-bottom {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.4;
+  }
+
+  /* ── Charts row ── */
+  .charts-row {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .chart-panel {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    padding: 20px 20px 16px;
+  }
+
+  .chart-heading {
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    margin: 0 0 3px;
+    color: #1a1a18;
+  }
+
+  .chart-subheading {
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+    margin: 0 0 16px;
+  }
+
+  /* Bar chart custom legend */
+  .bar-legend {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .bar-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #555;
+  }
+
+  .bar-legend-sq {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* Pie chart internals */
+  .pie-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .pie-box { position: relative; }
+
+  .pie-tooltip {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 7px 11px;
+    font-size: 13px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 10;
+  }
+
+  .pie-tooltip b { display: block; font-weight: 600; color: #1a1a18; margin-bottom: 2px; }
+  .pie-tooltip span { color: #666; font-size: 12px; }
+
+  .pie-legend { display: flex; flex-direction: column; gap: 8px; }
+
+  .pie-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #555;
+  }
+
+  .pie-legend-sq { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+  .pie-legend-lbl { flex: 1; }
+  .pie-legend-val { font-weight: 600; color: #1a1a18; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: #888;
+    margin-top: 36px;
+    padding-top: 16px;
+    border-top: 1px solid #ddd;
+  }
+</style>
+
 <div class="page-wrapper">
 
-  <h1>Welcome to </h1>
-
-  <div style="padding:16px; border:1px solid #ccc; border-radius:6px; background-color:#ab8585;">
-    <h2 style="font-size:22px; font-weight:bold;">Interesting facts:</h2>
-    <p style="font-size:14px;">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quasi rerum ipsum ipsa temporibus, nisi natus omnis expedita debitis, aspernatur et, quo ullam. Architecto atque asperiores quis inventore iusto omnis explicabo!</p>
+  <!-- ── Intro banner ── -->
+  <div class="intro-banner">
+    <h2>Investigate road accidents in</h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc maximus, nulla ut commodo sagittis, sapien dui mattis dui, non pulvinar lorem felis nec erat.</p>
   </div>
 
-  <!-- Heading -->
-  <h3 style="text-align: center; margin-top: 40px;">4 key factors:</h3>
+  <!-- ── 4 Key factors heading ── -->
+  <h3 class="section-heading">4 Key factors:</h3>
 
-  <!-- 4 Boxes directly below the heading -->
+  <!-- ── 4 Boxes ── -->
   <div class="box-container">
 
-    <!-- Box 1 -->
-    <div class="interactive-box" contenteditable="true">
-      <span class="text-top">Factor 1</span>
-      <span class="text-bottom">Detail description</span>
+    <div class="interactive-box">
+      <span class="text-top">58,965</span>
+      <span class="text-bottom">Total crashes</span>
     </div>
 
-    <!-- Box 2 -->
-    <div class="interactive-box" contenteditable="true">
-      <span class="text-top">Factor 2</span>
-      <span class="text-bottom">Detail description</span>
+    <div class="interactive-box">
+      <span class="text-top">56</span>
+      <span class="text-bottom">Fatalities</span>
     </div>
 
-    <!-- Box 3 -->
-    <div class="interactive-box" contenteditable="true">
-      <span class="text-top">Factor 3</span>
-      <span class="text-bottom">Detail description</span>
+    <div class="interactive-box">
+      <span class="text-top">50 km/h</span>
+      <span class="text-bottom">Most common Speed Zone</span>
     </div>
 
-    <!-- Box 4 -->
-    <div class="interactive-box" contenteditable="true">
-      <span class="text-top">Factor 4</span>
-      <span class="text-bottom">Detail description</span>
+    <div class="interactive-box">
+      <span class="text-top">25%</span>
+      <span class="text-bottom">Crash during night time</span>
     </div>
 
   </div>
 
+  <!-- ── Charts row ── -->
+  <div class="charts-row">
+
+    <!-- LEFT: Bar chart — accident number by region -->
+    <div class="chart-panel" id="bar-graph-panel">
+      <h3 class="chart-heading">Accidents by region</h3>
+
+      <div class="bar-legend">
+        <div class="bar-legend-item"><span class="bar-legend-sq" style="background:#534AB7"></span>Region 1</div>
+        <div class="bar-legend-item"><span class="bar-legend-sq" style="background:#1D9E75"></span>Region 2</div>
+        <div class="bar-legend-item"><span class="bar-legend-sq" style="background:#D85A30"></span>Region 3</div>
+      </div>
+
+      <div style="position:relative; width:100%; height:280px;">
+        <canvas id="barChart" role="img" aria-label="Bar chart: Region 1 61.2k, Region 2 60.8k, Region 3 61.5k accidents">Region 1: 61.2k, Region 2: 60.8k, Region 3: 61.5k.</canvas>
+      </div>
+      <p style="text-align:center; font-size:12px; color:#888; margin-top:8px;">accident number</p>
+    </div>
+
+    <!-- RIGHT: Pie chart — accidents by vehicle -->
+    <div class="chart-panel" id="pie-chart-panel">
+      <h3 class="chart-heading">Accidents by vehicle</h3>
+
+      <div class="pie-wrap">
+        <div class="pie-box">
+          <canvas
+            id="pieChart"
+            width="200"
+            height="200"
+            role="img"
+            aria-label="Pie chart: Vehicle1 32%, Vehicle2 24%, Vehicle3 18%, Vehicle4 15%, Vehicle5 11%"
+          >Vehicle1 32%, Vehicle2 24%, Vehicle3 18%, Vehicle4 15%, Vehicle5 11%.</canvas>
+          <div class="pie-tooltip" id="pieTooltip">
+            <b id="tt-name"></b>
+            <span id="tt-pct"></span>
+          </div>
+        </div>
+        <div class="pie-legend" id="pieLegend"></div>
+      </div>
+      <p style="text-align:center; font-size:12px; color:#888; margin-top:12px;">accidents by vehicle</p>
+    </div>
+
+  </div>
+
+  <div class="footer">Copyrights, students numbers</div>
+
 </div>
+
+<!-- Chart.js + DataLabels -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<script>
+  Chart.register(ChartDataLabels);
+
+  /* ════════════ BAR CHART ════════════ */
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Region 1', 'Region 2', 'Region 3'],
+      datasets: [{
+        label: 'Accident number',
+        data: [61.2, 60.8, 61.5],
+        backgroundColor: ['#534AB7', '#1D9E75', '#D85A30'],
+        borderRadius: 4,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: { display: false }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: '#666', font: { size: 12 } }
+        },
+        y: {
+          min: 60.0,
+          max: 62.0,
+          ticks: {
+            color: '#666',
+            font: { size: 11 },
+            stepSize: 0.4,
+            callback: function(v) { return v.toFixed(1); }
+          },
+          grid: { color: 'rgba(0,0,0,0.06)' }
+        }
+      }
+    }
+  });
+
+  /* ════════════ PIE CHART ════════════ */
+  var segments = [
+    { label: 'Vehicle1', value: 32, color: '#1D9E75' },
+    { label: 'Vehicle2', value: 24, color: '#534AB7' },
+    { label: 'Vehicle3', value: 18, color: '#9B8DD4' },
+    { label: 'Vehicle4', value: 15, color: '#D85A30' },
+    { label: 'Vehicle5', value: 11, color: '#185FA5' }
+  ];
+
+  var legendEl = document.getElementById('pieLegend');
+  segments.forEach(function(d) {
+    var item = document.createElement('div');
+    item.className = 'pie-legend-item';
+    item.innerHTML =
+      '<span class="pie-legend-sq" style="background:' + d.color + '"></span>' +
+      '<span class="pie-legend-lbl">' + d.label + '</span>' +
+      '<span class="pie-legend-val">' + d.value + '%</span>';
+    legendEl.appendChild(item);
+  });
+
+  var pieCanvas = document.getElementById('pieChart');
+  var tooltip   = document.getElementById('pieTooltip');
+  var ttName    = document.getElementById('tt-name');
+  var ttPct     = document.getElementById('tt-pct');
+
+  new Chart(pieCanvas, {
+    type: 'pie',
+    data: {
+      labels: segments.map(function(d) { return d.label; }),
+      datasets: [{
+        data:            segments.map(function(d) { return d.value; }),
+        backgroundColor: segments.map(function(d) { return d.color; }),
+        borderColor:     '#ffffff',
+        borderWidth:     2,
+        hoverOffset:     10
+      }]
+    },
+    options: {
+      responsive: false,
+      plugins: {
+        legend:  { display: false },
+        tooltip: { enabled: false },
+        datalabels: {
+          color: '#ffffff',
+          font:  { size: 11, weight: '500' },
+          formatter: function(val, ctx) {
+            return ctx.chart.data.labels[ctx.dataIndex];
+          },
+          textShadowBlur:  4,
+          textShadowColor: 'rgba(0,0,0,0.5)'
+        }
+      },
+      onHover: function(evt, els) {
+        if (els.length) {
+          var i = els[0].index;
+          ttName.textContent = segments[i].label;
+          ttPct.textContent  = segments[i].value + '% of total';
+          var pr = pieCanvas.parentElement.getBoundingClientRect();
+          tooltip.style.left    = (evt.native.clientX - pr.left + 14) + 'px';
+          tooltip.style.top     = (evt.native.clientY - pr.top  - 40) + 'px';
+          tooltip.style.opacity = '1';
+          pieCanvas.style.cursor = 'pointer';
+        } else {
+          tooltip.style.opacity  = '0';
+          pieCanvas.style.cursor = 'default';
+        }
+      }
+    }
+  });
+
+
+</script>
