@@ -7,7 +7,7 @@
 
 /* ── PAGE WRAPPER ── */
 .page-wrapper {
-    max-width: 1100px;
+    max-width: 1400px;
     margin: 30px auto;
     padding: 0 20px;
     display: flex;
@@ -156,6 +156,7 @@
     flex-direction: column;
     align-items: center;
     min-width: 160px;
+    align-self: flex-end;
 }
 
 .bar-chart {
@@ -239,7 +240,8 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
+    margin-left: 100px;
 }
 
 .chart-toggle {
@@ -319,7 +321,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 2px;
-    max-width: 320px;
+    max-width: 400px;
 }
 
 .person-icon {
@@ -331,12 +333,6 @@
 .person-icon.serious { color: #f0b429; }
 .person-icon.other   { color: #36afc8; }
 .person-icon.none    { color: #ccc; }
-
-.ai-note {
-    font-size: 10px;
-    color: #aaa;
-    font-style: italic;
-}
 
 /* ── TABLE SECTION ── */
 .table-section {
@@ -356,7 +352,7 @@
 
 .data-table thead tr {
     background-color: #36afc8;
-    color: white;
+    color: #333;
 }
 
 .data-table th {
