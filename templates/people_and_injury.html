@@ -28,26 +28,13 @@
 
             <!-- BAR CHART -->
             <div class="chart-container">
-                <div class="bar-chart">
-                    <div class="y-axis">
-                        <span>100%</span><span>90%</span><span>80%</span>
-                        <span>70%</span><span>60%</span><span>50%</span>
-                        <span>40%</span><span>30%</span><span>20%</span>
-                        <span>10%</span><span>0%</span>
-                    </div>
-                    <div class="bar-wrapper">
-                        <div class="stacked-bar">
-                            <div class="bar-segment seg-green"  style="height: 17%"><span>72,749</span></div>
-                            <div class="bar-segment seg-yellow" style="height: 44%"><span>183,471</span></div>
-                            <div class="bar-segment seg-orange" style="height: 39%"><span>154,582</span></div>
-                        </div>
-                        <div class="bar-total">413,966</div>
-                    </div>
+                <div style="position:relative; width:180px; height:280px;">
+                    <canvas id="injurySummaryChart" role="img" aria-label="Stacked bar chart: Injury outcome summary"></canvas>
                 </div>
                 <div class="bar-legend">
-                    <span class="legend-dot orange"></span> Inj level3
-                    <span class="legend-dot yellow"></span> Inj level2
-                    <span class="legend-dot green"></span> Inj level1
+                    <div class="bar-legend-item"><span class="bar-legend-sq" style="background:#e35336"></span> Inj level3</div>
+                    <div class="bar-legend-item"><span class="bar-legend-sq" style="background:#f0b429"></span> Inj level2</div>
+                    <div class="bar-legend-item"><span class="bar-legend-sq" style="background:#57b894"></span> Inj level1</div>
                 </div>
             </div>
 
@@ -213,6 +200,8 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script>
 // ── SHOW APPLY/CANCEL ONLY WHEN A CHECKBOX IS CHECKED ──
 function updateFilterButtons() {
@@ -259,18 +248,34 @@ function buildIconGrid(gridId, data) {
     const container = document.getElementById(gridId);
     if (!container) return;
     container.innerHTML = "";
+
     const counts = {
         fatal:   data.fatal,
         serious: data.serious,
         other:   data.other,
         none:    100 - data.fatal - data.serious - data.other
     };
+
+    const colors = {
+        fatal:   "#e35336",
+        serious: "#f0b429",
+        other:   "#36afc8",
+        none:    "#ccc"
+    };
+
     for (const [type, count] of Object.entries(counts)) {
         for (let i = 0; i < count; i++) {
-            const span = document.createElement("span");
-            span.classList.add("person-icon", type);
-            span.textContent = "♟";
-            container.appendChild(span);
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 24 24");
+            svg.setAttribute("width", "12");
+            svg.setAttribute("height", "12");
+            svg.setAttribute("fill", colors[type]);
+            svg.classList.add("person-icon", type);
+            svg.innerHTML = `
+                <circle cx="12" cy="5" r="3"/>
+                <path d="M12 10c-4 0-6 2-6 4v2h12v-2c0-2-2-4-6-4z"/>
+            `;
+            container.appendChild(svg);
         }
     }
 }
@@ -293,5 +298,72 @@ document.querySelectorAll(".sort-arrow").forEach((arrow, colIndex) => {
         asc = !asc;
         rows.forEach(row => table.appendChild(row));
     });
+});
+
+// ── STACKED BAR CHART ──
+Chart.register(ChartDataLabels);
+
+new Chart(document.getElementById("injurySummaryChart"), {
+    type: "bar",
+    data: {
+        labels: [""],
+        datasets: [
+            {
+                label: "Inj level1 (no injury)",
+                data: [72749],
+                backgroundColor: "#57b894",
+                borderRadius: 0,
+                borderSkipped: false
+            },
+            {
+                label: "Inj level2 (serious)",
+                data: [183471],
+                backgroundColor: "#f0b429",
+                borderSkipped: false
+            },
+            {
+                label: "Inj level3 (fatal)",
+                data: [154582],
+                backgroundColor: "#e35336",
+                borderSkipped: false,
+                borderRadius: { topLeft: 4, topRight: 4 }
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ` ${ctx.dataset.label}: ${ctx.raw.toLocaleString()}`
+                }
+            },
+            datalabels: {
+                color: "white",
+                font: { size: 10, weight: "600" },
+                formatter: val => val.toLocaleString(),
+                display: ctx => ctx.raw > 10000
+            }
+        },
+        scales: {
+            x: {
+                stacked: true,
+                grid: { display: false },
+                ticks: { display: false }
+            },
+            y: {
+                stacked: true,
+                max: 450000,
+                ticks: {
+                    color: "#777",
+                    font: { size: 10 },
+                    callback: v => (v / 1000).toFixed(0) + "k"
+                },
+                grid: { color: "rgba(0,0,0,0.06)" }
+            }
+        }
+    }
 });
 </script>

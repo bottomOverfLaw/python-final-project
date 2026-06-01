@@ -1,0 +1,328 @@
+<link rel="stylesheet" href="../static/people_analysis.css">
+
+<div class="page-wrapper">
+
+    <section class="dashboard-section">
+
+        <div class="section-body">
+
+            <!-- LEFT FILTER -->
+            <div class="filter-panel">
+                <div class="filter-icon">&#9663; Filter</div>
+                <div class="filter-group">
+
+                    <div class="filter-dropdown">
+                        <button class="filter-toggle">Injury level <span>&#8964;</span></button>
+                        <div class="filter-content">
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" value="fatal"> fatal</label>
+                                <label><input type="checkbox" value="serious"> serious</label>
+                                <label><input type="checkbox" value="other injury"> other injury</label>
+                                <label><input type="checkbox" value="no injury"> no injury</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-dropdown">
+                        <button class="filter-toggle">Age group <span>&#8964;</span></button>
+                        <div class="filter-content">
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" value="0-4"> 0-4</label>
+                                <label><input type="checkbox" value="18-21"> 18-21</label>
+                                <label><input type="checkbox" value="70+"> 70+</label>
+                                <label><input type="checkbox" value="Unknown"> Unknown</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-dropdown">
+                        <button class="filter-toggle">Light condition <span>&#8964;</span></button>
+                        <div class="filter-content">
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" value="day"> day</label>
+                                <label><input type="checkbox" value="dusk/dawn"> dusk/dawn</label>
+                                <label><input type="checkbox" value="dark no street light"> dark no street light</label>
+                                <label><input type="checkbox" value="..."> ...</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="filter-buttons">
+                    <button class="btn-apply">apply</button>
+                    <button class="btn-cancel">cancel</button>
+                </div>
+            </div>
+
+            <!-- MAIN CONTENT: TABLE + CHART -->
+            <div class="main-content">
+
+                <!-- ANALYSIS BUTTONS -->
+                <div class="action-buttons">
+                    <button class="btn-analysis" id="btnAnalysis">Analysis</button>
+                    <button class="btn-clear" id="btnClear">Clear</button>
+                </div>
+
+                <!-- TABLE -->
+                <div class="table-wrapper">
+                    <table class="data-table" id="analysisTable">
+                        <thead>
+                            <tr>
+                                <th>Age group <span class="sort-arrow" data-col="0">&#8964;</span></th>
+                                <th>Type of person <span class="sort-arrow" data-col="1">&#8964;</span></th>
+                                <th>Speed zone <span class="sort-arrow" data-col="2">&#8964;</span></th>
+                                <th>Injury rate <span class="sort-arrow" data-col="3">&#8964;</span></th>
+                                <th class="col-above">Above average</th>
+                                <th>Injury</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td>18-21</td>
+                                <td>Driver</td>
+                                <td>100</td>
+                                <td>6.4%</td>
+                                <td class="above-avg positive">+2.1pp</td>
+                                <td>Fatal</td>
+                            </tr>
+                            <tr class="row-highlight">
+                                <td>70+</td>
+                                <td>Pedestrian</td>
+                                <td>50</td>
+                                <td>5.8%</td>
+                                <td class="above-avg positive">+1.5pp</td>
+                                <td>Fatal</td>
+                            </tr>
+                            <tr>
+                                <td>22-24</td>
+                                <td>Passengers</td>
+                                <td>50</td>
+                                <td>3.9%</td>
+                                <td class="above-avg negative">-0.5pp</td>
+                                <td>Fatal</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- BAR CHART -->
+                <div class="chart-area">
+                    <div class="chart-legend">
+                        <span class="legend-bar-box"></span> Injury rate
+                    </div>
+                    <div style="position:relative; width:100%; height:220px;">
+                        <canvas id="injuryRateChart" role="img" aria-label="Bar chart: Injury rate by age group"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<!-- WARNING POPUP -->
+<div class="popup-overlay" id="popupOverlay">
+    <div class="popup-box" id="popupBox">
+        <div class="popup-icon" id="popupIcon">⚠️</div>
+        <h3 id="popupTitle">Warning</h3>
+        <p id="popupMessage">Only injury level has been selected. Do you want to continue anyway?</p>
+        <div class="popup-buttons">
+            <button class="btn-popup-confirm" id="btnPopupConfirm">Continue</button>
+            <button class="btn-popup-cancel" id="btnPopupCancel">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<script>
+Chart.register(ChartDataLabels);
+
+const allData = [
+    { age: "18-21", person: "Driver",     speed: 100, injuryRate: 6.4, above: "+2.1pp", aboveClass: "positive", injury: "Fatal" },
+    { age: "70+",   person: "Pedestrian", speed: 50,  injuryRate: 5.8, above: "+1.5pp", aboveClass: "positive", injury: "Fatal" },
+    { age: "22-24", person: "Passengers", speed: 50,  injuryRate: 3.9, above: "-0.5pp", aboveClass: "negative", injury: "Fatal" },
+];
+
+let currentData = [...allData];
+let injuryChart = null;
+
+// ── DROPDOWNS ──
+document.querySelectorAll(".filter-dropdown").forEach(dropdown => {
+    dropdown.querySelector(".filter-toggle").addEventListener("click", () => {
+        dropdown.classList.toggle("active");
+    });
+});
+
+// ── SHOW APPLY/CANCEL ONLY WHEN CHECKBOX IS CHECKED ──
+function updateFilterButtons() {
+    const panel = document.querySelector(".filter-panel");
+    const anyChecked = panel.querySelectorAll("input[type='checkbox']:checked").length > 0;
+    const buttons = panel.querySelector(".filter-buttons");
+    if (buttons) buttons.style.display = anyChecked ? "flex" : "none";
+}
+
+document.querySelector(".filter-buttons").style.display = "none";
+
+document.querySelectorAll(".filter-panel input[type='checkbox']").forEach(cb => {
+    cb.addEventListener("change", updateFilterButtons);
+});
+
+document.querySelector(".btn-cancel").addEventListener("click", () => {
+    document.querySelectorAll(".filter-panel input[type='checkbox']").forEach(cb => cb.checked = false);
+    updateFilterButtons();
+});
+
+// ── POPUP ──
+const overlay      = document.getElementById("popupOverlay");
+const popupTitle   = document.getElementById("popupTitle");
+const popupMessage = document.getElementById("popupMessage");
+const popupIcon    = document.getElementById("popupIcon");
+let pendingAction  = null;
+
+function showPopup(type, message, onConfirm) {
+    popupTitle.textContent   = type;
+    popupMessage.textContent = message;
+    popupIcon.textContent    = type === "Warning" ? "⚠️" : "❌";
+    overlay.classList.add("visible");
+    pendingAction = onConfirm || null;
+}
+
+document.getElementById("btnPopupConfirm").addEventListener("click", () => {
+    overlay.classList.remove("visible");
+    if (pendingAction) { pendingAction(); pendingAction = null; }
+});
+
+document.getElementById("btnPopupCancel").addEventListener("click", () => {
+    overlay.classList.remove("visible");
+    pendingAction = null;
+});
+
+// ── ANALYSIS BUTTON ──
+document.getElementById("btnAnalysis").addEventListener("click", () => {
+    const dropdowns = [...document.querySelectorAll(".filter-panel .filter-dropdown")];
+
+    const injuryChecked = dropdowns
+        .find(d => d.querySelector(".filter-toggle").textContent.includes("Injury"))
+        ?.querySelectorAll("input:checked").length > 0;
+
+    const ageChecked = dropdowns
+        .find(d => d.querySelector(".filter-toggle").textContent.includes("Age"))
+        ?.querySelectorAll("input:checked").length > 0;
+
+    const anyChecked = document.querySelectorAll(".filter-panel input:checked").length > 0;
+
+    if (!anyChecked) {
+        renderTable(allData);
+        renderChart(allData);
+        return;
+    }
+
+    if (injuryChecked && !ageChecked) {
+        showPopup("Warning", "Only injury level has been selected. Do you want to continue anyway?",
+            () => { renderTable(allData); renderChart(allData); });
+        return;
+    }
+
+    if (ageChecked && !injuryChecked) {
+        showPopup("Error", "Please also select an injury level to run the analysis.");
+        return;
+    }
+
+    renderTable(allData);
+    renderChart(allData);
+});
+
+// ── CLEAR ──
+document.getElementById("btnClear").addEventListener("click", () => {
+    document.querySelectorAll(".filter-panel input[type='checkbox']").forEach(cb => cb.checked = false);
+    updateFilterButtons();
+    renderTable(allData);
+    renderChart(allData);
+});
+
+// ── RENDER TABLE ──
+function renderTable(data) {
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = data.map((row, i) => `
+        <tr ${i % 2 === 1 ? 'class="row-highlight"' : ''}>
+            <td>${row.age}</td>
+            <td>${row.person}</td>
+            <td>${row.speed}</td>
+            <td>${row.injuryRate}%</td>
+            <td class="above-avg ${row.aboveClass}">${row.above}</td>
+            <td>${row.injury}</td>
+        </tr>
+    `).join("");
+}
+
+// ── RENDER CHART ──
+function renderChart(data) {
+    const ctx = document.getElementById("injuryRateChart").getContext("2d");
+    if (injuryChart) injuryChart.destroy();
+
+    injuryChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: data.map(d => d.age),
+            datasets: [{
+                label: "Injury rate",
+                data: data.map(d => d.injuryRate),
+                backgroundColor: "#2e6d8e",
+                borderRadius: 4,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                datalabels: { display: false }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: "#666", font: { size: 12 } }
+                },
+                y: {
+                    ticks: {
+                        color: "#666",
+                        font: { size: 11 },
+                        callback: v => v + "%"
+                    },
+                    grid: { color: "rgba(0,0,0,0.06)" }
+                }
+            }
+        }
+    });
+}
+
+// ── SORT ──
+document.querySelectorAll(".sort-arrow").forEach(arrow => {
+    let asc = true;
+    arrow.addEventListener("click", () => {
+        const col = parseInt(arrow.dataset.col);
+        const sorted = [...currentData].sort((a, b) => {
+            const vals = [
+                [a.age, b.age],
+                [a.person, b.person],
+                [a.speed, b.speed],
+                [a.injuryRate, b.injuryRate]
+            ][col];
+            return typeof vals[0] === "number"
+                ? asc ? vals[0] - vals[1] : vals[1] - vals[0]
+                : asc ? vals[0].localeCompare(vals[1]) : vals[1].localeCompare(vals[0]);
+        });
+        asc = !asc;
+        currentData = sorted;
+        renderTable(sorted);
+        renderChart(sorted);
+    });
+});
+
+// ── INIT ──
+renderTable(allData);
+renderChart(allData);
+</script>
