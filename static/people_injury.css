@@ -17,7 +17,7 @@
 
 /* ── SECTION ── */
 .dashboard-section {
-    background: #FFF8F0;
+    background: white;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(227, 83, 54, 0.15);
     padding: 20px;
@@ -155,63 +155,29 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 160px;
+    gap: 10px;
     align-self: flex-end;
 }
 
-.bar-chart {
+.bar-legend {
     display: flex;
-    gap: 8px;
-    align-items: flex-end;
-    height: 220px;
-}
-
-.y-axis {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 210px;
-    text-align: right;
-    font-size: 10px;
-    color: #777;
-}
-
-.bar-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-}
-
-.stacked-bar {
-    display: flex;
-    flex-direction: column-reverse; /* bottom segment first */
-    width: 80px;
-    height: 210px;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.bar-segment {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    color: white;
-    font-weight: 600;
-    transition: opacity 0.2s;
-}
-
-.bar-segment:hover { opacity: 0.85; }
-
-.seg-orange { background-color: #e35336; }
-.seg-yellow { background-color: #f0b429; }
-.seg-green  { background-color: #57b894; }
-
-.bar-total {
+    flex-direction: row;
+    gap: 6px;
     font-size: 11px;
+}
+
+.bar-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     color: #555;
-    font-weight: 600;
+}
+
+.bar-legend-sq {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
 }
 
 .bar-legend {
@@ -223,17 +189,6 @@
     justify-content: center;
 }
 
-.legend-dot {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 3px;
-}
-
-.legend-dot.orange { background: #e35336; }
-.legend-dot.yellow { background: #f0b429; }
-.legend-dot.green  { background: #57b894; }
 
 /* ── PICTOGRAM PANEL ── */
 .pictogram-panel {
@@ -285,6 +240,11 @@
     height: 10px;
     border-radius: 50%;
     margin-right: 4px;
+}
+
+.person-icon {
+    display: inline-block;
+    margin: 1px;
 }
 
 .dot.fatal   { background: #e35336; }
