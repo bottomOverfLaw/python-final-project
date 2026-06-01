@@ -1,114 +1,230 @@
- /* Main wrapper to keep the webpage content aligned nicely */
-    .page-wrapper {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-    /* Container for the 4 boxes directly below the heading */
-    .box-container {
-      display: flex;
-      justify-content: space-between; /* Aligns boxes side-by-side */
-      gap: 16px;                      /* Spaces the boxes evenly */
-      width: 100%;
-      margin-top: 24px;               /* Pushes the boxes down below the heading */
-      box-sizing: border-box;
-    }
-
-    /* Individual box styling */
-    .interactive-box {
-      flex: 1;                        /* Forces all 4 boxes to be the same width */
-      background-color: #ffffff;      
-      border: 1px solid #ccc;         
-      border-radius: 6px;             
-      padding: 16px;                  
-      text-align: center;             
-      outline: none;                  
-      transition: all 0.2s ease;      
-    }
-
-    /* Interactive states */
-    .interactive-box:hover {
-      border-color: #ab8585;          
-      transform: translateY(-2px);  
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);  
-    }
-
-
-    .interactive-box:focus {
-      border-color: #333333;
-      background-color: #fafafa;      
-    }
-
-    /* Text elements inside the boxes */
-    .text-top {
-      display: block;                 
-      font-size: 18px;
-      font-weight: bold;
-      color: #333333;
-      margin-bottom: 8px;             
-    }
-
-    .text-bottom {
-      display: block;
-      font-size: 14px;
-      color: #666666;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-.page-wrapper { padding: 24px 28px; max-width: 1100px; margin: 0 auto; }
+/* Main wrapper to keep the webpage content aligned nicely */
+.page-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 28px;
+}
 
 /* Intro box - styled to match the other boxes */
 .intro-banner {
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: #fff;
-  padding: 20px 24px;
-  margin-bottom: 32px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    padding: 20px 24px;
+    margin-bottom: 32px;
 }
-.intro-banner h2 { font-size: 18px; font-weight: 700; margin-bottom: 10px; color: #1a1a18; }
-.intro-banner p { font-size: 14px; color: #555; line-height: 1.6; }
+
+.intro-banner h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #1a1a18;
+}
+
+.intro-banner p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+}
 
 /* 4 Key factors heading - centred with generous spacing */
 .section-heading {
-  text-align: center;
-  font-size: 17px;
-  font-weight: 600;
-  color: #1a1a18;
-  margin-bottom: 20px;
-  margin-top: 8px;
-  letter-spacing: 0.02em;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 600;
+    color: #1a1a18;
+    margin-top: 8px;
+    margin-bottom: 20px;
+    letter-spacing: 0.02em;
 }
 
 /* 4 stat boxes */
-.box-container { display: flex; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
-.interactive-box { flex: 1; min-width: 140px; border: 1px solid #ccc; border-radius: 6px; background: #fff; padding: 14px 16px; display: flex; flex-direction: column; align-items: center; text-align: center; user-select: none; cursor: default; }
-.text-top { font-size: 22px; font-weight: 700; color: #534AB7; line-height: 1.2; margin-bottom: 6px; }
-.text-bottom { font-size: 13px; color: #555; line-height: 1.4; }
+.box-container {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.interactive-box {
+    flex: 1;
+    min-width: 140px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    user-select: none;
+    cursor: default;
+    transition: all 0.2s ease;
+}
+
+.interactive-box:hover {
+    border-color: #ab8585;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.interactive-box:focus {
+    border-color: #333333;
+    background-color: #fafafa;
+}
+
+.text-top {
+    font-size: 22px;
+    font-weight: 700;
+    color: #534AB7;
+    line-height: 1.2;
+    margin-bottom: 6px;
+}
+
+.text-bottom {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.4;
+}
 
 /* Charts row - both panels same height */
-.charts-row { display: flex; gap: 24px; align-items: stretch; }
-.chart-panel { flex: 1; min-width: 0; border: 1px solid #ccc; border-radius: 8px; background: #fff; padding: 20px 20px 16px; display: flex; flex-direction: column; }
+.charts-row {
+    display: flex;
+    gap: 24px;
+    align-items: stretch;
+}
 
-.chart-heading { font-size: 15px; font-weight: 600; text-align: center; margin: 0 0 3px; color: #1a1a18; }
-.chart-axis-label { text-align: center; font-size: 12px; color: #888; margin-top: 8px; }
+.chart-panel {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    padding: 20px 20px 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-heading {
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    margin: 0 0 3px;
+    color: #1a1a18;
+}
+
+.chart-axis-label {
+    text-align: center;
+    font-size: 12px;
+    color: #888;
+    margin-top: 8px;
+}
 
 /* Bar chart */
-.bar-legend { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px; }
-.bar-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #555; }
-.bar-legend-sq { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; }
-.bar-canvas-wrap { position: relative; width: 100%; flex: 1; min-height: 280px; }
+.bar-legend {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.bar-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #555;
+}
+
+.bar-legend-sq {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.bar-canvas-wrap {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    min-height: 280px;
+}
 
 /* Pie chart */
-.pie-wrap { display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1; }
-.pie-box { position: relative; }
-.pie-tooltip { position: absolute; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 7px 11px; font-size: 13px; pointer-events: none; opacity: 0; transition: opacity 0.12s ease; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10; }
-.pie-tooltip b { display: block; font-weight: 600; color: #1a1a18; margin-bottom: 2px; }
-.pie-tooltip span { color: #666; font-size: 12px; }
+.pie-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex: 1;
+}
 
-.pie-legend { display: flex; flex-direction: column; gap: 8px; }
-.pie-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #555; }
-.pie-legend-sq { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
-.pie-legend-lbl { flex: 1; }
-.pie-legend-val { font-weight: 600; color: #1a1a18; }
+.pie-box {
+    position: relative;
+}
+
+.pie-tooltip {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 7px 11px;
+    font-size: 13px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.pie-tooltip b {
+    display: block;
+    font-weight: 600;
+    color: #1a1a18;
+    margin-bottom: 2px;
+}
+
+.pie-tooltip span {
+    color: #666;
+    font-size: 12px;
+}
+
+.pie-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pie-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #555;
+}
+
+.pie-legend-sq {
+    width: 11px;
+    height: 11px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.pie-legend-lbl {
+    flex: 1;
+}
+
+.pie-legend-val {
+    font-weight: 600;
+    color: #1a1a18;
+}
+
