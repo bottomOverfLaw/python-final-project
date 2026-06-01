@@ -1,0 +1,318 @@
+<link rel="stylesheet" href="../static/home.css">
+<link rel="stylesheet" href="../static/accident_analysis.css">
+
+<div class="aa-page">
+
+  <!-- Search bar + Filter button -->
+  <div class="aa-search-row">
+    <div class="aa-search-wrap">
+      <svg class="aa-search-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="8.5" cy="8.5" r="5.5" stroke="#888" stroke-width="1.8"/>
+        <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="#888" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <input type="text" id="postcodeInput" class="aa-search-input" placeholder="search postcode">
+    </div>
+    <button class="aa-filter-btn" id="filterToggle">
+      <svg viewBox="0 0 20 20" fill="none" width="14" height="14" xmlns="http://www.w3.org/2000/svg">
+        <line x1="3" y1="5"  x2="17" y2="5"  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="7" y1="15" x2="13" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      Filter
+    </button>
+  </div>
+
+  <!-- Filter panel (toggled open/closed) -->
+  <div class="aa-filter-panel" id="filterPanel">
+    <div class="aa-filter-groups">
+
+      <div class="aa-filter-group">
+        <div class="aa-filter-heading" id="lightHeading">Light condition <span class="aa-arrow">▾</span></div>
+        <div class="aa-filter-opts" id="lightOpts"></div>
+      </div>
+
+      <div class="aa-filter-group">
+        <div class="aa-filter-heading" id="atmoHeading">Atmo condition <span class="aa-arrow">▾</span></div>
+        <div class="aa-filter-opts" id="atmoOpts"></div>
+      </div>
+
+      <div class="aa-filter-group">
+        <div class="aa-filter-heading" id="roadHeading">Road condition <span class="aa-arrow">▾</span></div>
+        <div class="aa-filter-opts" id="roadOpts"></div>
+      </div>
+
+    </div>
+    <div class="aa-filter-actions">
+      <button class="aa-apply-btn" id="applyFilter">apply</button>
+      <button class="aa-cancel-btn" id="cancelFilter">cancel</button>
+    </div>
+  </div>
+
+  <!-- Accident table -->
+  <div class="aa-table-wrap">
+    <table class="aa-table">
+      <thead>
+        <tr>
+          <th>Serial No.</th>
+          <th>Accident No.</th>
+          <th>Light condition</th>
+          <th>Road condition</th>
+          <th>Atmospheric condition</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Road type</th>
+          <th>Road intersection</th>
+          <th>People involved</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Charts: pie (left) + line (right) -->
+  <div class="aa-charts-row">
+
+    <div class="aa-chart-panel">
+      <div class="aa-pie-legend" id="pieLegend"></div>
+      <div class="aa-pie-box">
+        <canvas id="pieChart" width="260" height="260"></canvas>
+      </div>
+      <p class="aa-chart-label">Accident by road type</p>
+    </div>
+
+    <div class="aa-chart-panel">
+      <h3 class="aa-chart-title">Accidents trend in the last years</h3>
+      <div class="aa-line-wrap">
+        <canvas id="lineChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<script>
+  Chart.register(ChartDataLabels);
+
+  /* Master dataset — replace with real DB/API data */
+  var masterData = [
+    {id:1,  accNo:'T20130000003', light:'Dark no street lights', road:'Dry', atmo:'Clear',     date:'1/01/2013', time:'00:20:36 AM', roadType:'HIGHWAY', intersection:'SUNNYCLIFFS',        people:4, postcode:'3000', year:'Year1'},
+    {id:2,  accNo:'T20130000007', light:'Dusk/dawn',             road:'Wet', atmo:'Raining',   date:'1/01/2013', time:'05:30:00 AM', roadType:'ROAD',    intersection:'BARKLY',             people:2, postcode:'3000', year:'Year2'},
+    {id:3,  accNo:'T20130000013', light:'Day',                   road:'Dry', atmo:'Clear',     date:'1/01/2013', time:'11:11:00 AM', roadType:'ROAD',    intersection:'SIMPSONS',           people:1, postcode:'3000', year:'Year1'},
+    {id:4,  accNo:'T20130000032', light:'Dark street lights on', road:'Dry', atmo:'Not known', date:'1/01/2013', time:'00:02:00 AM', roadType:'ROAD',    intersection:'TAYLOR BAY LEFT ARM',people:1, postcode:'3000', year:'Year2'},
+    {id:5,  accNo:'T20130000045', light:'Day',                   road:'Wet', atmo:'Raining',   date:'2/01/2013', time:'08:15:00 AM', roadType:'HIGHWAY', intersection:'MAIN ST',            people:3, postcode:'3000', year:'Year3'},
+    {id:6,  accNo:'T20130000056', light:'Dusk/dawn',             road:'Dry', atmo:'Clear',     date:'3/01/2013', time:'06:45:00 AM', roadType:'FREEWAY', intersection:'BRIDGE RD',          people:2, postcode:'3000', year:'Year3'},
+    {id:7,  accNo:'T20130000078', light:'Dark no street lights', road:'Mud', atmo:'Raining',   date:'4/01/2013', time:'23:30:00',    roadType:'ROAD',    intersection:'NORTH AVE',          people:1, postcode:'3000', year:'Year4'},
+    {id:8,  accNo:'T20130000089', light:'Day',                   road:'Ice', atmo:'Snow',      date:'5/01/2013', time:'14:00:00',    roadType:'HIGHWAY', intersection:'SOUTH RD',           people:5, postcode:'3000', year:'Year4'},
+    {id:9,  accNo:'T20130000101', light:'Day',                   road:'Dry', atmo:'Clear',     date:'1/01/2013', time:'10:00:00 AM', roadType:'ROAD',    intersection:'PARK ST',            people:2, postcode:'3001', year:'Year1'},
+    {id:10, accNo:'T20130000112', light:'Dark street lights on', road:'Wet', atmo:'Raining',   date:'2/01/2013', time:'21:30:00',    roadType:'FREEWAY', intersection:'LAKE RD',            people:3, postcode:'3001', year:'Year2'},
+    {id:11, accNo:'T20130000124', light:'Dusk/dawn',             road:'Dry', atmo:'Windy',     date:'3/01/2013', time:'17:00:00',    roadType:'ROAD',    intersection:'HILL AVE',           people:1, postcode:'3001', year:'Year3'},
+    {id:12, accNo:'T20130000136', light:'Day',                   road:'Mud', atmo:'Raining',   date:'4/01/2013', time:'13:45:00',    roadType:'HIGHWAY', intersection:'CREEK RD',           people:2, postcode:'3001', year:'Year4'},
+    {id:13, accNo:'T20130000201', light:'Dark no street lights', road:'Dry', atmo:'Clear',     date:'1/01/2013', time:'02:00:00 AM', roadType:'ROAD',    intersection:'COAST RD',           people:1, postcode:'3002', year:'Year1'},
+    {id:14, accNo:'T20130000213', light:'Day',                   road:'Wet', atmo:'Fog',       date:'2/01/2013', time:'07:30:00 AM', roadType:'HIGHWAY', intersection:'RIVER ST',           people:4, postcode:'3002', year:'Year2'},
+    {id:15, accNo:'T20130000225', light:'Dark street lights on', road:'Ice', atmo:'Snow',      date:'3/01/2013', time:'22:15:00',    roadType:'FREEWAY', intersection:'MOUNTAIN RD',        people:2, postcode:'3002', year:'Year3'},
+    {id:16, accNo:'T20130000237', light:'Dusk/dawn',             road:'Dry', atmo:'Clear',     date:'4/01/2013', time:'18:30:00',    roadType:'ROAD',    intersection:'VALLEY DR',          people:1, postcode:'3002', year:'Year4'}
+  ];
+
+  var filterOptions = {
+    light: ['Day', 'Dusk/dawn', 'Dark no street lights', 'Dark street lights on'],
+    atmo:  ['Clear', 'Raining', 'Not known', 'Fog', 'Snow', 'Windy'],
+    road:  ['Dry', 'Wet', 'Mud', 'Ice']
+  };
+
+  var roadTypes  = ['HIGHWAY', 'ROAD', 'FREEWAY'];
+  var years      = ['Year1', 'Year2', 'Year3', 'Year4'];
+  var colors     = ['#534AB7', '#1D9E75', '#D85A30', '#185FA5', '#9B8DD4'];
+
+  var activeFilters  = { light: [], atmo: [], road: [] };
+  var currentPostcode = '';
+  var pieChartInst   = null;
+  var lineChartInst  = null;
+
+  /* Build checkbox options in filter panel */
+  function buildFilterUI() {
+    Object.keys(filterOptions).forEach(function(type) {
+      var container = document.getElementById(type + 'Opts');
+      filterOptions[type].forEach(function(opt) {
+        var lbl = document.createElement('label');
+        lbl.className = 'aa-check-label';
+        lbl.innerHTML = '<input type="checkbox" value="' + opt + '" data-type="' + type + '"> ' + opt;
+        container.appendChild(lbl);
+      });
+    });
+  }
+
+  /* Apply postcode + active filters to master data */
+  function getFiltered() {
+    var pc = currentPostcode.trim();
+    return masterData.filter(function(row) {
+      if (pc && row.postcode !== pc) return false;
+      if (activeFilters.light.length && activeFilters.light.indexOf(row.light) === -1) return false;
+      if (activeFilters.atmo.length  && activeFilters.atmo.indexOf(row.atmo)   === -1) return false;
+      if (activeFilters.road.length  && activeFilters.road.indexOf(row.road)   === -1) return false;
+      return true;
+    });
+  }
+
+  /* Render table rows */
+  function renderTable(rows) {
+    var tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="10" class="aa-no-data">No records found for the selected filters.</td></tr>';
+      return;
+    }
+    rows.forEach(function(r) {
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + r.id           + '</td>' +
+        '<td>' + r.accNo        + '</td>' +
+        '<td>' + r.light        + '</td>' +
+        '<td>' + r.road         + '</td>' +
+        '<td>' + r.atmo         + '</td>' +
+        '<td>' + r.date         + '</td>' +
+        '<td>' + r.time         + '</td>' +
+        '<td>' + r.roadType     + '</td>' +
+        '<td>' + r.intersection + '</td>' +
+        '<td>' + r.people       + '</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* Render pie chart — accidents by road type */
+  function renderPie(rows) {
+    var counts = {};
+    roadTypes.forEach(function(rt) { counts[rt] = 0; });
+    rows.forEach(function(r) {
+      if (counts[r.roadType] !== undefined) counts[r.roadType]++;
+      else counts['Other'] = (counts['Other'] || 0) + 1;
+    });
+    var labels = Object.keys(counts).filter(function(k) { return counts[k] > 0; });
+    var data   = labels.map(function(l) { return counts[l]; });
+
+    var legendEl = document.getElementById('pieLegend');
+    legendEl.innerHTML = '';
+    labels.forEach(function(label, i) {
+      var item = document.createElement('div');
+      item.className = 'aa-pie-legend-item';
+      item.innerHTML = '<span class="aa-pie-dot" style="background:' + colors[i % colors.length] + '"></span>' + label;
+      legendEl.appendChild(item);
+    });
+
+    if (pieChartInst) pieChartInst.destroy();
+    pieChartInst = new Chart(document.getElementById('pieChart'), {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: colors,
+          borderColor: '#fff',
+          borderWidth: 2,
+          hoverOffset: 10
+        }]
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: true },
+          datalabels: {
+            color: '#fff',
+            font: { size: 11, weight: '500' },
+            formatter: function(val, ctx) { return val > 0 ? ctx.chart.data.labels[ctx.dataIndex] : ''; },
+            textShadowBlur: 4,
+            textShadowColor: 'rgba(0,0,0,0.5)'
+          }
+        }
+      }
+    });
+  }
+
+  /* Render line chart — accident trend per road type per year */
+  function renderLine(rows) {
+    var datasets = roadTypes.map(function(rt, i) {
+      return {
+        label: rt,
+        data: years.map(function(yr) {
+          return rows.filter(function(r) { return r.roadType === rt && r.year === yr; }).length;
+        }),
+        borderColor: colors[i],
+        backgroundColor: 'transparent',
+        tension: 0.4,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderWidth: 2
+      };
+    });
+
+    if (lineChartInst) lineChartInst.destroy();
+    lineChartInst = new Chart(document.getElementById('lineChart'), {
+      type: 'line',
+      data: { labels: years, datasets: datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 12, font: { size: 12 }, color: '#333' } },
+          datalabels: { display: false }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#555', font: { size: 12 } } },
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#555', stepSize: 1 } }
+        }
+      }
+    });
+  }
+
+  function refresh() {
+    var rows = getFiltered();
+    renderTable(rows);
+    renderPie(rows);
+    renderLine(rows);
+  }
+
+  /* Init */
+  buildFilterUI();
+  refresh();
+
+  /* Filter panel toggle */
+  document.getElementById('filterToggle').addEventListener('click', function() {
+    document.getElementById('filterPanel').classList.toggle('open');
+  });
+
+  /* Collapsible condition sections */
+  ['light', 'atmo', 'road'].forEach(function(type) {
+    document.getElementById(type + 'Heading').addEventListener('click', function() {
+      var opts  = document.getElementById(type + 'Opts');
+      var arrow = this.querySelector('.aa-arrow');
+      opts.classList.toggle('open');
+      arrow.textContent = opts.classList.contains('open') ? '▴' : '▾';
+    });
+  });
+
+  /* Apply filters */
+  document.getElementById('applyFilter').addEventListener('click', function() {
+    activeFilters = { light: [], atmo: [], road: [] };
+    document.querySelectorAll('.aa-filter-opts input:checked').forEach(function(cb) {
+      activeFilters[cb.dataset.type].push(cb.value);
+    });
+    document.getElementById('filterPanel').classList.remove('open');
+    refresh();
+  });
+
+  /* Cancel — close panel without applying */
+  document.getElementById('cancelFilter').addEventListener('click', function() {
+    document.getElementById('filterPanel').classList.remove('open');
+  });
+
+  /* Postcode search on Enter */
+  document.getElementById('postcodeInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      currentPostcode = this.value;
+      refresh();
+    }
+  });
+</script>

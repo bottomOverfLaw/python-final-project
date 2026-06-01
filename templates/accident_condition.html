@@ -1,2 +1,253 @@
-<h1>Accident Condition</h1>
-<p>Here is a simple page made from HTML and CSS.</p>
+<link rel="stylesheet" href="../static/home.css">
+<link rel="stylesheet" href="../static/accident_condition.css">
+
+<div class="ac-page">
+
+  <!-- Top section: left controls + right chart -->
+  <div class="ac-top">
+
+    <!-- Left panel: search, tabs, icons -->
+    <div class="ac-left">
+
+      <!-- Postcode search -->
+      <div class="ac-search-wrap">
+        <svg class="ac-search-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="8.5" cy="8.5" r="5.5" stroke="#888" stroke-width="1.8"/>
+          <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="#888" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <input type="text" id="postcodeInput" class="ac-search-input" placeholder="search postcode">
+      </div>
+
+      <!-- Condition icons -->
+      <div class="ac-icons">
+
+        <!-- Road condition -->
+        <div class="ac-icon active" data-condition="road">
+          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="22,5 41,39 3,39" fill="currentColor"/>
+            <rect x="20" y="18" width="4" height="5" rx="1" fill="white"/>
+            <rect x="20" y="27" width="4" height="5" rx="1" fill="white"/>
+          </svg>
+          <span>road con</span>
+        </div>
+
+        <!-- Weather condition -->
+        <div class="ac-icon" data-condition="weather">
+          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="22" cy="22" r="7" fill="currentColor"/>
+            <line x1="22" y1="4"  x2="22" y2="10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="22" y1="34" x2="22" y2="40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="4"  y1="22" x2="10" y2="22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="34" y1="22" x2="40" y2="22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="9"  y1="9"  x2="13" y2="13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="31" y1="31" x2="35" y2="35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="35" y1="9"  x2="31" y2="13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="13" y1="31" x2="9"  y2="35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+          <span>weather con</span>
+        </div>
+
+        <!-- Light condition -->
+        <div class="ac-icon" data-condition="light">
+          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 6C16 6 11 11 11 17C11 21 13.2 24.5 16.5 26.5V30H27.5V26.5C30.8 24.5 33 21 33 17C33 11 28 6 22 6Z" fill="currentColor"/>
+            <rect x="16.5" y="31" width="11" height="3" rx="1.5" fill="currentColor"/>
+            <rect x="18"   y="35" width="8"  height="2" rx="1"   fill="currentColor"/>
+          </svg>
+          <span>light con</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right panel: chart title + canvas -->
+    <div class="ac-right">
+      <h3 class="ac-chart-title" id="chartTitle">Accident by road condition:</h3>
+      <div class="ac-chart-wrap">
+        <canvas id="conditionChart"></canvas>
+      </div>
+      <p class="ac-no-data" id="noDataMsg" style="display:none;">No data found for this postcode.</p>
+    </div>
+
+  </div>
+
+  <!-- Table -->
+  <div class="ac-table-wrap">
+    <table class="ac-table" id="conditionTable">
+      <thead>
+        <tr>
+          <th id="tableColHeader">Surface Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<script>
+  Chart.register(ChartDataLabels);
+
+  /* Mock data — replace values with real DB/API responses keyed by postcode */
+  var mockData = {
+    road: {
+      title:     'Accident by road condition:',
+      colHeader: 'Surface Type',
+      labels:    ['Dry', 'Wet', 'Muddy', 'Icy', 'Snowy'],
+      postcodes: {
+        '3000': [45, 26, 5, 3, 2],
+        '3001': [30, 15, 8, 2, 1],
+        '3002': [52, 18, 3, 1, 0]
+      },
+      fallback: [45, 26, 5, 3, 2],
+      descriptions: [
+        'Road surface is completely dry with normal grip levels.',
+        'Road surface is wet due to rain or water accumulation.',
+        'Road surface covered in mud, significantly reducing traction.',
+        'Ice patches on the road surface, greatly reducing grip.',
+        'Road covered in snow, creating hazardous driving conditions.'
+      ]
+    },
+    weather: {
+      title:     'Accident by weather condition:',
+      colHeader: 'Weather Condition',
+      labels:    ['Clear', 'Rain', 'Fog', 'Snow', 'Wind'],
+      postcodes: {
+        '3000': [40, 20, 8, 2, 11],
+        '3001': [25, 30, 12, 1, 8],
+        '3002': [38, 22, 6, 0, 9]
+      },
+      fallback: [40, 20, 8, 2, 11],
+      descriptions: [
+        'Clear sky with good visibility and no precipitation.',
+        'Rainfall reducing road grip and driver visibility.',
+        'Dense fog significantly limiting driver visibility.',
+        'Snowfall creating slippery conditions and reduced visibility.',
+        'Strong winds affecting vehicle control, especially large vehicles.'
+      ]
+    },
+    light: {
+      title:     'Accident by light condition:',
+      colHeader: 'Light Condition',
+      labels:    ['Daylight', 'Dusk/Dawn', 'Dark-lit', 'Dark-unlit', 'Unknown'],
+      postcodes: {
+        '3000': [35, 10, 18, 12, 6],
+        '3001': [20, 15, 22, 18, 4],
+        '3002': [42,  8, 14, 10, 3]
+      },
+      fallback: [35, 10, 18, 12, 6],
+      descriptions: [
+        'Full daylight with maximum natural visibility.',
+        'Transitional lighting at dusk or dawn with reduced visibility.',
+        'Darkness with street lighting providing some visibility.',
+        'Darkness with no street lighting, minimal visibility.',
+        'Light conditions at time of accident were not recorded.'
+      ]
+    }
+  };
+
+  var sliceColors    = ['#534AB7', '#1D9E75', '#D85A30', '#185FA5', '#9B8DD4'];
+  var currentCondition = 'road';
+  var currentPostcode  = '';
+  var chartInstance    = null;
+
+  function getData() {
+    var cond = mockData[currentCondition];
+    var pc   = currentPostcode.trim();
+    if (!pc)                return { values: cond.fallback, found: true };
+    if (cond.postcodes[pc]) return { values: cond.postcodes[pc], found: true };
+    return { values: null, found: false };
+  }
+
+  function buildChart() {
+    var result = getData();
+    var cond   = mockData[currentCondition];
+    var canvas = document.getElementById('conditionChart');
+    var noMsg  = document.getElementById('noDataMsg');
+
+    if (!result.found) {
+      if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+      canvas.style.display = 'none';
+      noMsg.style.display  = 'block';
+      noMsg.textContent    = 'No data found for postcode "' + currentPostcode.trim() + '".';
+      return;
+    }
+
+    canvas.style.display = 'block';
+    noMsg.style.display  = 'none';
+
+    if (chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: cond.labels,
+        datasets: [{
+          label: 'Number of accidents',
+          data:  result.values,
+          backgroundColor: sliceColors,
+          borderWidth: 0,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            align: 'end',
+            labels: { boxWidth: 14, font: { size: 12 }, color: '#333' }
+          },
+          tooltip: { enabled: true },
+          datalabels: { display: false }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#555', font: { size: 12 } } },
+          y: { beginAtZero: false, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#555', font: { size: 11 } } }
+        }
+      }
+    });
+  }
+
+  function buildTable() {
+    var cond = mockData[currentCondition];
+    var pc   = currentPostcode.trim();
+    var pcLabel = pc ? ' — Postcode: ' + pc : ' — All Postcodes';
+    document.getElementById('chartTitle').textContent     = cond.title + pcLabel;
+    document.getElementById('tableColHeader').textContent = cond.colHeader;
+
+    var tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    cond.labels.forEach(function(label, i) {
+      var row = document.createElement('tr');
+      row.innerHTML = '<td>' + label + '</td><td>' + cond.descriptions[i] + '</td>';
+      tbody.appendChild(row);
+    });
+  }
+
+  function refresh() { buildChart(); buildTable(); }
+  refresh();
+
+  /* Icon switching */
+  document.querySelectorAll('.ac-icon').forEach(function(el) {
+    el.addEventListener('click', function() {
+      document.querySelectorAll('.ac-icon').forEach(function(e) { e.classList.remove('active'); });
+      el.classList.add('active');
+      currentCondition = el.dataset.condition;
+      refresh();
+    });
+  });
+
+  /* Postcode search on Enter */
+  document.getElementById('postcodeInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      currentPostcode = this.value;
+      refresh();
+    }
+  });
+</script>
