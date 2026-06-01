@@ -55,111 +55,60 @@
       color: #666666;
     }
 
-      new Chart(document.getElementById('barChart'), {
-    type: 'bar',
-    data: {
-      labels: ['Region 1', 'Region 2', 'Region 3'],
-      datasets: [{
-        label: 'Accident number',
-        data: [61.2, 60.8, 61.5],
-        backgroundColor: ['#534AB7', '#1D9E75', '#D85A30'],
-        borderRadius: 4,
-        borderSkipped: false
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        datalabels: { display: false }
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: { color: '#666', font: { size: 12 } }
-        },
-        y: {
-          min: 60.0,
-          max: 62.0,
-          ticks: {
-            color: '#666',
-            font: { size: 11 },
-            stepSize: 0.4,
-            callback: function(v) { return v.toFixed(1); }
-          },
-          grid: { color: 'rgba(0,0,0,0.06)' }
-        }
-      }
-    }
-  });
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
+.page-wrapper { padding: 24px 28px; max-width: 1100px; margin: 0 auto; }
 
-  var segments = [
-    { label: 'Vehicle1', value: 32, color: '#1D9E75' },
-    { label: 'Vehicle2', value: 24, color: '#534AB7' },
-    { label: 'Vehicle3', value: 18, color: '#9B8DD4' },
-    { label: 'Vehicle4', value: 15, color: '#D85A30' },
-    { label: 'Vehicle5', value: 11, color: '#185FA5' }
-  ];
+/* Intro box - styled to match the other boxes */
+.intro-banner {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  padding: 20px 24px;
+  margin-bottom: 32px;
+}
+.intro-banner h2 { font-size: 18px; font-weight: 700; margin-bottom: 10px; color: #1a1a18; }
+.intro-banner p { font-size: 14px; color: #555; line-height: 1.6; }
 
-  var legendEl = document.getElementById('pieLegend');
-  segments.forEach(function(d) {
-    var item = document.createElement('div');
-    item.className = 'pie-legend-item';
-    item.innerHTML =
-      '<span class="pie-legend-sq" style="background:' + d.color + '"></span>' +
-      '<span class="pie-legend-lbl">' + d.label + '</span>' +
-      '<span class="pie-legend-val">' + d.value + '%</span>';
-    legendEl.appendChild(item);
-  });
+/* 4 Key factors heading - centred with generous spacing */
+.section-heading {
+  text-align: center;
+  font-size: 17px;
+  font-weight: 600;
+  color: #1a1a18;
+  margin-bottom: 20px;
+  margin-top: 8px;
+  letter-spacing: 0.02em;
+}
 
-  var pieCanvas = document.getElementById('pieChart');
-  var tooltip   = document.getElementById('pieTooltip');
-  var ttName    = document.getElementById('tt-name');
-  var ttPct     = document.getElementById('tt-pct');
+/* 4 stat boxes */
+.box-container { display: flex; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+.interactive-box { flex: 1; min-width: 140px; border: 1px solid #ccc; border-radius: 6px; background: #fff; padding: 14px 16px; display: flex; flex-direction: column; align-items: center; text-align: center; user-select: none; cursor: default; }
+.text-top { font-size: 22px; font-weight: 700; color: #534AB7; line-height: 1.2; margin-bottom: 6px; }
+.text-bottom { font-size: 13px; color: #555; line-height: 1.4; }
 
-  new Chart(pieCanvas, {
-    type: 'pie',
-    data: {
-      labels: segments.map(function(d) { return d.label; }),
-      datasets: [{
-        data:            segments.map(function(d) { return d.value; }),
-        backgroundColor: segments.map(function(d) { return d.color; }),
-        borderColor:     '#ffffff',
-        borderWidth:     2,
-        hoverOffset:     10
-      }]
-    },
-    options: {
-      responsive: false,
-      plugins: {
-        legend:  { display: false },
-        tooltip: { enabled: false },
-        datalabels: {
-          color: '#ffffff',
-          font:  { size: 11, weight: '500' },
-          formatter: function(val, ctx) {
-            return ctx.chart.data.labels[ctx.dataIndex];
-          },
-          textShadowBlur:  4,
-          textShadowColor: 'rgba(0,0,0,0.5)'
-        }
-      },
-      onHover: function(evt, els) {
-        if (els.length) {
-          var i = els[0].index;
-          ttName.textContent = segments[i].label;
-          ttPct.textContent  = segments[i].value + '% of total';
-          var pr = pieCanvas.parentElement.getBoundingClientRect();
-          tooltip.style.left    = (evt.native.clientX - pr.left + 14) + 'px';
-          tooltip.style.top     = (evt.native.clientY - pr.top  - 40) + 'px';
-          tooltip.style.opacity = '1';
-          pieCanvas.style.cursor = 'pointer';
-        } else {
-          tooltip.style.opacity  = '0';
-          pieCanvas.style.cursor = 'default';
-        }
-      }
-    }
-  });
+/* Charts row - both panels same height */
+.charts-row { display: flex; gap: 24px; align-items: stretch; }
+.chart-panel { flex: 1; min-width: 0; border: 1px solid #ccc; border-radius: 8px; background: #fff; padding: 20px 20px 16px; display: flex; flex-direction: column; }
+
+.chart-heading { font-size: 15px; font-weight: 600; text-align: center; margin: 0 0 3px; color: #1a1a18; }
+.chart-axis-label { text-align: center; font-size: 12px; color: #888; margin-top: 8px; }
+
+/* Bar chart */
+.bar-legend { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px; }
+.bar-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #555; }
+.bar-legend-sq { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; }
+.bar-canvas-wrap { position: relative; width: 100%; flex: 1; min-height: 280px; }
+
+/* Pie chart */
+.pie-wrap { display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1; }
+.pie-box { position: relative; }
+.pie-tooltip { position: absolute; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 7px 11px; font-size: 13px; pointer-events: none; opacity: 0; transition: opacity 0.12s ease; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10; }
+.pie-tooltip b { display: block; font-weight: 600; color: #1a1a18; margin-bottom: 2px; }
+.pie-tooltip span { color: #666; font-size: 12px; }
+
+.pie-legend { display: flex; flex-direction: column; gap: 8px; }
+.pie-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #555; }
+.pie-legend-sq { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+.pie-legend-lbl { flex: 1; }
+.pie-legend-val { font-weight: 600; color: #1a1a18; }
