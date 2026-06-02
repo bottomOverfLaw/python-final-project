@@ -1,4 +1,5 @@
 <link rel="stylesheet" href="../static/people_injury.css">
+<script src="../static/api.js"></script>
 <div class="page-wrapper">
 
     <!-- ── SECTION 1: INJURY OUTCOME SUMMARY ── -->
@@ -203,64 +204,157 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script>
-// ── SHOW APPLY/CANCEL ONLY WHEN A CHECKBOX IS CHECKED ──
+/* people_and_injury.js — uses real DB via API */
+
+Chart.register(ChartDataLabels);
+
+let injuryChart = null;
+
+// ── COLOURS ──
+const COLOURS = {
+    fatal:   "#e35336",
+    serious: "#f0b429",
+    other:   "#36afc8",
+    none:    "#ccc",
+};
+
+// ── DROPDOWNS ──
+document.querySelectorAll(".filter-dropdown").forEach(dd => {
+    dd.querySelector(".filter-toggle").addEventListener("click", () => {
+        dd.classList.toggle("active");
+    });
+});
+
+// ── SHOW APPLY/CANCEL ONLY WHEN CHECKED ──
 function updateFilterButtons() {
     document.querySelectorAll(".filter-panel").forEach(panel => {
-        const anyChecked = panel.querySelectorAll("input[type='checkbox']:checked").length > 0;
-        const buttons = panel.querySelector(".filter-buttons");
-        if (buttons) {
-            buttons.style.display = anyChecked ? "flex" : "none";
-        }
+        const anyChecked = panel.querySelectorAll("input:checked").length > 0;
+        const btns = panel.querySelector(".filter-buttons");
+        if (btns) btns.style.display = anyChecked ? "flex" : "none";
     });
 }
 
-document.querySelectorAll(".filter-buttons").forEach(btn => {
-    btn.style.display = "none";
-});
-
-document.querySelectorAll(".filter-panel input[type='checkbox']").forEach(checkbox => {
-    checkbox.addEventListener("change", updateFilterButtons);
+document.querySelectorAll(".filter-buttons").forEach(b => b.style.display = "none");
+document.querySelectorAll(".filter-panel input[type='checkbox']").forEach(cb => {
+    cb.addEventListener("change", updateFilterButtons);
 });
 
 document.querySelectorAll(".btn-cancel").forEach(btn => {
     btn.addEventListener("click", () => {
-        const panel = btn.closest(".filter-panel");
-        panel.querySelectorAll("input[type='checkbox']").forEach(cb => cb.checked = false);
+        btn.closest(".filter-panel").querySelectorAll("input").forEach(cb => cb.checked = false);
         updateFilterButtons();
+        loadAll();   // reset to unfiltered data
     });
 });
 
-// ── DROPDOWNS ──
-document.querySelectorAll(".filter-dropdown").forEach(dropdown => {
-    dropdown.querySelector(".filter-toggle").addEventListener("click", () => {
-        dropdown.classList.toggle("active");
-    });
+document.querySelectorAll(".btn-apply").forEach(btn => {
+    btn.addEventListener("click", loadAll);
 });
+
+// ── COLLECT FILTERS ──
+function getFilters() {
+    const levels = [...document.querySelectorAll("input[type='checkbox']:checked")]
+        .filter(cb => ["fatal","serious","other injury","no injury"].includes(cb.value))
+        .map(cb => ({ "fatal": 1, "serious": 2, "other injury": 3, "no injury": 4 }[cb.value]));
+
+    const ages = [...document.querySelectorAll("input[type='checkbox']:checked")]
+        .filter(cb => ["0-4","18-21","70+","Unknown"].includes(cb.value))
+        .map(cb => cb.value);
+
+    return { levels, ages };
+}
+
+async function loadFilterOptions() {
+    const options = await fetch("/api/filter-options").then(r => r.json());
+
+    // Populate injury level checkboxes
+    const injuryGroup = document.querySelector(".filter-dropdown:nth-child(1) .checkbox-group");
+    injuryGroup.innerHTML = options.injury_levels.map(o => `
+        <label><input type="checkbox" value="${o.id}"> ${o.label}</label>
+    `).join("");
+
+    // Populate age group checkboxes
+    const ageGroup = document.querySelector(".filter-dropdown:nth-child(2) .checkbox-group");
+    ageGroup.innerHTML = options.age_groups.map(age => `
+        <label><input type="checkbox" value="${age}"> ${age}</label>
+    `).join("");
+
+    // Re-attach checkbox listeners after dynamic load
+    document.querySelectorAll(".filter-panel input[type='checkbox']").forEach(cb => {
+        cb.addEventListener("change", updateFilterButtons);
+    });
+}
+
+loadFilterOptions().then(() => loadAll());
+
+// ── STACKED BAR CHART ──
+function renderInjuryChart(rows) {
+    const ctx = document.getElementById("injurySummaryChart").getContext("2d");
+    if (injuryChart) injuryChart.destroy();
+
+    // Map DB labels to colours
+    const colourMap = {
+        "Fatality":      "#e35336",
+        "Serious injury":"#f0b429",
+        "Other injury":  "#57b894",
+        "Not injured":   "#ccc",
+    };
+
+    injuryChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: [""],
+            datasets: rows.map(r => ({
+                label: r.label,
+                data:  [r.value],
+                backgroundColor: colourMap[r.label] || "#aaa",
+                borderSkipped: false,
+            }))
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ` ${ctx.dataset.label}: ${ctx.raw.toLocaleString()}`
+                    }
+                },
+                datalabels: {
+                    color: "white",
+                    font: { size: 10, weight: "600" },
+                    formatter: val => val > 5000 ? val.toLocaleString() : "",
+                    display: ctx => ctx.raw > 5000,
+                }
+            },
+            scales: {
+                x: { stacked: true, grid: { display: false }, ticks: { display: false } },
+                y: {
+                    stacked: true,
+                    ticks: {
+                        color: "#777",
+                        font: { size: 10 },
+                        callback: v => (v / 1000).toFixed(0) + "k"
+                    },
+                    grid: { color: "rgba(0,0,0,0.06)" }
+                }
+            }
+        }
+    });
+}
 
 // ── PICTOGRAM ──
-const ageGroupData = {
-    "grid-1617":   { fatal: 5,  serious: 30, other: 40 },
-    "grid-1821":   { fatal: 8,  serious: 35, other: 35 },
-    "grid-70plus": { fatal: 20, serious: 40, other: 25 },
-};
-
 function buildIconGrid(gridId, data) {
     const container = document.getElementById(gridId);
     if (!container) return;
     container.innerHTML = "";
 
     const counts = {
-        fatal:   data.fatal,
-        serious: data.serious,
-        other:   data.other,
-        none:    100 - data.fatal - data.serious - data.other
-    };
-
-    const colors = {
-        fatal:   "#e35336",
-        serious: "#f0b429",
-        other:   "#36afc8",
-        none:    "#ccc"
+        fatal:   data.fatal   || 0,
+        serious: data.serious || 0,
+        other:   data.other   || 0,
+        none:    100 - (data.fatal || 0) - (data.serious || 0) - (data.other || 0)
     };
 
     for (const [type, count] of Object.entries(counts)) {
@@ -269,7 +363,7 @@ function buildIconGrid(gridId, data) {
             svg.setAttribute("viewBox", "0 0 24 24");
             svg.setAttribute("width", "12");
             svg.setAttribute("height", "12");
-            svg.setAttribute("fill", colors[type]);
+            svg.setAttribute("fill", COLOURS[type]);
             svg.classList.add("person-icon", type);
             svg.innerHTML = `
                 <circle cx="12" cy="5" r="3"/>
@@ -280,90 +374,90 @@ function buildIconGrid(gridId, data) {
     }
 }
 
-Object.keys(ageGroupData).forEach(id => buildIconGrid(id, ageGroupData[id]));
+// ── EJECTED TABLE ──
+function renderTable(rows) {
+    const tbody = document.querySelector(".data-table tbody");
+    if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#aaa;">No data</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = rows.map((r, i) => `
+        <tr ${i % 2 === 1 ? 'class="row-highlight"' : ''}>
+            <td>${r.ejected}</td>
+            <td>${r.taken_hospital}</td>
+            <td>${r.age_group}</td>
+            <td>${r.person_type}</td>
+            <td>${Number(r.total_count).toLocaleString()}</td>
+            <td>${r.pct_fatality}%</td>
+        </tr>
+    `).join("");
+}
 
-// ── SORTABLE TABLE ──
+// ── SORT TABLE ──
 document.querySelectorAll(".sort-arrow").forEach((arrow, colIndex) => {
     let asc = true;
     arrow.addEventListener("click", () => {
-        const table = document.querySelector(".data-table tbody");
-        const rows = Array.from(table.querySelectorAll("tr"));
+        const tbody = document.querySelector(".data-table tbody");
+        const rows  = Array.from(tbody.querySelectorAll("tr"));
         const actualCol = colIndex + 4;
         rows.sort((a, b) => {
-            const aVal = a.cells[actualCol].textContent.replace(/[,%]/g, "").trim();
-            const bVal = b.cells[actualCol].textContent.replace(/[,%]/g, "").trim();
+            const aVal = a.cells[actualCol]?.textContent.replace(/[,%]/g, "").trim();
+            const bVal = b.cells[actualCol]?.textContent.replace(/[,%]/g, "").trim();
             return asc ? parseFloat(aVal) - parseFloat(bVal)
                        : parseFloat(bVal) - parseFloat(aVal);
         });
         asc = !asc;
-        rows.forEach(row => table.appendChild(row));
+        rows.forEach(row => tbody.appendChild(row));
     });
 });
 
-// ── STACKED BAR CHART ──
-Chart.register(ChartDataLabels);
+// ── LOAD ALL DATA ──
+async function loadAll() {
+    const { levels, ages } = getFilters();
 
-new Chart(document.getElementById("injurySummaryChart"), {
-    type: "bar",
-    data: {
-        labels: [""],
-        datasets: [
-            {
-                label: "Inj level1 (no injury)",
-                data: [72749],
-                backgroundColor: "#57b894",
-                borderRadius: 0,
-                borderSkipped: false
-            },
-            {
-                label: "Inj level2 (serious)",
-                data: [183471],
-                backgroundColor: "#f0b429",
-                borderSkipped: false
-            },
-            {
-                label: "Inj level3 (fatal)",
-                data: [154582],
-                backgroundColor: "#e35336",
-                borderSkipped: false,
-                borderRadius: { topLeft: 4, topRight: 4 }
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                callbacks: {
-                    label: ctx => ` ${ctx.dataset.label}: ${ctx.raw.toLocaleString()}`
-                }
-            },
-            datalabels: {
-                color: "white",
-                font: { size: 10, weight: "600" },
-                formatter: val => val.toLocaleString(),
-                display: ctx => ctx.raw > 10000
-            }
-        },
-        scales: {
-            x: {
-                stacked: true,
-                grid: { display: false },
-                ticks: { display: false }
-            },
-            y: {
-                stacked: true,
-                max: 450000,
-                ticks: {
-                    color: "#777",
-                    font: { size: 10 },
-                    callback: v => (v / 1000).toFixed(0) + "k"
-                },
-                grid: { color: "rgba(0,0,0,0.06)" }
-            }
+    try {
+        // 1 — stacked bar
+        const injuryRows = await API.injurySummary(levels);
+        renderInjuryChart(injuryRows);
+
+        // 2 — pictogram
+        const pictoAges = ages.length ? ages : ["16-17", "18-21", "70+"];
+        const pictoData = await API.pictogram(pictoAges, levels);
+
+        const gridMap = {
+            "16-17":  "grid-1617",
+            "18-21":  "grid-1821",
+            "70+":    "grid-70plus",
+        };
+
+        for (const [age, gridId] of Object.entries(gridMap)) {
+            buildIconGrid(gridId, pictoData[age] || { fatal: 0, serious: 0, other: 0 });
         }
+
+        // 3 — ejected table
+        const ejFilters = {};
+        const ejectedChecked = [...document.querySelectorAll("input:checked")]
+            .filter(cb => ["Yes","No"].includes(cb.value) && cb.closest(".filter-dropdown")
+                ?.querySelector(".filter-toggle")?.textContent.includes("Ejected"))
+            .map(cb => cb.value);
+
+        const hospitalChecked = [...document.querySelectorAll("input:checked")]
+            .filter(cb => ["Yes","No"].includes(cb.value) && cb.closest(".filter-dropdown")
+                ?.querySelector(".filter-toggle")?.textContent.includes("hospital"))
+            .map(cb => cb.value === "Yes" ? "Y" : "N");
+
+        if (ejectedChecked.length) ejFilters.ejected = ejectedChecked;
+        if (hospitalChecked.length) ejFilters.hospital = hospitalChecked;
+        if (ages.length)            ejFilters.age = ages;
+
+        const tableRows = await API.ejectedTable(ejFilters);
+        renderTable(tableRows);
+
+    } catch (err) {
+        console.error("Error loading data:", err);
     }
-});
+}
+
+// ── INIT ──
+loadAll();
 </script>
