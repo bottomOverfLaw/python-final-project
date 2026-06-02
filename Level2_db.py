@@ -143,16 +143,17 @@ def get_age_groups():
     )]
 
 def get_injury_levels():
-    return [{"id": r["INJ_LEVEL"], "label": r["INJ_LEVEL_DESC"]} 
+    return [{"id": r["INJ_LEVEL"], "label": r["INJ_LEVEL_DESC"]}
             for r in query("SELECT * FROM Injury ORDER BY INJ_LEVEL")]
 
 def get_road_user_types():
-    return [{"id": r["ROAD_USER_TYPE"], "label": r["ROAD_USER_TYPE_DESC"]} 
+    return [{"id": r["ROAD_USER_TYPE"], "label": r["ROAD_USER_TYPE_DESC"]}
             for r in query("SELECT * FROM Road_User ORDER BY ROAD_USER_TYPE")]
 
 def get_light_conditions():
-    return [{"id": r["COND_ID"], "label": r["COND_NAME"]} 
+    return [{"id": r["COND_ID"], "label": r["COND_NAME"]}
             for r in query("SELECT * FROM Light_Condition ORDER BY COND_ID")]
+
 # ══════════════════════════════════════════
 #  ACCIDENT CONDITION PAGE
 # ══════════════════════════════════════════

@@ -36,6 +36,9 @@ const API = {
     // Home page
     home: () => fetchJSON("/api/home"),
 
+    // Filter options
+    filterOptions: () => fetchJSON("/api/filter-options"),
+
     // People & Injury — stacked bar
     injurySummary: (levels = []) =>
         fetchJSON("/api/injury-summary", { level: levels }),
