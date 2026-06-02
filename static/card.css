@@ -44,7 +44,7 @@ img {
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     border-radius: 5px;
     overflow: hidden;
-    background:  #FFF8F0;
+    background:  white;
     transition: 0.3s;
 }
 
@@ -71,7 +71,7 @@ img {
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     border-radius: 5px;
     overflow: hidden;
-    background: #FFF8F0;
+    background: white;
 
     transition: 0.3s;
 }
