@@ -58,7 +58,9 @@ ul li a {
     text-decoration: none;
     transition: 0.3s;
 }
-
+.none:hover{
+    background-color: #00000000;
+}
 /* HOVER EFFECT */
 ul li a:hover {
     background-color: #006884;
