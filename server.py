@@ -9,7 +9,8 @@ import urllib.parse
 # ---- Level 1: Home & About -----
 
 # ---- Level 2: People & Injury + Accident Condition ----
-from Level2_db import injury_summary, pictogram_data, ejected_hospital_table
+from Level2_db import injury_summary, pictogram_data, ejected_hospital_table, \
+    get_age_groups, get_injury_levels, get_road_user_types, get_light_conditions
 
 # ---- Level 3: People Analysis + Accident Analysis ----
 from Level3_db import people_analysis, people_analysis_chart
@@ -29,10 +30,14 @@ def render_page(page_title, content_html):
 
     with open("templates/navbar.html", "r", encoding="utf-8") as f:
         navbar = f.read()
+    
+    with open("templates/footer.html", "r", encoding="utf-8") as f:
+        footer = f.read()
 
     base = base.replace("{{NAVBAR}}", navbar)
     base = base.replace("{{PAGE_TITLE}}", page_title)
     base = base.replace("{{PAGE_CONTENT}}", content_html)
+    base = base.replace("{{FOOTER}}", footer)
 
     return base
 
@@ -87,9 +92,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         elif path == "/api/filter-options":
             from Level2_db import get_age_groups, get_injury_levels, get_road_user_types, get_light_conditions
             self.send_json({
-                "age_groups":   get_age_groups(),
-                "injury_levels": get_injury_levels(),
-                "person_types":  get_road_user_types(),
+                "age_groups":       get_age_groups(),
+                "injury_levels":    get_injury_levels(),
+                "person_types":     get_road_user_types(),
                 "light_conditions": get_light_conditions(),
             })
 

@@ -35,7 +35,7 @@
                 <div class="bar-legend">
                     <div class="bar-legend-item"><span class="bar-legend-sq" style="background:#e35336"></span> Inj level3</div>
                     <div class="bar-legend-item"><span class="bar-legend-sq" style="background:#f0b429"></span> Inj level2</div>
-                    <div class="bar-legend-item"><span class="bar-legend-sq" style="background:#57b894"></span> Inj level1</div>
+                    <div class="bar-legend-item"><span class="bar-legend-sq" style="background:#ccd"></span> Inj level1</div>
                 </div>
             </div>
 
@@ -204,18 +204,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script>
-/* people_and_injury.js — uses real DB via API */
-
+/* people_and_injury.js — uses DB via API */
 Chart.register(ChartDataLabels);
 
 let injuryChart = null;
 
-// ── COLOURS ──
 const COLOURS = {
     fatal:   "#e35336",
     serious: "#f0b429",
-    other:   "#36afc8",
-    none:    "#ccc",
+    other:   "#ccd",
+    none:    "#57b894",
 };
 
 // ── DROPDOWNS ──
@@ -234,70 +232,152 @@ function updateFilterButtons() {
     });
 }
 
-document.querySelectorAll(".filter-buttons").forEach(b => b.style.display = "none");
-document.querySelectorAll(".filter-panel input[type='checkbox']").forEach(cb => {
-    cb.addEventListener("change", updateFilterButtons);
-});
-
-document.querySelectorAll(".btn-cancel").forEach(btn => {
-    btn.addEventListener("click", () => {
-        btn.closest(".filter-panel").querySelectorAll("input").forEach(cb => cb.checked = false);
-        updateFilterButtons();
-        loadAll();   // reset to unfiltered data
-    });
-});
-
-document.querySelectorAll(".btn-apply").forEach(btn => {
-    btn.addEventListener("click", loadAll);
-});
-
-// ── COLLECT FILTERS ──
-function getFilters() {
-    const levels = [...document.querySelectorAll("input[type='checkbox']:checked")]
-        .filter(cb => ["fatal","serious","other injury","no injury"].includes(cb.value))
-        .map(cb => ({ "fatal": 1, "serious": 2, "other injury": 3, "no injury": 4 }[cb.value]));
-
-    const ages = [...document.querySelectorAll("input[type='checkbox']:checked")]
-        .filter(cb => ["0-4","18-21","70+","Unknown"].includes(cb.value))
-        .map(cb => cb.value);
-
-    return { levels, ages };
-}
-
-async function loadFilterOptions() {
-    const options = await fetch("/api/filter-options").then(r => r.json());
-
-    // Populate injury level checkboxes
-    const injuryGroup = document.querySelector(".filter-dropdown:nth-child(1) .checkbox-group");
-    injuryGroup.innerHTML = options.injury_levels.map(o => `
-        <label><input type="checkbox" value="${o.id}"> ${o.label}</label>
-    `).join("");
-
-    // Populate age group checkboxes
-    const ageGroup = document.querySelector(".filter-dropdown:nth-child(2) .checkbox-group");
-    ageGroup.innerHTML = options.age_groups.map(age => `
-        <label><input type="checkbox" value="${age}"> ${age}</label>
-    `).join("");
-
-    // Re-attach checkbox listeners after dynamic load
+function attachCheckboxListeners() {
     document.querySelectorAll(".filter-panel input[type='checkbox']").forEach(cb => {
         cb.addEventListener("change", updateFilterButtons);
     });
 }
 
-loadFilterOptions().then(() => loadAll());
+document.querySelectorAll(".filter-buttons").forEach(b => b.style.display = "none");
+
+// ── APPLY/CANCEL — section independent ──
+document.querySelectorAll(".dashboard-section:nth-child(1) .btn-apply").forEach(btn => {
+    btn.addEventListener("click", loadSection1);
+});
+
+document.querySelectorAll(".dashboard-section:nth-child(2) .btn-apply").forEach(btn => {
+    btn.addEventListener("click", loadSection2);
+});
+
+document.querySelectorAll(".dashboard-section:nth-child(1) .btn-cancel").forEach(btn => {
+    btn.addEventListener("click", () => {
+        btn.closest(".filter-panel").querySelectorAll("input").forEach(cb => cb.checked = false);
+        updateFilterButtons();
+        loadSection1();
+    });
+});
+
+document.querySelectorAll(".dashboard-section:nth-child(2) .btn-cancel").forEach(btn => {
+    btn.addEventListener("click", () => {
+        btn.closest(".filter-panel").querySelectorAll("input").forEach(cb => cb.checked = false);
+        updateFilterButtons();
+        loadSection2();
+    });
+});
+
+// ── UPDATE LEGEND ──
+function updateInjuryLegend(rows) {
+    const colourMap = {
+        "Fatality":       "#e35336",
+        "Serious injury": "#f0b429",
+        "Other injury":   "#ccd",
+        "Not injured":    "#57b894",
+    };
+
+    const legend = document.querySelector(".bar-legend");
+    legend.innerHTML = rows.map(r => `
+        <div class="bar-legend-item">
+            <span class="bar-legend-sq" style="background:${colourMap[r.label] || '#aaa'}"></span>
+            ${r.label}: ${Number(r.value).toLocaleString()}
+        </div>
+    `).join("");
+}
+
+// ── LOAD FILTER OPTIONS FROM DB ──
+async function loadFilterOptions() {
+    const options = await API.filterOptions();
+
+    // Section 1 left — injury level
+    const sec1Left = document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(1) .checkbox-group");
+    sec1Left.forEach(group => {
+        group.innerHTML = options.injury_levels.map(o => `
+            <label><input type="checkbox" value="${o.id}"> ${o.label}</label>
+        `).join("");
+    });
+
+    // Section 1 right — injury level + age group
+    const sec1RightDropdowns = document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(4) .filter-dropdown");
+    if (sec1RightDropdowns[0]) {
+        sec1RightDropdowns[0].querySelector(".checkbox-group").innerHTML =
+            options.injury_levels.map(o => `
+                <label><input type="checkbox" value="${o.id}"> ${o.label}</label>
+            `).join("");
+    }
+    if (sec1RightDropdowns[1]) {
+        sec1RightDropdowns[1].querySelector(".checkbox-group").innerHTML =
+            options.age_groups.map(age => `
+                <label><input type="checkbox" value="${age}"> ${age}</label>
+            `).join("");
+    }
+
+    // Section 2 — ejected, hospital, age group, type of person
+    const sec2Dropdowns = document.querySelectorAll(".dashboard-section:nth-child(2) .filter-dropdown");
+
+    sec2Dropdowns[0].querySelector(".checkbox-group").innerHTML = `
+        <label><input type="checkbox" value="Y"> Yes</label>
+        <label><input type="checkbox" value="N"> No</label>
+    `;
+    sec2Dropdowns[1].querySelector(".checkbox-group").innerHTML = `
+        <label><input type="checkbox" value="Y"> Yes</label>
+        <label><input type="checkbox" value="N"> No</label>
+    `;
+    sec2Dropdowns[2].querySelector(".checkbox-group").innerHTML =
+        options.age_groups.map(age => `
+            <label><input type="checkbox" value="${age}"> ${age}</label>
+        `).join("");
+    sec2Dropdowns[3].querySelector(".checkbox-group").innerHTML =
+        options.person_types.map(o => `
+            <label><input type="checkbox" value="${o.id}"> ${o.label}</label>
+        `).join("");
+
+    attachCheckboxListeners();
+}
+
+// ── COLLECT SECTION 1 FILTERS ──
+function getSection1Filters() {
+    const sec1 = document.querySelector(".dashboard-section:nth-child(1)");
+    const checked = [...sec1.querySelectorAll("input:checked")];
+
+    const levels = checked
+        .filter(cb => !isNaN(cb.value) && cb.value !== "")
+        .map(cb => parseInt(cb.value));
+
+    const ages = checked
+        .filter(cb => isNaN(cb.value))
+        .map(cb => cb.value);
+
+    return { levels, ages };
+}
+
+// ── COLLECT SECTION 2 FILTERS ──
+function getSection2Filters() {
+    const sec2 = document.querySelector(".dashboard-section:nth-child(2)");
+    const dropdowns = sec2.querySelectorAll(".filter-dropdown");
+
+    const ejected      = [...dropdowns[0].querySelectorAll("input:checked")].map(cb => cb.value);
+    const hospital     = [...dropdowns[1].querySelectorAll("input:checked")].map(cb => cb.value);
+    const age_groups   = [...dropdowns[2].querySelectorAll("input:checked")].map(cb => cb.value);
+    const person_types = [...dropdowns[3].querySelectorAll("input:checked")].map(cb => cb.value);
+
+    const filters = {};
+    if (ejected.length)      filters.ejected  = ejected;
+    if (hospital.length)     filters.hospital = hospital;
+    if (age_groups.length)   filters.age      = age_groups;
+    if (person_types.length) filters.type     = person_types;
+
+    return filters;
+}
 
 // ── STACKED BAR CHART ──
 function renderInjuryChart(rows) {
     const ctx = document.getElementById("injurySummaryChart").getContext("2d");
     if (injuryChart) injuryChart.destroy();
 
-    // Map DB labels to colours
     const colourMap = {
-        "Fatality":      "#e35336",
-        "Serious injury":"#f0b429",
-        "Other injury":  "#57b894",
-        "Not injured":   "#ccc",
+        "Fatality":       "#e35336",
+        "Serious injury": "#f0b429",
+        "Other injury":   "#ccd",
+        "Not injured":    "#57b894",
     };
 
     injuryChart = new Chart(ctx, {
@@ -305,10 +385,10 @@ function renderInjuryChart(rows) {
         data: {
             labels: [""],
             datasets: rows.map(r => ({
-                label: r.label,
-                data:  [r.value],
+                label:           r.label,
+                data:            [r.value],
                 backgroundColor: colourMap[r.label] || "#aaa",
-                borderSkipped: false,
+                borderSkipped:   false,
             }))
         },
         options: {
@@ -365,13 +445,25 @@ function buildIconGrid(gridId, data) {
             svg.setAttribute("height", "12");
             svg.setAttribute("fill", COLOURS[type]);
             svg.classList.add("person-icon", type);
-            svg.innerHTML = `
-                <circle cx="12" cy="5" r="3"/>
-                <path d="M12 10c-4 0-6 2-6 4v2h12v-2c0-2-2-4-6-4z"/>
-            `;
+            svg.innerHTML = `<circle cx="12" cy="5" r="3"/><path d="M12 10c-4 0-6 2-6 4v2h12v-2c0-2-2-4-6-4z"/>`;
             container.appendChild(svg);
         }
     }
+}
+
+function renderPictogram(pictoAges, pictoData) {
+    const ageRowsContainer = document.querySelector(".age-rows");
+    ageRowsContainer.innerHTML = pictoAges.map(age => `
+        <div class="age-row">
+            <div class="age-label">${age}<br><small>(100 people)</small></div>
+            <div class="icon-grid" id="grid-${age.replace(/[^a-z0-9]/gi, '')}"></div>
+        </div>
+    `).join("");
+
+    pictoAges.forEach(age => {
+        const gridId = `grid-${age.replace(/[^a-z0-9]/gi, '')}`;
+        buildIconGrid(gridId, pictoData[age] || { fatal: 0, serious: 0, other: 0, none: 0});
+    });
 }
 
 // ── EJECTED TABLE ──
@@ -411,53 +503,65 @@ document.querySelectorAll(".sort-arrow").forEach((arrow, colIndex) => {
     });
 });
 
-// ── LOAD ALL DATA ──
-async function loadAll() {
-    const { levels, ages } = getFilters();
-
+// ── LOAD SECTION 1: bar chart + pictogram ──
+async function loadSection1() {
     try {
-        // 1 — stacked bar
-        const injuryRows = await API.injurySummary(levels);
+        const { levels, ages } = getSection1Filters();
+
+        // ── BAR CHART — filtered by injury level only ──
+        const injuryRows = await API.injurySummary(levels.length ? levels : null);
         renderInjuryChart(injuryRows);
+        updateInjuryLegend(injuryRows);
 
-        // 2 — pictogram
-        const pictoAges = ages.length ? ages : ["16-17", "18-21", "70+"];
-        const pictoData = await API.pictogram(pictoAges, levels);
+        // ── PICTOGRAM — filtered by age group only ──
+        const pictoAges = ages.length ? ages : ["16-17", "18-21", "70+"];  // ← regular hyphens
+        const pictoData = await API.pictogram(pictoAges, null);
 
-        const gridMap = {
-            "16-17":  "grid-1617",
-            "18-21":  "grid-1821",
-            "70+":    "grid-70plus",
-        };
+        // pictogram legend always shows all 3 injury types
+        document.querySelector(".pictogram-legend").innerHTML = `
+            <span class="dot fatal"></span> FATAL
+            <span class="dot serious"></span> SERIOUS
+            <span class="dot other"></span> OTHER INJURY
+        `;
 
-        for (const [age, gridId] of Object.entries(gridMap)) {
-            buildIconGrid(gridId, pictoData[age] || { fatal: 0, serious: 0, other: 0 });
-        }
+        // show/hide rows and update icons
+        document.querySelectorAll(".age-row").forEach(row => {
+            const ageLabel = row.querySelector(".age-label");
+            const label = ageLabel.childNodes[0].textContent.trim().replace(/–/g, "-");
 
-        // 3 — ejected table
-        const ejFilters = {};
-        const ejectedChecked = [...document.querySelectorAll("input:checked")]
-            .filter(cb => ["Yes","No"].includes(cb.value) && cb.closest(".filter-dropdown")
-                ?.querySelector(".filter-toggle")?.textContent.includes("Ejected"))
-            .map(cb => cb.value);
+            if (pictoAges.includes(label)) {
+                row.style.visibility = "visible";  // ← show
+                row.style.height = "";
+                const gridId = row.querySelector(".icon-grid").id;
+                buildIconGrid(gridId, pictoData[label] || { fatal: 0, serious: 0, other: 0 });
+            } else {
+                row.style.visibility = "hidden";   // ← hide but keep space
+                row.style.height = "20px";
+            }
+        });
 
-        const hospitalChecked = [...document.querySelectorAll("input:checked")]
-            .filter(cb => ["Yes","No"].includes(cb.value) && cb.closest(".filter-dropdown")
-                ?.querySelector(".filter-toggle")?.textContent.includes("hospital"))
-            .map(cb => cb.value === "Yes" ? "Y" : "N");
-
-        if (ejectedChecked.length) ejFilters.ejected = ejectedChecked;
-        if (hospitalChecked.length) ejFilters.hospital = hospitalChecked;
-        if (ages.length)            ejFilters.age = ages;
-
-        const tableRows = await API.ejectedTable(ejFilters);
-        renderTable(tableRows);
+        document.querySelector(".chart-note").textContent =
+            `Each icon represents 1 person. Showing: ${pictoAges.join(", ")}`;
 
     } catch (err) {
-        console.error("Error loading data:", err);
+        console.error("Error loading section 1:", err);
+    }
+}
+
+// ── LOAD SECTION 2: ejected table ──
+async function loadSection2() {
+    try {
+        const ejFilters = getSection2Filters();
+        const tableRows = await API.ejectedTable(ejFilters);
+        renderTable(tableRows);
+    } catch (err) {
+        console.error("Error loading section 2:", err);
     }
 }
 
 // ── INIT ──
-loadAll();
+loadFilterOptions().then(() => {
+    loadSection1();
+    loadSection2();
+});
 </script>

@@ -249,19 +249,21 @@
 
 .dot.fatal   { background: #e35336; }
 .dot.serious { background: #f0b429; }
-.dot.other   { background: #36afc8; }
+.dot.other   { background: #ccd; }
 
 /* ── AGE ROWS ── */
 .age-rows {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    min-width: 400px;   /* ← keeps the container width stable */
 }
 
 .age-row {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-height: 40px;    /* ← reserves space even when hidden */
 }
 
 .age-label {
@@ -291,8 +293,8 @@
 
 .person-icon.fatal   { color: #e35336; }
 .person-icon.serious { color: #f0b429; }
-.person-icon.other   { color: #36afc8; }
-.person-icon.none    { color: #ccc; }
+.person-icon.other   { color: #ccd; }
+.person-icon.none    { color: #57b894; }
 
 /* ── TABLE SECTION ── */
 .table-section {
