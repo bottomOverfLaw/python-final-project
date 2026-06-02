@@ -1,0 +1,72 @@
+.site-footer {
+  background: rgba(227, 83, 54, 0.5);
+  color: #fff;
+  padding: 40px 60px;
+  position: relative;
+  font-family: Arial, sans-serif;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* LEFT SIDE */
+.footer-left {
+  flex: 1;
+}
+
+.footer-logo {
+  width: 140px;
+}
+
+/* RIGHT SIDE */
+.footer-right {
+  flex: 2;
+  text-align: right;
+}
+
+.footer-links {
+  margin-bottom: 10px;
+}
+
+.footer-links a {
+  color: #fff;
+  text-decoration: none;
+  margin-left: 15px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+  opacity: 1;
+  text-decoration-color: #006884;
+}
+
+.footer-copy {
+  margin-top: 15px;
+  font-size: 12px;
+  opacity: 0.7;
+  text-align: center;
+}
+
+/* SCROLL TO TOP */
+.scroll-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #b3001b;
+  color: white;
+  padding: 10px 12px;
+  border-radius: 50%;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.scroll-top:hover {
+  background: #8f0016;
+}
