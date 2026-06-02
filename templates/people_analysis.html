@@ -1,5 +1,5 @@
 <link rel="stylesheet" href="../static/people_analysis.css">
-
+<script src="../static/api.js"></script>
 <div class="page-wrapper">
 
     <section class="dashboard-section">
@@ -47,10 +47,6 @@
                         </div>
                     </div>
 
-                </div>
-                <div class="filter-buttons">
-                    <button class="btn-apply">apply</button>
-                    <button class="btn-cancel">cancel</button>
                 </div>
             </div>
 
@@ -137,41 +133,40 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script>
+/* people_analysis.js — uses real DB via API */
+
 Chart.register(ChartDataLabels);
 
-const allData = [
-    { age: "18-21", person: "Driver",     speed: 100, injuryRate: 6.4, above: "+2.1pp", aboveClass: "positive", injury: "Fatal" },
-    { age: "70+",   person: "Pedestrian", speed: 50,  injuryRate: 5.8, above: "+1.5pp", aboveClass: "positive", injury: "Fatal" },
-    { age: "22-24", person: "Passengers", speed: 50,  injuryRate: 3.9, above: "-0.5pp", aboveClass: "negative", injury: "Fatal" },
-];
-
-let currentData = [...allData];
 let injuryChart = null;
+let currentData = [];
+
+const INJURY_MAP = { "fatal": 1, "serious": 2, "other injury": 3, "no injury": 4 };
+const LIGHT_MAP  = { "day": 1, "dusk/dawn": 2, "dark no street light": 3, "...": 9 };
 
 // ── DROPDOWNS ──
-document.querySelectorAll(".filter-dropdown").forEach(dropdown => {
-    dropdown.querySelector(".filter-toggle").addEventListener("click", () => {
-        dropdown.classList.toggle("active");
+document.querySelectorAll(".filter-dropdown").forEach(dd => {
+    dd.querySelector(".filter-toggle").addEventListener("click", () => {
+        dd.classList.toggle("active");
     });
 });
 
-// ── SHOW APPLY/CANCEL ONLY WHEN CHECKBOX IS CHECKED ──
+// ── SHOW APPLY/CANCEL ONLY WHEN CHECKED ──
 function updateFilterButtons() {
     const panel = document.querySelector(".filter-panel");
-    const anyChecked = panel.querySelectorAll("input[type='checkbox']:checked").length > 0;
-    const buttons = panel.querySelector(".filter-buttons");
-    if (buttons) buttons.style.display = anyChecked ? "flex" : "none";
+    const anyChecked = panel.querySelectorAll("input:checked").length > 0;
+    const btns = panel.querySelector(".filter-buttons");
+    if (btns) btns.style.display = anyChecked ? "flex" : "none";
 }
 
 document.querySelector(".filter-buttons").style.display = "none";
-
 document.querySelectorAll(".filter-panel input[type='checkbox']").forEach(cb => {
     cb.addEventListener("change", updateFilterButtons);
 });
 
 document.querySelector(".btn-cancel").addEventListener("click", () => {
-    document.querySelectorAll(".filter-panel input[type='checkbox']").forEach(cb => cb.checked = false);
+    document.querySelectorAll(".filter-panel input").forEach(cb => cb.checked = false);
     updateFilterButtons();
+    loadAnalysis({});
 });
 
 // ── POPUP ──
@@ -199,60 +194,58 @@ document.getElementById("btnPopupCancel").addEventListener("click", () => {
     pendingAction = null;
 });
 
+// ── COLLECT FILTERS ──
+function getFilters() {
+    const checked = [...document.querySelectorAll(".filter-panel input:checked")];
+    const injuryLevels = checked.filter(cb => INJURY_MAP[cb.value]).map(cb => INJURY_MAP[cb.value]);
+    const ageGroups    = checked.filter(cb => ["0-4","18-21","70+","Unknown"].includes(cb.value)).map(cb => cb.value);
+    const lightConds   = checked.filter(cb => LIGHT_MAP[cb.value]).map(cb => LIGHT_MAP[cb.value]);
+    return { injuryLevels, ageGroups, lightConds };
+}
+
 // ── ANALYSIS BUTTON ──
 document.getElementById("btnAnalysis").addEventListener("click", () => {
-    const dropdowns = [...document.querySelectorAll(".filter-panel .filter-dropdown")];
-
-    const injuryChecked = dropdowns
-        .find(d => d.querySelector(".filter-toggle").textContent.includes("Injury"))
-        ?.querySelectorAll("input:checked").length > 0;
-
-    const ageChecked = dropdowns
-        .find(d => d.querySelector(".filter-toggle").textContent.includes("Age"))
-        ?.querySelectorAll("input:checked").length > 0;
-
+    const { injuryLevels, ageGroups, lightConds } = getFilters();
     const anyChecked = document.querySelectorAll(".filter-panel input:checked").length > 0;
 
-    if (!anyChecked) {
-        renderTable(allData);
-        renderChart(allData);
-        return;
-    }
+    if (!anyChecked) { loadAnalysis({}); return; }
 
-    if (injuryChecked && !ageChecked) {
+    if (injuryLevels.length > 0 && ageGroups.length === 0) {
         showPopup("Warning", "Only injury level has been selected. Do you want to continue anyway?",
-            () => { renderTable(allData); renderChart(allData); });
+            () => loadAnalysis({ level: injuryLevels, light: lightConds }));
         return;
     }
 
-    if (ageChecked && !injuryChecked) {
+    if (ageGroups.length > 0 && injuryLevels.length === 0) {
         showPopup("Error", "Please also select an injury level to run the analysis.");
         return;
     }
 
-    renderTable(allData);
-    renderChart(allData);
+    loadAnalysis({ level: injuryLevels, age: ageGroups, light: lightConds });
 });
 
-// ── CLEAR ──
+// ── CLEAR BUTTON ──
 document.getElementById("btnClear").addEventListener("click", () => {
-    document.querySelectorAll(".filter-panel input[type='checkbox']").forEach(cb => cb.checked = false);
+    document.querySelectorAll(".filter-panel input").forEach(cb => cb.checked = false);
     updateFilterButtons();
-    renderTable(allData);
-    renderChart(allData);
+    loadAnalysis({});
 });
 
 // ── RENDER TABLE ──
 function renderTable(data) {
     const tbody = document.getElementById("tableBody");
-    tbody.innerHTML = data.map((row, i) => `
+    if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#aaa;">No data</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = data.map((r, i) => `
         <tr ${i % 2 === 1 ? 'class="row-highlight"' : ''}>
-            <td>${row.age}</td>
-            <td>${row.person}</td>
-            <td>${row.speed}</td>
-            <td>${row.injuryRate}%</td>
-            <td class="above-avg ${row.aboveClass}">${row.above}</td>
-            <td>${row.injury}</td>
+            <td>${r.age}</td>
+            <td>${r.person_type}</td>
+            <td>${r.speed_zone}</td>
+            <td>${r.injury_rate}%</td>
+            <td class="above-avg ${r.above_class}">${r.above}</td>
+            <td>Fatal</td>
         </tr>
     `).join("");
 }
@@ -261,39 +254,25 @@ function renderTable(data) {
 function renderChart(data) {
     const ctx = document.getElementById("injuryRateChart").getContext("2d");
     if (injuryChart) injuryChart.destroy();
-
     injuryChart = new Chart(ctx, {
         type: "bar",
         data: {
-            labels: data.map(d => d.age),
-            datasets: [{
-                label: "Injury rate",
-                data: data.map(d => d.injuryRate),
-                backgroundColor: "#2e6d8e",
-                borderRadius: 4,
-                borderSkipped: false
+            labels: data.map(d => d.age),           // chart has age + injury_rate
+            datasets: [{ 
+                label: "Injury rate", 
+                data: data.map(d => d.injury_rate),
+                backgroundColor: "#2e6d8e", 
+                borderRadius: 4, 
+                borderSkipped: false 
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                datalabels: { display: false }
-            },
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, datalabels: { display: false } },
             scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: { color: "#666", font: { size: 12 } }
-                },
-                y: {
-                    ticks: {
-                        color: "#666",
-                        font: { size: 11 },
-                        callback: v => v + "%"
-                    },
-                    grid: { color: "rgba(0,0,0,0.06)" }
-                }
+                x: { grid: { display: false }, ticks: { color: "#666", font: { size: 12 } } },
+                y: { ticks: { color: "#666", font: { size: 11 }, callback: v => v + "%" },
+                     grid: { color: "rgba(0,0,0,0.06)" } }
             }
         }
     });
@@ -303,18 +282,15 @@ function renderChart(data) {
 document.querySelectorAll(".sort-arrow").forEach(arrow => {
     let asc = true;
     arrow.addEventListener("click", () => {
-        const col = parseInt(arrow.dataset.col);
-        const sorted = [...currentData].sort((a, b) => {
-            const vals = [
-                [a.age, b.age],
-                [a.person, b.person],
-                [a.speed, b.speed],
-                [a.injuryRate, b.injuryRate]
-            ][col];
-            return typeof vals[0] === "number"
-                ? asc ? vals[0] - vals[1] : vals[1] - vals[0]
-                : asc ? vals[0].localeCompare(vals[1]) : vals[1].localeCompare(vals[0]);
-        });
+        const col  = parseInt(arrow.dataset.col);
+        const keys = ["age", "person_type", "speed_zone", "injury_rate"];
+        const key  = keys[col];
+        const sorted = [...currentData].sort((a, b) =>
+            typeof a[key] === "number"
+                ? asc ? a[key] - b[key] : b[key] - a[key]
+                : asc ? String(a[key]).localeCompare(String(b[key]))
+                      : String(b[key]).localeCompare(String(a[key]))
+        );
         asc = !asc;
         currentData = sorted;
         renderTable(sorted);
@@ -322,7 +298,17 @@ document.querySelectorAll(".sort-arrow").forEach(arrow => {
     });
 });
 
-// ── INIT ──
-renderTable(allData);
-renderChart(allData);
+// ── LOAD ──
+async function loadAnalysis(filters) {
+    try {
+        const response = await API.peopleAnalysis(filters);
+        currentData = response.table;
+        renderTable(response.table);
+        renderChart(response.chart);
+    } catch (err) {
+        console.error("Error loading analysis data:", err);
+    }
+}
+
+loadAnalysis({});
 </script>
