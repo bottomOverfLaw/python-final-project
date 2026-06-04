@@ -7,7 +7,7 @@
 
 /* ── PAGE WRAPPER ── */
 .page-wrapper {
-    max-width: 1400px;
+    max-width: 2000px;
     margin: 30px auto;
     padding: 0 20px;
     display: flex;
@@ -21,6 +21,7 @@
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(227, 83, 54, 0.15);
     padding: 20px;
+    width: 100%;
 }
 
 .section-title {
@@ -36,16 +37,58 @@
     display: flex;
     gap: 16px;
     align-items: flex-start;
+    flex-wrap: nowrap;        
 }
 
 /* ── FILTER PANEL ── */
+
+/* ── FILTER TOGGLE BUTTON ── */
+.aa-filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background: #fff;
+    font-size: 13px;
+    color: #444;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+}
+
+.aa-filter-btn:hover {
+    background: #f0efea;
+    border-color: #999;
+}
+
+/* ── FILTER PANEL (hidden by default) ── */
+.aa-filter-panel {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    padding: 12px;
+    margin-top: 6px;
+    width: 100%;            /* ← matches filter-panel width */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-sizing: border-box;
+}
+
+.aa-filter-panel.open {
+    display: flex;
+}
+
 .filter-panel {
     min-width: 130px;
     max-width: 150px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-
+    align-self: flex-start;
 }
 
 .filter-icon {
@@ -65,29 +108,21 @@
 
 .filter-toggle {
     width: 100%;
-
     border: 1px solid #ccc;
-    border-radius: 4px;
-
-    background: #f0e8dc;
-
-    padding: 6px 8px;
-
-    font-size: 12px;
+    border-radius: 6px;
+    background: #f9f9f9;
+    padding: 6px 10px;
+    font-size: 13px;
     font-weight: 600;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     cursor: pointer;
-
     transition: background 0.2s;
+    color: #333;
 }
 
-.filter-toggle:hover {
-    background: #e8dccd;
-}
+.filter-toggle:hover { background: #f0efea; }
 
 .filter-label {
     font-size: 12px;
@@ -119,20 +154,35 @@
 
 .filter-buttons {
     display: flex;
-    gap: 6px;
+    gap: 8px;
+    margin-top: 8px;
 }
 
-.btn-apply, .btn-cancel {
-    font-size: 11px;
-    padding: 3px 8px;
-    border: 1px solid #aaa;
-    border-radius: 3px;
+.btn-apply {
+    padding: 7px 15px;
+    background: #36afc8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
     cursor: pointer;
-    background: #f5f5f5;
+    transition: background 0.15s;
 }
 
-.btn-apply:hover { background: #36afc8; color: white; }
-.btn-cancel:hover { background: #e35336; color: white; }
+.btn-apply:hover { background: #3d35a0; color: white; }
+
+.btn-cancel {
+    padding: 7px 15px;
+    background: #fff;
+    color: #444;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-cancel:hover { background: #f0efea; }
 
 .checkbox-group {
     display: flex;
@@ -196,7 +246,7 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-left: 100px;
+    margin-left: 20px;
 }
 
 .chart-toggle {
@@ -250,20 +300,21 @@
 .dot.fatal   { background: #e35336; }
 .dot.serious { background: #f0b429; }
 .dot.other   { background: #ccd; }
+.dot.noinjury {background: #57b894;}
 
 /* ── AGE ROWS ── */
 .age-rows {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    min-width: 400px;   /* ← keeps the container width stable */
+    min-width: 500px;   /* ← keeps the container width stable */
 }
 
 .age-row {
     display: flex;
     align-items: center;
     gap: 10px;
-    min-height: 40px;    /* ← reserves space even when hidden */
+    min-height: 50px;    /* ← reserves space even when hidden */
 }
 
 .age-label {
