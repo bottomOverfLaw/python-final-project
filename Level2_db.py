@@ -60,15 +60,16 @@ def pictogram_data(age_groups=None, injury_levels=None):
         params += list(injury_levels)
 
     rows = query(f"""
-        SELECT p.AGE_GROUP,
-               SUM(CASE WHEN p.INJ_LEVEL = 1 THEN 1 ELSE 0 END) AS fatal,
-               SUM(CASE WHEN p.INJ_LEVEL = 2 THEN 1 ELSE 0 END) AS serious,
-               SUM(CASE WHEN p.INJ_LEVEL = 3 THEN 1 ELSE 0 END) AS other,
-               COUNT(*) AS total
+        SELECT 
+            CASE WHEN p.AGE_GROUP = '5-Dec' THEN '5-12' ELSE p.AGE_GROUP END AS AGE_GROUP,
+            SUM(CASE WHEN p.INJ_LEVEL = 1 THEN 1 ELSE 0 END) AS fatal,
+            SUM(CASE WHEN p.INJ_LEVEL = 2 THEN 1 ELSE 0 END) AS serious,
+            SUM(CASE WHEN p.INJ_LEVEL = 3 THEN 1 ELSE 0 END) AS other,
+            COUNT(*) AS total
         FROM Person p
         WHERE p.AGE_GROUP IN ({ph})
         {inj_where}
-        GROUP BY p.AGE_GROUP
+        GROUP BY AGE_GROUP
     """, params)
 
     result = {}
@@ -119,9 +120,9 @@ def ejected_hospital_table(filters=None):
 
     return query(f"""
         SELECT
+            CASE WHEN p.AGE_GROUP = '5-Dec' THEN '5-12' ELSE p.AGE_GROUP END AS age_group,     
             CASE WHEN p.EJECTED_CODE IN (1,2) THEN 'Yes' ELSE 'No' END AS ejected,
             CASE WHEN p.TAKEN_HOSPITAL = 'Y'  THEN 'Yes' ELSE 'No' END AS taken_hospital,
-            p.AGE_GROUP AS age_group,
             ru.ROAD_USER_TYPE_DESC AS person_type,
             COUNT(*) AS total_count,
             ROUND(
@@ -137,9 +138,24 @@ def ejected_hospital_table(filters=None):
 
 # ── FILTER OPTIONS ──
 def get_age_groups():
-    return [r["AGE_GROUP"] for r in query(
+    rows = query(
         "SELECT DISTINCT AGE_GROUP FROM Person ORDER BY AGE_GROUP"
-    )]
+    )
+    
+    # fix typo and define correct order
+    age_order = [
+        "0-4", "5-12", "13-15", "16-17", "18-21",
+        "22-25", "26-29", "30-39", "40-49", "50-59",
+        "60-64", "65-69", "70+", "Unknown"
+    ]
+    
+    # replace 5-Dec with 5-12
+    ages = ["5-12" if r["AGE_GROUP"] == "5-Dec" else r["AGE_GROUP"] for r in rows]
+    
+    # sort by the defined order, unknowns go to end
+    ages.sort(key=lambda x: age_order.index(x) if x in age_order else 999)
+    
+    return ages
 
 def get_injury_levels():
     return [{"id": r["INJ_LEVEL"], "label": r["INJ_LEVEL_DESC"]}
