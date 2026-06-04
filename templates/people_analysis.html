@@ -3,7 +3,7 @@
 <div class="page-wrapper">
 
     <section class="dashboard-section">
-
+        <h2 class="section-title">Analysis:</h2>
         <div class="section-body">
 
             <!-- LEFT FILTER -->
@@ -48,16 +48,16 @@
                     </div>
 
                 </div>
+
+                <div class="filter-buttons">
+                    <button class="btn-apply">apply</button>
+                    <button class="btn-cancel">cancel</button>
+                </div>
             </div>
 
             <!-- MAIN CONTENT: TABLE + CHART -->
             <div class="main-content">
 
-                <!-- ANALYSIS BUTTONS -->
-                <div class="action-buttons">
-                    <button class="btn-analysis" id="btnAnalysis">Analysis</button>
-                    <button class="btn-clear" id="btnClear">Clear</button>
-                </div>
 
                 <!-- TABLE -->
                 <div class="table-wrapper">
@@ -133,7 +133,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script>
-/* people_analysis.js — uses real DB via API */
+/* people_analysis.js — DB via API */
 
 Chart.register(ChartDataLabels);
 
@@ -158,7 +158,8 @@ function updateFilterButtons() {
     if (btns) btns.style.display = anyChecked ? "flex" : "none";
 }
 
-document.querySelector(".filter-buttons").style.display = "none";
+// Hide ALL filter buttons on load
+document.querySelectorAll(".filter-buttons").forEach(b => b.style.display = "none");
 document.querySelectorAll(".filter-panel input[type='checkbox']").forEach(cb => {
     cb.addEventListener("change", updateFilterButtons);
 });
