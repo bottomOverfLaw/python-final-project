@@ -21,6 +21,14 @@
     padding: 20px;
 }
 
+.section-title {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #e3c8b0;
+    padding-bottom: 8px;
+}
+
 /* ── SECTION BODY ── */
 .section-body {
     display: flex;
