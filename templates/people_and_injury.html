@@ -10,20 +10,25 @@
 
             <!-- LEFT FILTER -->
             <div class="filter-panel">
-                <div class="filter-dropdown">
-                    <button class="filter-toggle">Injury level <span>&#8964;</span></button>
-                    <div class="filter-content">
-                        <div class="checkbox-group">
-                            <label><input type="checkbox"> fatal</label>
-                            <label><input type="checkbox"> serious</label>
-                            <label><input type="checkbox"> other injury</label>
-                            <label><input type="checkbox"> no injury</label>
+                <button class="aa-filter-btn" id="filterToggleS1">
+                    <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
+                        <line x1="3" y1="5"  x2="17" y2="5"  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <line x1="7" y1="15" x2="13" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                    Filter
+                </button>
+                <div class="aa-filter-panel" id="filterPanelS1">
+                    <div class="filter-dropdown">
+                        <button class="filter-toggle">Injury level <span>&#8964;</span></button>
+                        <div class="filter-content">
+                            <div class="checkbox-group"></div>
                         </div>
                     </div>
-                </div>
-                <div class="filter-buttons">
-                    <button class="btn-apply">apply</button>
-                    <button class="btn-cancel">cancel</button>
+                    <div class="filter-buttons">
+                        <button class="btn-apply">apply</button>
+                        <button class="btn-cancel">cancel</button>
+                    </div>
                 </div>
             </div>
 
@@ -46,6 +51,7 @@
                     <span class="dot fatal"></span> FATAL
                     <span class="dot serious"></span> SERIOUS
                     <span class="dot other"></span> OTHER INJURY
+                    <span class="dot noinjury"></span> NO INJURY
                 </div>
                 <div class="age-rows">
                     <div class="age-row">
@@ -65,27 +71,26 @@
 
             <!-- RIGHT FILTER -->
             <div class="filter-panel">
+            <button class="aa-filter-btn" id="filterToggleS1Right">
+                <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
+                    <line x1="3" y1="5"  x2="17" y2="5"  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <line x1="7" y1="15" x2="13" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+                Filter
+            </button>
+            <div class="aa-filter-panel" id="filterPanelS1Right">
                 <div class="filter-group">
                     <div class="filter-dropdown">
                         <button class="filter-toggle">Injury level <span>&#8964;</span></button>
                         <div class="filter-content">
-                            <div class="checkbox-group">
-                                <label><input type="checkbox"> fatal</label>
-                                <label><input type="checkbox"> serious</label>
-                                <label><input type="checkbox"> other injury</label>
-                                <label><input type="checkbox"> no injury</label>
-                            </div>
+                            <div class="checkbox-group"></div>
                         </div>
                     </div>
                     <div class="filter-dropdown">
                         <button class="filter-toggle">Age group <span>&#8964;</span></button>
                         <div class="filter-content">
-                            <div class="checkbox-group">
-                                <label><input type="checkbox"> 0-4</label>
-                                <label><input type="checkbox"> 18-21</label>
-                                <label><input type="checkbox"> 70+</label>
-                                <label><input type="checkbox"> Unknown</label>
-                            </div>
+                            <div class="checkbox-group"></div>
                         </div>
                     </div>
                 </div>
@@ -94,7 +99,6 @@
                     <button class="btn-cancel">cancel</button>
                 </div>
             </div>
-
         </div>
     </section>
 
@@ -106,45 +110,38 @@
 
             <!-- LEFT FILTER -->
             <div class="filter-panel">
+            <button class="aa-filter-btn" id="filterToggleS2">
+                <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
+                    <line x1="3" y1="5"  x2="17" y2="5"  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <line x1="7" y1="15" x2="13" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+                Filter
+            </button>
+            <div class="aa-filter-panel" id="filterPanelS2">
                 <div class="filter-group">
                     <div class="filter-dropdown">
                         <button class="filter-toggle">Ejected <span>&#8964;</span></button>
                         <div class="filter-content">
-                            <div class="checkbox-group">
-                                <label><input type="checkbox"> Yes</label>
-                                <label><input type="checkbox"> No</label>
-                            </div>
+                            <div class="checkbox-group"></div>
                         </div>
                     </div>
                     <div class="filter-dropdown">
                         <button class="filter-toggle">Taken to the hospital <span>&#8964;</span></button>
                         <div class="filter-content">
-                            <div class="checkbox-group">
-                                <label><input type="checkbox"> Yes</label>
-                                <label><input type="checkbox"> No</label>
-                            </div>
+                            <div class="checkbox-group"></div>
                         </div>
                     </div>
                     <div class="filter-dropdown">
                         <button class="filter-toggle">Age group <span>&#8964;</span></button>
                         <div class="filter-content">
-                            <div class="checkbox-group">
-                                <label><input type="checkbox"> 0-4</label>
-                                <label><input type="checkbox"> 18-21</label>
-                                <label><input type="checkbox"> 70+</label>
-                                <label><input type="checkbox"> Unknown</label>
-                            </div>
+                            <div class="checkbox-group"></div>
                         </div>
                     </div>
                     <div class="filter-dropdown">
                         <button class="filter-toggle">Type of person <span>&#8964;</span></button>
                         <div class="filter-content">
-                            <div class="checkbox-group">
-                                <label><input type="checkbox"> driver</label>
-                                <label><input type="checkbox"> passenger</label>
-                                <label><input type="checkbox"> pedestrian</label>
-                                <label><input type="checkbox"> unknown</label>
-                            </div>
+                            <div class="checkbox-group"></div>
                         </div>
                     </div>
                 </div>
@@ -153,6 +150,7 @@
                     <button class="btn-cancel">cancel</button>
                 </div>
             </div>
+        </div>
 
             <!-- TABLE -->
             <div class="table-wrapper">
@@ -216,6 +214,19 @@ const COLOURS = {
     none:    "#57b894",
 };
 
+// ── FILTER PANEL TOGGLES ──
+document.getElementById("filterToggleS1").addEventListener("click", () => {
+    document.getElementById("filterPanelS1").classList.toggle("open");
+});
+
+document.getElementById("filterToggleS1Right").addEventListener("click", () => {
+    document.getElementById("filterPanelS1Right").classList.toggle("open");
+});
+
+document.getElementById("filterToggleS2").addEventListener("click", () => {
+    document.getElementById("filterPanelS2").classList.toggle("open");
+});
+
 // ── DROPDOWNS ──
 document.querySelectorAll(".filter-dropdown").forEach(dd => {
     dd.querySelector(".filter-toggle").addEventListener("click", () => {
@@ -241,20 +252,33 @@ function attachCheckboxListeners() {
 document.querySelectorAll(".filter-buttons").forEach(b => b.style.display = "none");
 
 // ── APPLY/CANCEL — section independent ──
-document.querySelectorAll(".dashboard-section:nth-child(1) .btn-apply").forEach(btn => {
-    btn.addEventListener("click", loadSection1);
+// LEFT filter → bar chart only
+document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(1) .btn-apply").forEach(btn => {
+    btn.addEventListener("click", loadBarChart);
 });
-
-document.querySelectorAll(".dashboard-section:nth-child(2) .btn-apply").forEach(btn => {
-    btn.addEventListener("click", loadSection2);
-});
-
-document.querySelectorAll(".dashboard-section:nth-child(1) .btn-cancel").forEach(btn => {
+document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(1) .btn-cancel").forEach(btn => {
     btn.addEventListener("click", () => {
         btn.closest(".filter-panel").querySelectorAll("input").forEach(cb => cb.checked = false);
         updateFilterButtons();
-        loadSection1();
+        loadBarChart();
     });
+});
+
+// RIGHT filter → pictogram only
+document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(4) .btn-apply").forEach(btn => {
+    btn.addEventListener("click", loadPictogram);
+});
+document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(4) .btn-cancel").forEach(btn => {
+    btn.addEventListener("click", () => {
+        btn.closest(".filter-panel").querySelectorAll("input").forEach(cb => cb.checked = false);
+        updateFilterButtons();
+        loadPictogram();
+    });
+});
+
+// BOTTOM filter -> talbe only
+document.querySelectorAll(".dashboard-section:nth-child(2) .btn-apply").forEach(btn => {
+    btn.addEventListener("click", loadSection2);
 });
 
 document.querySelectorAll(".dashboard-section:nth-child(2) .btn-cancel").forEach(btn => {
@@ -504,47 +528,58 @@ document.querySelectorAll(".sort-arrow").forEach((arrow, colIndex) => {
 });
 
 // ── LOAD SECTION 1: bar chart + pictogram ──
-async function loadSection1() {
+async function loadBarChart() {
     try {
-        const { levels, ages } = getSection1Filters();
+        const sec1Left = document.querySelector(".dashboard-section:nth-child(1) .filter-panel:nth-child(1)");
+        const checked  = [...sec1Left.querySelectorAll("input:checked")];
+        const levels   = checked
+            .filter(cb => !isNaN(cb.value) && cb.value !== "")
+            .map(cb => parseInt(cb.value));
 
-        // ── BAR CHART — filtered by injury level only ──
         const injuryRows = await API.injurySummary(levels.length ? levels : null);
         renderInjuryChart(injuryRows);
         updateInjuryLegend(injuryRows);
+    } catch (err) {
+        console.error("Error loading bar chart:", err);
+    }
+}
 
-        // ── PICTOGRAM — filtered by age group only ──
-        const pictoAges = ages.length ? ages : ["16-17", "18-21", "70+"];  // ← regular hyphens
-        const pictoData = await API.pictogram(pictoAges, null);
+async function loadPictogram() {
+    try {
+        const sec1Right = document.querySelector(".dashboard-section:nth-child(1) .filter-panel:nth-child(4)");
+        const dropdowns = sec1Right.querySelectorAll(".filter-dropdown");
 
-        // pictogram legend always shows all 3 injury types TODO: NAH AH
-        document.querySelector(".pictogram-legend").innerHTML = `
-            <span class="dot fatal"></span> FATAL
-            <span class="dot serious"></span> SERIOUS
-            <span class="dot other"></span> OTHER INJURY
-        `;
+        // dropdown 0 = injury level, dropdown 1 = age group
+        const levels = [...dropdowns[0].querySelectorAll("input:checked")]
+            .filter(cb => !isNaN(cb.value) && cb.value !== "")
+            .map(cb => parseInt(cb.value));
 
-        // show/hide rows and update icons
-        document.querySelectorAll(".age-row").forEach(row => {
-            const ageLabel = row.querySelector(".age-label");
-            const label = ageLabel.childNodes[0].textContent.trim().replace(/–/g, "-");
+        const ages      = [...dropdowns[1].querySelectorAll("input:checked")].map(cb => cb.value);
+        const pictoAges = ages.length ? ages : ["16-17", "18-21", "70+"];
 
-            if (pictoAges.includes(label)) {
-                row.style.visibility = "visible";  // ← show
-                row.style.height = "";
-                const gridId = row.querySelector(".icon-grid").id;
-                buildIconGrid(gridId, pictoData[label] || { fatal: 0, serious: 0, other: 0 });
-            } else {
-                row.style.visibility = "hidden";   // ← hide but keep space
-                row.style.height = "20px";
-            }
+        const pictoData = await API.pictogram(pictoAges, levels.length ? levels : null);
+
+        const ageRowsContainer = document.querySelector(".age-rows");
+        ageRowsContainer.innerHTML = pictoAges.map(age => {
+            const safeId = `grid-${age.replace(/[^a-z0-9]/gi, "")}`;
+            return `
+                <div class="age-row">
+                    <div class="age-label">${age}<br><small>(100 people)</small></div>
+                    <div class="icon-grid" id="${safeId}"></div>
+                </div>
+            `;
+        }).join("");
+
+        pictoAges.forEach(age => {
+            const safeId = `grid-${age.replace(/[^a-z0-9]/gi, "")}`;
+            buildIconGrid(safeId, pictoData[age] || { fatal: 0, serious: 0, other: 0 });
         });
 
         document.querySelector(".chart-note").textContent =
             `Each icon represents 1 person. Showing: ${pictoAges.join(", ")}`;
 
     } catch (err) {
-        console.error("Error loading section 1:", err);
+        console.error("Error loading pictogram:", err);
     }
 }
 
@@ -561,7 +596,8 @@ async function loadSection2() {
 
 // ── INIT ──
 loadFilterOptions().then(() => {
-    loadSection1();
+    loadBarChart();
+    loadPictogram();
     loadSection2();
 });
 </script>
