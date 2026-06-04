@@ -7,7 +7,6 @@ import sqlite3
 import os
 
 DB_PATH = "database/Road_Accidents.db"
-#DB_PATH = os.path.join(os.path.dirname(__file__), "Road_Accidents.db")
 
 
 def query(sql, params=()):

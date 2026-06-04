@@ -517,7 +517,7 @@ async function loadSection1() {
         const pictoAges = ages.length ? ages : ["16-17", "18-21", "70+"];  // ← regular hyphens
         const pictoData = await API.pictogram(pictoAges, null);
 
-        // pictogram legend always shows all 3 injury types
+        // pictogram legend always shows all 3 injury types TODO: NAH AH
         document.querySelector(".pictogram-legend").innerHTML = `
             <span class="dot fatal"></span> FATAL
             <span class="dot serious"></span> SERIOUS
