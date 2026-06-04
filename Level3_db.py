@@ -54,7 +54,7 @@ def people_analysis(filters=None):
 
     rows = query(f"""
         SELECT
-            p.AGE_GROUP AS age,
+            CASE WHEN p.AGE_GROUP = '5-Dec' THEN '5-12' ELSE p.AGE_GROUP END AS age,
             ru.ROAD_USER_TYPE_DESC AS person_type,
             a.SPEED_ZONE AS speed_zone,
             ROUND(100.0 * SUM(CASE WHEN p.INJ_LEVEL = 1 THEN 1 ELSE 0 END) / COUNT(*), 2) AS injury_rate,
@@ -107,7 +107,7 @@ def people_analysis_chart(filters=None):
 
     return query(f"""
         SELECT
-            p.AGE_GROUP AS age,
+            CASE WHEN p.AGE_GROUP = '5-Dec' THEN '5-12' ELSE p.AGE_GROUP END AS age,     
             ROUND(100.0 * SUM(CASE WHEN p.INJ_LEVEL = 1 THEN 1 ELSE 0 END) / COUNT(*), 2) AS injury_rate
         FROM Person p
         JOIN Accident a ON p.ACCIDENT_NO = a.ACCIDENT_NO
