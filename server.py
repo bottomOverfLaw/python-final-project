@@ -63,10 +63,13 @@ class RequestHandler(BaseHTTPRequestHandler):
         elif path.startswith("/static/"):
             self.handle_static(path)
         
-        # --- API level 1 ---
-        
+        # --- API level 1 --- 
+       
         elif path == "/api/home":
-            self.send_json({})
+            from Level1_db import get_home_stats
+            self.send_json(get_home_stats())
+           
+
         elif path == "/api/about":
             self.send_json({})
            
@@ -130,24 +133,23 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(full_html.encode("utf-8"))
 
     def handle_static(self, path):
-        # e.g. /static/style.css
-        file_path = path.lstrip("/")  # remove leading '/'
-        if os.path.isfile(file_path):
-            if file_path.endswith(".css"):
-                content_type = "text/css"
+            file_path = path.lstrip("/")
+            if os.path.isfile(file_path):
+                ext = os.path.splitext(file_path)[1]
+                content_type = MIME.get(ext, "application/octet-stream")
+       
+
+
+                with open(file_path, "rb") as f:
+                    content = f.read()
+
+
+                self.send_response(200)
+                self.send_header("Content-type", content_type)
+                self.end_headers()
+                self.wfile.write(content)
             else:
-                content_type = "application/octet-stream"
-
-            with open(file_path, "rb") as f:
-                content = f.read()
-
-            self.send_response(200)
-            self.send_header("Content-type", content_type)
-            self.end_headers()
-            self.wfile.write(content)
-        else:
-            self.send_error(404, "Static file not found")
-
+                self.send_error(404, "Static file not found")
 
 
 def run():
