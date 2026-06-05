@@ -67,7 +67,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         
         elif path == "/api/home":
             self.send_json({})
-        elif path == "/api/home":
+        elif path == "/api/about":
             self.send_json({})
            
         # --- API Level2 ---
