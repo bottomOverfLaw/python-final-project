@@ -159,7 +159,7 @@
 }
 
 .btn-apply {
-    padding: 7px 15px;
+    padding: 7px 10px;
     background: #36afc8;
     color: white;
     border: none;
@@ -172,7 +172,7 @@
 .btn-apply:hover { background: #3d35a0; color: white; }
 
 .btn-cancel {
-    padding: 7px 15px;
+    padding: 7px 7px;
     background: #fff;
     color: #444;
     border: 1px solid #ccc;
@@ -399,3 +399,28 @@
     background-color: #c5e5f0 !important;
 }
 
+.pagination {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    padding: 12px 0;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.page-btn:hover { background: #f0efea; }
+
+.page-btn.active {
+    background: rgba(227, 83, 54, 0.5);
+    color: white;
+    border-color: #e35336;
+}
