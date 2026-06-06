@@ -20,5 +20,15 @@
             </ul>
         </nav>
     </div>
+
+
+<script>
+    const path = window.location.pathname;
+    document.querySelectorAll(".nav-centre a").forEach(link => {
+        if (link.getAttribute("href") === path) {
+            link.classList.add("active");
+        }
+    });
+</script>
 </body>
 </html>
