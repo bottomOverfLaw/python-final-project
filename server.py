@@ -7,6 +7,7 @@ import urllib.parse
 
 
 # ---- Level 1: Home & About -----
+from Level1_db import get_home_stats, get_students, get_personas
 
 # ---- Level 2: People & Injury + Accident Condition ----
 from Level2_db import injury_summary, pictogram_data, ejected_hospital_table, \
@@ -66,12 +67,19 @@ class RequestHandler(BaseHTTPRequestHandler):
         # --- API level 1 --- 
        
         elif path == "/api/home":
-            from Level1_db import get_home_stats
             self.send_json(get_home_stats())
            
 
         elif path == "/api/about":
-            self.send_json({})
+            try:
+                #from Level1_db import get_students, get_personas
+                self.send_json({
+                    "students": get_students(),
+                    "personas": get_personas(),
+                })
+            except Exception as e:
+                print(f"Error in /api/about: {e}")
+                self.send_json({"error": str(e)})
            
         # --- API Level2 ---
         elif path == "/api/injury-summary":
