@@ -63,12 +63,12 @@ ul li a {
 }
 /* HOVER EFFECT */
 ul li a:hover {
-    background-color: #006884;
+    background-color: rgba(79, 155, 185, 0.8);
 }
 
 /* ACTIVE PAGE */
 ul li a.active {
-    background-color: #8ccdff;
+    background-color: rgba(140, 205, 255, 0.7);
 }
 
 img {
