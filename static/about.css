@@ -1,3 +1,41 @@
+/* ── BASE ── */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── PAGE WRAPPER ── */
+.page-wrapper {
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+/* ── SECTION ── */
+.dashboard-section {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(227, 83, 54, 0.15);
+    padding: 20px;
+}
+
+.section-title {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #e3c8b0;
+    padding-bottom: 8px;
+}
+
+/* ── SECTION BODY ── */
+.section-body {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+/* -- CARD SECTION --*/
 .card-container {
     display: flex;
     flex-direction: column; /* stacks cards vertically one under the other */
