@@ -43,6 +43,29 @@ def injury_summary(injury_levels=None):
         ORDER BY p.INJ_LEVEL
     """, params)
 
+def injury_by_sex(injury_levels=None):
+    """Stacked bar: count by sex and injury level."""
+    where, params = "", ()
+    if injury_levels:
+        ph = ",".join("?" * len(injury_levels))
+        where  = f"WHERE p.INJ_LEVEL IN ({ph})"
+        params = tuple(injury_levels)
+
+    return query(f"""
+        SELECT
+            CASE p.SEX
+                WHEN 'M' THEN 'Male'
+                WHEN 'F' THEN 'Female'
+                ELSE 'Unknown'
+            END AS sex,
+            i.INJ_LEVEL_DESC AS injury_label,
+            COUNT(*) AS value
+        FROM Person p
+        JOIN Injury i ON p.INJ_LEVEL = i.INJ_LEVEL
+        {where}
+        GROUP BY p.SEX, p.INJ_LEVEL
+        ORDER BY p.SEX, p.INJ_LEVEL
+    """, params)
 
 def pictogram_data(age_groups=None, injury_levels=None):
     """

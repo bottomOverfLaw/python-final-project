@@ -58,4 +58,8 @@ const API = {
     peopleAnalysis: (filters = {}) =>
         fetchJSON("/api/people-analysis", filters),
 
+    // Sex rappresentation
+    injuryBySex: (levels = []) =>
+    fetchJSON("/api/injury-by-sex", { level: levels }),
+
 };

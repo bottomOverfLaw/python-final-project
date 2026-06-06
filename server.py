@@ -10,7 +10,7 @@ import urllib.parse
 from Level1_db import get_home_stats, get_students, get_personas
 
 # ---- Level 2: People & Injury + Accident Condition ----
-from Level2_db import injury_summary, pictogram_data, ejected_hospital_table, \
+from Level2_db import injury_summary, pictogram_data, ejected_hospital_table, injury_by_sex, \
     get_age_groups, get_injury_levels, get_road_user_types, get_light_conditions
 
 # ---- Level 3: People Analysis + Accident Analysis ----
@@ -89,6 +89,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             ages   = params.get("age", None)
             levels = [int(x) for x in params.get("level", [])]
             self.send_json(pictogram_data(ages, levels or None))
+        elif path == "/api/injury-by-sex":
+            levels = [int(x) for x in params.get("level", [])]
+            self.send_json(injury_by_sex(levels or None))
 
         elif path == "/api/ejected-table":
             filters = {
