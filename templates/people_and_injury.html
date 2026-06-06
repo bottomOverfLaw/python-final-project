@@ -161,17 +161,15 @@
                             <th>Taken to the hospital</th>
                             <th>Age group</th>
                             <th>Type of person</th>
-                            <th>Total count <span class="sort-arrow">&#8964;</span></th>
-                            <th>% Fatality <span class="sort-arrow">&#8964;</span></th>
+                            <th class="sort-arrow">% Fatality <span>&#8964;</span></th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="ejectedTableBody">
                         <tr>
                             <td>Yes</td>
                             <td>Yes</td>
                             <td>18-21</td>
                             <td>driver</td>
-                            <td>1,204</td>
                             <td>24%</td>
                         </tr>
                         <tr class="row-highlight">
@@ -179,7 +177,6 @@
                             <td>Yes</td>
                             <td>40-43</td>
                             <td>passenger</td>
-                            <td>5,801</td>
                             <td>4%</td>
                         </tr>
                         <tr>
@@ -187,11 +184,11 @@
                             <td>No</td>
                             <td>Unknown</td>
                             <td>Unknown</td>
-                            <td>14,500</td>
                             <td>0.8%</td>
                         </tr>
                     </tbody>
                 </table>
+                <div class="pagination" id="ejectedPagination"></div>
             </div>
 
         </div>
@@ -213,6 +210,9 @@ const COLOURS = {
     other:   "#ccd",
     none:    "#57b894",
 };
+const PAGE_SIZE = 20;
+let ejectedPage = 1;
+let ejectedData = [];
 
 // ── FILTER PANEL TOGGLES ──
 document.getElementById("filterToggleS1").addEventListener("click", () => {
@@ -492,21 +492,39 @@ function renderPictogram(pictoAges, pictoData) {
 
 // ── EJECTED TABLE ──
 function renderTable(rows) {
-    const tbody = document.querySelector(".data-table tbody");
+    ejectedData = rows;
+    const tbody = document.getElementById("ejectedTableBody");
+
     if (!rows.length) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#aaa;">No data</td></tr>`;
+        document.getElementById("ejectedPagination").innerHTML = "";
         return;
     }
-    tbody.innerHTML = rows.map((r, i) => `
+
+    const totalPages = Math.ceil(rows.length / PAGE_SIZE);
+    const start      = (ejectedPage - 1) * PAGE_SIZE;
+    const pageData   = rows.slice(start, start + PAGE_SIZE);
+
+    tbody.innerHTML = pageData.map((r, i) => `
         <tr ${i % 2 === 1 ? 'class="row-highlight"' : ''}>
             <td>${r.ejected}</td>
             <td>${r.taken_hospital}</td>
             <td>${r.age_group}</td>
             <td>${r.person_type}</td>
-            <td>${Number(r.total_count).toLocaleString()}</td>
             <td>${r.pct_fatality}%</td>
         </tr>
     `).join("");
+
+    document.getElementById("ejectedPagination").innerHTML =
+        Array.from({ length: totalPages }, (_, i) => `
+            <button class="page-btn ${i + 1 === ejectedPage ? "active" : ""}"
+                onclick="goToEjectedPage(${i + 1})">${i + 1}</button>
+        `).join("");
+}
+
+function goToEjectedPage(page) {
+    ejectedPage = page;
+    renderTable(ejectedData);
 }
 
 // ── SORT TABLE ──
@@ -586,6 +604,7 @@ async function loadPictogram() {
 // ── LOAD SECTION 2: ejected table ──
 async function loadSection2() {
     try {
+        ejectedPage = 1; 
         const ejFilters = getSection2Filters();
         const tableRows = await API.ejectedTable(ejFilters);
         renderTable(tableRows);
