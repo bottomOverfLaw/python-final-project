@@ -117,14 +117,14 @@ def ejected_hospital_table(filters=None):
         params += [int(v) for v in vals]
 
     where = "WHERE " + " AND ".join(where_clauses)
-
+    
+    # query to fill the table, calculating the percentage of the fatality 
     return query(f"""
         SELECT
             CASE WHEN p.AGE_GROUP = '5-Dec' THEN '5-12' ELSE p.AGE_GROUP END AS age_group,     
             CASE WHEN p.EJECTED_CODE IN (1,2) THEN 'Yes' ELSE 'No' END AS ejected,
             CASE WHEN p.TAKEN_HOSPITAL = 'Y'  THEN 'Yes' ELSE 'No' END AS taken_hospital,
             ru.ROAD_USER_TYPE_DESC AS person_type,
-            COUNT(*) AS total_count,
             ROUND(
                 100.0 * SUM(CASE WHEN p.INJ_LEVEL = 1 THEN 1 ELSE 0 END) / COUNT(*), 1
             ) AS pct_fatality
@@ -132,8 +132,7 @@ def ejected_hospital_table(filters=None):
         JOIN Road_User ru ON p.ROAD_USER_TYPE = ru.ROAD_USER_TYPE
         {where}
         GROUP BY ejected, taken_hospital, p.AGE_GROUP, p.ROAD_USER_TYPE
-        ORDER BY total_count DESC
-        LIMIT 50
+        ORDER BY pct_fatality DESC
     """, params)
 
 # ── FILTER OPTIONS ──
