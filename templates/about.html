@@ -1,87 +1,121 @@
-<link  rel="stylesheet" href="../static/card.css">
-<h1>Mission statement:</h1>
-<p>We help Victorians understand the factors behind road incidents through transparent, accessible, and unbiased crash data — empowering parents, researchers, and policymakers to take informed action.</p>
+<link rel="stylesheet" href="../static/about.css">
+<script src="../static/api.js"></script>
+<div class="page-wrapper">
 
-<h1>How to use this website:</h1>
-<div class="horizontal-card-container">
-    <div class="horizontal-card">
-        <div class="horizontal-card-body">
-            <h4>Accident Condition</h4>
-            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. 
-                Omnis, quia quae vel iusto dolores provident explicabo velit facere error beatae perferendis fugit ullam? 
-                Repudiandae culpa maiores consequuntur voluptatem cupiditate aspernatur.</p>
-        </div>
-    </div>
-
-    <div class="horizontal-card">
-        <div class="horizontal-card-body">
-            <h4>People and Injury</h4>
-            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
-                Omnis, veniam fugiat suscipit ipsam ducimus sunt possimus necessitatibus numquam quam ipsa reprehenderit atque quis pariatur maiores at perferendis nostrum rem nesciunt?</p>
-        </div>
-    </div>
-</div>
-<div class="horizontal-card-container">
-    <div class="horizontal-card">
-        <div class="horizontal-card-body">
-            <h4>Accident Analysis</h4>
-            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. 
-                Doloremque esse provident quidem laborum rerum iste, inventore, magnam praesentium assumenda illum est laboriosam illo, officia consectetur. 
-                Possimus impedit mollitia quibusdam necessitatibus!</p>
-        </div>
-    </div>
-
-    <div class="horizontal-card">
-        <div class="horizontal-card-body">
-            <h4>People Analysis</h4>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-                Totam, excepturi! Sit tenetur error sapiente debitis, consequuntur minima voluptatem voluptas illum labore, neque cumque suscipit. 
-                Quod ab voluptatibus praesentium laborum commodi.</p>
-        </div>
-    </div>
-</div>
-   
-<!-- TODO: retrive data from db! -->
-<h1>Personas:</h1>
-<div class="card-container">
-    <div class="card">
-        <img src="../static/images/eImg.png" alt="Elda">
-        <div class="container">
-            <h4>Elda</h4>
-            <p>
-                Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
-                Illo quisquam, aspernatur recusandae repellat optio repellendus enim dolorem aperiam modi? 
-                Rem ad blanditiis culpa harum, impedit totam ab illo tempore adipisci!
+    <section class="dashboard-section">
+        <h2 class="section-title">Mission statement:</h2>
+        <div class="section-body">
+            <p>We believe safer roads start with better understanding. 
+                Every statistic represents a real event on our roads, which is why we make crash data accessible, clear, and meaningful. 
+                By helping Victorians understand trends, identify risks, and explore the factors behind road incidents, we empower informed decisions that contribute to safer communities and roads across Victoria.
             </p>
         </div>
-    </div>
-    <div class="card">
-        <img src="../static/images/kImg.png" alt="Kwazimoto">
-        <div class="container">
-            <h4>Kwasimoto</h4>
-            <p>
-                Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
-                Illo quisquam, aspernatur recusandae repellat optio repellendus enim dolorem aperiam modi? 
-                Rem ad blanditiis culpa harum, impedit totam ab illo tempore adipisci!
-            </p>
+    </section>
+    <br>
+    <section>
+        <h2 class="section-title">How to use this website:</h2>
+        <div class="horizontal-card-container">
+            <div class="horizontal-card">
+                <div class="horizontal-card-body">
+                    <h4>Accident Condition</h4>
+                    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. 
+                        Omnis, quia quae vel iusto dolores provident explicabo velit facere error beatae perferendis fugit ullam? 
+                        Repudiandae culpa maiores consequuntur voluptatem cupiditate aspernatur.</p>
+                </div>
+            </div>
+            <div class="horizontal-card">
+                <div class="horizontal-card-body">
+                    <h4>People and Injury</h4>
+                    <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
+                        Omnis, veniam fugiat suscipit ipsam ducimus sunt possimus necessitatibus numquam quam ipsa reprehenderit atque quis pariatur maiores at perferendis nostrum rem nesciunt?</p>
+                </div>
+            </div>
+        </div>
+        <div class="horizontal-card-container">
+            <div class="horizontal-card">
+                <div class="horizontal-card-body">
+                    <h4>Accident Analysis</h4>
+                    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. 
+                        Doloremque esse provident quidem laborum rerum iste, inventore, magnam praesentium assumenda illum est laboriosam illo, officia consectetur. 
+                        Possimus impedit mollitia quibusdam necessitatibus!</p>
+                </div>
+            </div>
+            <div class="horizontal-card">
+                <div class="horizontal-card-body">
+                    <h4>People Analysis</h4>
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. 
+                        Totam, excepturi! Sit tenetur error sapiente debitis, consequuntur minima voluptatem voluptas illum labore, neque cumque suscipit. 
+                        Quod ab voluptatibus praesentium laborum commodi.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+   <!-- PERSONAS — loaded from DB -->
+    <h2 class="section-title">Personas:</h2>
+    <div class="card-container" id="personaList"></div>
+
+    <!-- TEAM MEMBERS — loaded from DB -->
+    <h2 class="section-title">Team members:</h2>
+    <div class="horizontal-card-container-sm" id="studentList">
+        <!-- fallback while loading -->
+        <div class="horizontal-card-sm">
+            <div class="horizontal-card-body-sm">
+                <h4>Loading...</h4>
+                <p></p>
+            </div>
         </div>
     </div>
+
 </div>
 
-<!-- TODO: retrive data from db! -->
-<h1>Team members:</h1>
-<div class="horizontal-card-container-sm">
-    <div class="horizontal-card-sm">
-        <div class="horizontal-card-body-sm">
-            <h4>Ayan Goel</h4>
-            <p>S4252762</p>
-        </div>
-    </div>
+<script>
+async function loadAbout() {
+    try {
+        const data = await fetch("/api/about").then(r => r.json());
 
-    <div class="horizontal-card-sm">
-        <div class="horizontal-card-body-sm">
-            <h4>Laura Albrile</h4>
-            <p>S4257196</p>
-        </div>
-    </div>
-</div>
+        const imgMap = {
+            "Elda":      "../static/images/eImg.png",
+            "Kwazimoto": "../static/images/kImg.png",
+        };
+
+        const personaList = document.getElementById("personaList");
+        if (personaList && data.personas && data.personas.length) {
+            personaList.innerHTML = data.personas.map(p => `
+                <div class="card">
+                    <img src="${imgMap[p.Name] || ''}"
+                        alt="${p.Name}"
+                        onerror="this.style.display='none'">
+                    <div class="container">
+                        <h4>${p.Name}</h4>
+                        <p class="persona-tag"><strong>Age:</strong> ${p.Age} &nbsp;|&nbsp; <strong>Gender:</strong> ${p.Gender}</p>
+                        <p><strong>Background:</strong> ${p.Background}</p>
+                        <p><strong>Goals:</strong> ${p.Goals}</p>
+                        <p><strong>Needs:</strong> ${p.Needs}</p>
+                        <p><strong>Pain Points:</strong> ${p.Pain_Points}</p>
+                        <p><strong>Skills:</strong> ${p.Skills}</p>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        // ── STUDENTS ──
+        const studentList = document.getElementById("studentList");
+        if (studentList && data.students && data.students.length) {
+            studentList.innerHTML = data.students.map(s => `
+                <div class="horizontal-card-sm">
+                    <div class="horizontal-card-body-sm">
+                        <h4>${s.first_name} ${s.last_name}</h4>
+                        <p>${s.S_Number}</p>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+    } catch (err) {
+        console.error("Error loading about data:", err);
+    }
+}
+
+loadAbout();
+</script>
