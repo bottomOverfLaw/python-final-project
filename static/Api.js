@@ -36,6 +36,9 @@ const API = {
     // Home page
     home: () => fetchJSON("/api/home"),
 
+    // About page
+    about: () => fetchJSON("/api/about"),
+
     // Filter options
     filterOptions: () => fetchJSON("/api/filter-options"),
 
