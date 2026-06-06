@@ -1,6 +1,5 @@
 """
-db_level1.py — Level 1 queries (People & Injury + Accident Condition pages)
-Filtered breakdowns: injury outcomes, ejection, road/weather conditions
+Level1_db.py — Level 1 queries (Home page + About page)
 """
 
 import sqlite3
@@ -72,10 +71,24 @@ def get_home_stats():
     }
 
 
-
-
-
-
 # ══════════════════════════════════════════
 #  ABOUT PAGE
 # ══════════════════════════════════════════
+
+def get_students():
+    rows = query("SELECT Id, S_Name, S_Number FROM Students ORDER BY Id")
+    # split S_Name into first and last name
+    for r in rows:
+        parts = r["S_Name"].split(" ", 1)
+        r["first_name"] = parts[0]
+        r["last_name"]  = parts[1] if len(parts) > 1 else ""
+    return rows
+
+
+def get_personas():
+    return query("""
+        SELECT Id, Name, Age, Gender, Background,
+               Goals, Needs, Pain_Points, Skills
+        FROM Personas
+        ORDER BY Id
+    """)
