@@ -1,5 +1,5 @@
-
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from socketserver import ThreadingMixIn
 import sqlite3
 import os
 import json
@@ -14,7 +14,7 @@ from Level2_db import injury_summary, pictogram_data, ejected_hospital_table, in
     get_age_groups, get_injury_levels, get_road_user_types, get_light_conditions
 
 # ---- Level 3: People Analysis + Accident Analysis ----
-from Level3_db import people_analysis, people_analysis_chart
+from Level3_db import people_analysis, people_analysis_chart, get_accident_analysis
 
 MIME = {
     ".css" : "text/css", ".js" : "application/javascript",
@@ -23,7 +23,6 @@ MIME = {
 }
 
 print("LOADING SERVER CODE")
-#DB_NAME = "database/Road_Accidents.db"
 
 def render_page(page_title, content_html):
     with open("templates/base.html", "r", encoding="utf-8") as f:
@@ -31,7 +30,7 @@ def render_page(page_title, content_html):
 
     with open("templates/navbar.html", "r", encoding="utf-8") as f:
         navbar = f.read()
-    
+
     with open("templates/footer.html", "r", encoding="utf-8") as f:
         footer = f.read()
 
@@ -60,22 +59,19 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.handle_simple_page("Accident Analysis", "templates/accident_analysis.html")
         elif path == "/people_analysis":
             self.handle_simple_page("People Analysis", "templates/people_analysis.html")
-        
+
         elif path.startswith("/static/"):
             self.handle_static(path)
-        
-        # --- API level 1 --- 
-       
+
+        # --- API Level 1 ---
         elif path == "/api/home":
             self.send_json(get_home_stats())
-        
+
         elif path == "/api/fun-facts":
             self.send_json(get_fun_facts())
-           
 
         elif path == "/api/about":
             try:
-                #from Level1_db import get_students, get_personas
                 self.send_json({
                     "students": get_students(),
                     "personas": get_personas(),
@@ -83,15 +79,17 @@ class RequestHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 print(f"Error in /api/about: {e}")
                 self.send_json({"error": str(e)})
-           
-        # --- API Level2 ---
+
+        # --- API Level 2 ---
         elif path == "/api/injury-summary":
             levels = [int(x) for x in params.get("level", [])]
             self.send_json(injury_summary(levels or None))
+
         elif path == "/api/pictogram":
             ages   = params.get("age", None)
             levels = [int(x) for x in params.get("level", [])]
             self.send_json(pictogram_data(ages, levels or None))
+
         elif path == "/api/injury-by-sex":
             levels = [int(x) for x in params.get("level", [])]
             self.send_json(injury_by_sex(levels or None))
@@ -105,9 +103,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             }
             filters = {k: v for k, v in filters.items() if v}
             self.send_json(ejected_hospital_table(filters))
-        
+
         elif path == "/api/filter-options":
-            from Level2_db import get_age_groups, get_injury_levels, get_road_user_types, get_light_conditions
             self.send_json({
                 "age_groups":       get_age_groups(),
                 "injury_levels":    get_injury_levels(),
@@ -116,8 +113,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             })
 
         elif path == "/api/accident-conditions":
-            print(f"DEBUG: accident-conditions hit, condition={params.get('condition')}")
-            condition = params.get("condition", ["road"])[0]    
+            condition = params.get("condition", ["road"])[0]
             postcode  = params.get("postcode",  [None])[0]
             from Level2_db import get_accident_conditions
             result = get_accident_conditions(condition, postcode)
@@ -126,7 +122,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             else:
                 self.send_json(result)
 
-        # ---- API: Level 3 ----
+        # --- API Level 3 ---
         elif path == "/api/people-analysis":
             filters = {k: v for k, v in {
                 "level": params.get("level", []),
@@ -138,18 +134,13 @@ class RequestHandler(BaseHTTPRequestHandler):
                 "chart": people_analysis_chart(filters),
             })
 
-        # ---- API: Level 3 ----
-        elif path == "/api/people-analysis":
-            filters = {k: v for k, v in {
-                "level": params.get("level", []),
-                "age":   params.get("age", []),
-                "light": params.get("light", []),
-            }.items() if v}
-            self.send_json({
-                "table": people_analysis(filters),
-                "chart": people_analysis_chart(filters),
-            })
-        
+        elif path == "/api/accident-analysis":
+            postcode = params.get("postcode", [None])[0]
+            light    = params.get("light", []) or None
+            atmo     = params.get("atmo",  []) or None
+            road     = params.get("road",  []) or None
+            self.send_json(get_accident_analysis(postcode, light, atmo, road))
+
         else:
             self.send_error(404, "Not found")
 
@@ -157,6 +148,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         self.wfile.write(body)
 
@@ -170,28 +162,30 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(full_html.encode("utf-8"))
 
     def handle_static(self, path):
-            file_path = path.lstrip("/")
-            if os.path.isfile(file_path):
-                ext = os.path.splitext(file_path)[1]
-                content_type = MIME.get(ext, "application/octet-stream")
-       
+        file_path = path.lstrip("/")
+        if os.path.isfile(file_path):
+            ext = os.path.splitext(file_path)[1]
+            content_type = MIME.get(ext, "application/octet-stream")
+            with open(file_path, "rb") as f:
+                content = f.read()
+            self.send_response(200)
+            self.send_header("Content-type", content_type)
+            self.end_headers()
+            self.wfile.write(content)
+        else:
+            self.send_error(404, "Static file not found")
+
+    def log_message(self, format, *args):
+        pass  # Suppress request logs to keep terminal clean
 
 
-                with open(file_path, "rb") as f:
-                    content = f.read()
-
-
-                self.send_response(200)
-                self.send_header("Content-type", content_type)
-                self.end_headers()
-                self.wfile.write(content)
-            else:
-                self.send_error(404, "Static file not found")
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    daemon_threads = True
 
 
 def run():
-    server_address = ("", 8000)  # localhost:8000
-    httpd = HTTPServer(server_address, RequestHandler)
+    server_address = ("", 8000)
+    httpd = ThreadedHTTPServer(server_address, RequestHandler)
     print("Server running at http://localhost:8000")
     httpd.serve_forever()
 
