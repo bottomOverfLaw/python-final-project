@@ -88,107 +88,55 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<script src="../static/api.js"></script>
 <script>
   Chart.register(ChartDataLabels);
 
-  /* Mock data — replace values with real DB/API responses keyed by postcode */
-  var mockData = {
-    road: {
-      title:     'Accident by road condition:',
-      colHeader: 'Surface Type',
-      labels:    ['Dry', 'Wet', 'Muddy', 'Icy', 'Snowy'],
-      postcodes: {
-        '3000': [45, 26, 5, 3, 2],
-        '3001': [30, 15, 8, 2, 1],
-        '3002': [52, 18, 3, 1, 0]
-      },
-      fallback: [45, 26, 5, 3, 2],
-      descriptions: [
-        'Road surface is completely dry with normal grip levels.',
-        'Road surface is wet due to rain or water accumulation.',
-        'Road surface covered in mud, significantly reducing traction.',
-        'Ice patches on the road surface, greatly reducing grip.',
-        'Road covered in snow, creating hazardous driving conditions.'
-      ]
-    },
-    weather: {
-      title:     'Accident by weather condition:',
-      colHeader: 'Weather Condition',
-      labels:    ['Clear', 'Rain', 'Fog', 'Snow', 'Wind'],
-      postcodes: {
-        '3000': [40, 20, 8, 2, 11],
-        '3001': [25, 30, 12, 1, 8],
-        '3002': [38, 22, 6, 0, 9]
-      },
-      fallback: [40, 20, 8, 2, 11],
-      descriptions: [
-        'Clear sky with good visibility and no precipitation.',
-        'Rainfall reducing road grip and driver visibility.',
-        'Dense fog significantly limiting driver visibility.',
-        'Snowfall creating slippery conditions and reduced visibility.',
-        'Strong winds affecting vehicle control, especially large vehicles.'
-      ]
-    },
-    light: {
-      title:     'Accident by light condition:',
-      colHeader: 'Light Condition',
-      labels:    ['Daylight', 'Dusk/Dawn', 'Dark-lit', 'Dark-unlit', 'Unknown'],
-      postcodes: {
-        '3000': [35, 10, 18, 12, 6],
-        '3001': [20, 15, 22, 18, 4],
-        '3002': [42,  8, 14, 10, 3]
-      },
-      fallback: [35, 10, 18, 12, 6],
-      descriptions: [
-        'Full daylight with maximum natural visibility.',
-        'Transitional lighting at dusk or dawn with reduced visibility.',
-        'Darkness with street lighting providing some visibility.',
-        'Darkness with no street lighting, minimal visibility.',
-        'Light conditions at time of accident were not recorded.'
-      ]
-    }
-  };
+  const COLORS = ['#534AB7', '#1D9E75', '#D85A30', '#185FA5', '#9B8DD4',
+                  '#E8A838', '#2BB5A0', '#C74B8A'];
 
-  var sliceColors    = ['#534AB7', '#1D9E75', '#D85A30', '#185FA5', '#9B8DD4'];
-  var currentCondition = 'road';
-  var currentPostcode  = '';
-  var chartInstance    = null;
+  let currentCondition = 'road';
+  let currentPostcode  = '';
+  let chartInstance    = null;
 
-  function getData() {
-    var cond = mockData[currentCondition];
-    var pc   = currentPostcode.trim();
-    if (!pc)                return { values: cond.fallback, found: true };
-    if (cond.postcodes[pc]) return { values: cond.postcodes[pc], found: true };
-    return { values: null, found: false };
+  function refresh() {
+    API.accidentConditions(currentCondition, currentPostcode)
+      .then(function(data) {
+        updateChart(data);
+        updateTable(data);
+      })
+      .catch(function(err) {
+        console.error('Failed to load condition data:', err);
+      });
   }
 
-  function buildChart() {
-    var result = getData();
-    var cond   = mockData[currentCondition];
-    var canvas = document.getElementById('conditionChart');
-    var noMsg  = document.getElementById('noDataMsg');
+  function updateChart(data) {
+    const canvas = document.getElementById('conditionChart');
+    const noMsg  = document.getElementById('noDataMsg');
 
-    if (!result.found) {
+    if (!data.chart.labels.length) {
       if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
       canvas.style.display = 'none';
       noMsg.style.display  = 'block';
-      noMsg.textContent    = 'No data found for postcode "' + currentPostcode.trim() + '".';
+      noMsg.textContent    = 'No data found for postcode "' + currentPostcode + '".';
       return;
     }
 
     canvas.style.display = 'block';
     noMsg.style.display  = 'none';
 
+    document.getElementById('chartTitle').textContent = data.title;
+
     if (chartInstance) chartInstance.destroy();
 
     chartInstance = new Chart(canvas, {
       type: 'bar',
       data: {
-        labels: cond.labels,
+        labels: data.chart.labels,
         datasets: [{
           label: 'Number of accidents',
-          data:  result.values,
-          backgroundColor: sliceColors,
+          data:  data.chart.values,
+          backgroundColor: data.chart.labels.map((_, i) => COLORS[i % COLORS.length]),
           borderWidth: 0,
           borderRadius: 4
         }]
@@ -198,42 +146,31 @@
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            display: true,
-            position: 'top',
-            align: 'end',
-            labels: { boxWidth: 14, font: { size: 12 }, color: '#333' }
-          },
-          tooltip: { enabled: true },
+            display: false
+           },
+          tooltip:    { enabled: true },
           datalabels: { display: false }
         },
         scales: {
           x: { grid: { display: false }, ticks: { color: '#555', font: { size: 12 } } },
-          y: { beginAtZero: false, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#555', font: { size: 11 } } }
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#555', font: { size: 11 } } }
         }
       }
     });
   }
 
-  function buildTable() {
-    var cond = mockData[currentCondition];
-    var pc   = currentPostcode.trim();
-    var pcLabel = pc ? ' — Postcode: ' + pc : ' — All Postcodes';
-    document.getElementById('chartTitle').textContent     = cond.title + pcLabel;
-    document.getElementById('tableColHeader').textContent = cond.colHeader;
-
-    var tbody = document.getElementById('tableBody');
+  function updateTable(data) {
+    document.getElementById('tableColHeader').textContent = data.col_header;
+    const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '';
-    cond.labels.forEach(function(label, i) {
-      var row = document.createElement('tr');
-      row.innerHTML = '<td>' + label + '</td><td>' + cond.descriptions[i] + '</td>';
-      tbody.appendChild(row);
+    data.table.forEach(function(row) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + row.label + '</td><td>' + row.description + '</td>';
+      tbody.appendChild(tr);
     });
   }
 
-  function refresh() { buildChart(); buildTable(); }
-  refresh();
-
-  /* Icon switching */
+  /* Icon switching — only affects active condition, both chart and table update */
   document.querySelectorAll('.ac-icon').forEach(function(el) {
     el.addEventListener('click', function() {
       document.querySelectorAll('.ac-icon').forEach(function(e) { e.classList.remove('active'); });
@@ -243,11 +180,16 @@
     });
   });
 
-  /* Postcode search on Enter */
+  /* Postcode search — only triggers on Enter, only affects chart */
   document.getElementById('postcodeInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
-      currentPostcode = this.value;
-      refresh();
+      currentPostcode = this.value.trim();
+      API.accidentConditions(currentCondition, currentPostcode)
+        .then(function(data) { updateChart(data); })
+        .catch(function(err) { console.error('Failed to load postcode data:', err); });
     }
   });
+
+  /* Initial load */
+  refresh();
 </script>

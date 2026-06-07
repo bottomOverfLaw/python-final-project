@@ -4,7 +4,7 @@ Level1_db.py — Level 1 queries (Home page + About page)
 
 import sqlite3
 import os
-
+import random
 DB_PATH = "database/Road_Accidents.db"
 
 
@@ -52,6 +52,8 @@ def get_home_stats():
     for r in by_vehicle:
         r["percentage"] = round(r["count"] / total_vehicles * 100)
 
+    facts = query("SELECT Id, Title_Fact, Fact FROM Fun_Facts ORDER BY Id")
+
     return {
         "stats": {
             "total_accidents": total,
@@ -67,8 +69,19 @@ def get_home_stats():
             "labels": [r["vehicle"] for r in by_vehicle],
             "values": [r["count"] for r in by_vehicle],
             "percentages": [r["percentage"] for r in by_vehicle],
-        }
+        },
+        "facts": facts
     }
+
+def get_fun_facts():
+    """Fetch all fun facts from the database."""
+    return query("SELECT Id, Title_Fact, Fact FROM Fun_Facts ORDER BY Id")
+
+
+def get_random_fact():
+    """Fetch a single random fact."""
+    facts = query("SELECT Id, Title_Fact, Fact FROM Fun_Facts")
+    return random.choice(facts) if facts else None
 
 
 # ══════════════════════════════════════════

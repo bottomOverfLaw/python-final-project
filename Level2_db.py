@@ -194,3 +194,137 @@ def get_light_conditions():
 # ══════════════════════════════════════════
 #  ACCIDENT CONDITION PAGE
 # ══════════════════════════════════════════
+# Descriptions for each condition type
+CONDITION_META = {
+    'road': {
+        'title':      'Accident by road condition:',
+        'col_header': 'Surface Type',
+        'descriptions': {
+            'Dry':   'Road surface is completely dry with normal grip levels.',
+            'Wet':   'Road surface is wet due to rain or water accumulation.',
+            'Muddy': 'Road surface covered in mud, significantly reducing traction.',
+            'Icy':   'Ice patches on the road surface, greatly reducing grip.',
+            'Snowy': 'Road covered in snow, creating hazardous driving conditions.',
+        }
+    },
+    'weather': {
+        'title':      'Accident by weather condition:',
+        'col_header': 'Weather Condition',
+        'descriptions': {
+            'Clear':   'Clear sky with good visibility and no precipitation.',
+            'Raining': 'Rainfall reducing road grip and driver visibility.',
+            'Snowing': 'Snowfall creating slippery conditions and reduced visibility.',
+            'Fog':     'Dense fog significantly limiting driver visibility.',
+            'Wind':    'Strong winds affecting vehicle control.',
+            'Smoke':   'Smoke reducing visibility on the road.',
+            'Dust':    'Dust reducing visibility and grip.',
+            'Not known': 'Weather conditions were not recorded.',
+        }
+    },
+    'light': {
+        'title':      'Accident by light condition:',
+        'col_header': 'Light Condition',
+        'descriptions': {
+            'Day':                    'Full daylight with maximum natural visibility.',
+            'Dusk/dawn':              'Transitional lighting at dusk or dawn.',
+            'Dark street lights on':  'Darkness with street lighting providing some visibility.',
+            'Dark street lights off': 'Darkness with street lights off, minimal visibility.',
+            'Dark no street lights':  'Darkness with no street lighting.',
+            'Dark street lights unknown': 'Darkness with unknown street lighting status.',
+        }
+    }
+}
+
+
+def get_accident_conditions(condition, postcode=None):
+    meta = CONDITION_META.get(condition)
+    if not meta:
+        return None
+
+    if condition == 'road':
+        if postcode:
+            rows = query("""
+                SELECT rsc.SURFACE_COND_DESC as label, COUNT(*) as count
+                FROM Surface_Cond_Seq scs
+                JOIN Road_Surface_Cond rsc ON scs.SURFACE_COND = rsc.SURFACE_COND
+                JOIN Accident a ON scs.ACCIDENT_NO = a.ACCIDENT_NO
+                JOIN Node n ON a.NODE_ID = n.NODE_ID
+                WHERE scs.SURFACE_COND_SEQ = 1 AND n.POSTCODE = ?
+                GROUP BY rsc.SURFACE_COND_DESC
+                ORDER BY count DESC
+            """, [int(postcode)])
+        else:
+            rows = query("""
+                SELECT rsc.SURFACE_COND_DESC as label, COUNT(*) as count
+                FROM Surface_Cond_Seq scs
+                JOIN Road_Surface_Cond rsc ON scs.SURFACE_COND = rsc.SURFACE_COND
+                WHERE scs.SURFACE_COND_SEQ = 1
+                GROUP BY rsc.SURFACE_COND_DESC
+                ORDER BY count DESC
+            """)
+
+    elif condition == 'weather':
+        if postcode:
+            rows = query("""
+                SELECT ac.ATMOSPH_COND_DESC as label, COUNT(*) as count
+                FROM Atmospheric_Cond_Seq acs
+                JOIN Amospheric_Cond ac ON acs.ATMOSPH_COND = ac.ATMOSPH_COND
+                JOIN Accident a ON acs.ACCIDENT_NO = a.ACCIDENT_NO
+                JOIN Node n ON a.NODE_ID = n.NODE_ID
+                WHERE acs.ATMOSPH_COND_SEQ = 1 AND n.POSTCODE = ?
+                GROUP BY ac.ATMOSPH_COND_DESC
+                ORDER BY count DESC
+            """, [int(postcode)])
+        else:
+            rows = query("""
+                SELECT ac.ATMOSPH_COND_DESC as label, COUNT(*) as count
+                FROM Atmospheric_Cond_Seq acs
+                JOIN Amospheric_Cond ac ON acs.ATMOSPH_COND = ac.ATMOSPH_COND
+                WHERE acs.ATMOSPH_COND_SEQ = 1
+                GROUP BY ac.ATMOSPH_COND_DESC
+                ORDER BY count DESC
+            """)
+
+    elif condition == 'light':
+        if postcode:
+            rows = query("""
+                SELECT lc.COND_NAME as label, COUNT(*) as count
+                FROM Accident a
+                JOIN Light_Condition lc ON a.LIGHT_CONDITION = lc.COND_ID
+                JOIN Node n ON a.NODE_ID = n.NODE_ID
+                WHERE n.POSTCODE = ?
+                GROUP BY lc.COND_NAME
+                ORDER BY count DESC
+            """, [int(postcode)])
+        else:
+            rows = query("""
+                SELECT lc.COND_NAME as label, COUNT(*) as count
+                FROM Accident a
+                JOIN Light_Condition lc ON a.LIGHT_CONDITION = lc.COND_ID
+                GROUP BY lc.COND_NAME
+                ORDER BY count DESC
+            """)
+    else:
+        rows = []
+
+    descriptions = meta['descriptions']
+    table_rows = [
+        {
+            'label':       r['label'],
+            'description': descriptions.get(r['label'], '—'),
+            'count':       r['count']
+        }
+        for r in rows
+    ]
+
+    postcode_label = f' — Postcode: {postcode}' if postcode else ' — All Postcodes'
+
+    return {
+        'title':      meta['title'] + postcode_label,
+        'col_header': meta['col_header'],
+        'chart': {
+            'labels': [r['label'] for r in rows],
+            'values': [r['count'] for r in rows],
+        },
+        'table': table_rows
+    }

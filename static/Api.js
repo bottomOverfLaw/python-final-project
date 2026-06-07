@@ -36,6 +36,13 @@ const API = {
     // Home page
     home: () => fetchJSON("/api/home"),
 
+    // Fun facts
+    funFacts: () => fetchJSON("/api/fun-facts"),
+
+    // Accident condition page
+    accidentConditions: (condition, postcode = '') =>
+    fetchJSON("/api/accident-conditions", { condition, postcode }),
+   
     // About page
     about: () => fetchJSON("/api/about"),
 
