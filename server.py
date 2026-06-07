@@ -7,7 +7,7 @@ import urllib.parse
 
 
 # ---- Level 1: Home & About -----
-from Level1_db import get_home_stats, get_students, get_personas
+from Level1_db import get_home_stats, get_students, get_personas, get_fun_facts
 
 # ---- Level 2: People & Injury + Accident Condition ----
 from Level2_db import injury_summary, pictogram_data, ejected_hospital_table, injury_by_sex, \
@@ -68,6 +68,9 @@ class RequestHandler(BaseHTTPRequestHandler):
        
         elif path == "/api/home":
             self.send_json(get_home_stats())
+        
+        elif path == "/api/fun-facts":
+            self.send_json(get_fun_facts())
            
 
         elif path == "/api/about":
@@ -110,6 +113,29 @@ class RequestHandler(BaseHTTPRequestHandler):
                 "injury_levels":    get_injury_levels(),
                 "person_types":     get_road_user_types(),
                 "light_conditions": get_light_conditions(),
+            })
+
+        elif path == "/api/accident-conditions":
+            print(f"DEBUG: accident-conditions hit, condition={params.get('condition')}")
+            condition = params.get("condition", ["road"])[0]    
+            postcode  = params.get("postcode",  [None])[0]
+            from Level2_db import get_accident_conditions
+            result = get_accident_conditions(condition, postcode)
+            if result is None:
+                self.send_error(400, "Invalid condition")
+            else:
+                self.send_json(result)
+
+        # ---- API: Level 3 ----
+        elif path == "/api/people-analysis":
+            filters = {k: v for k, v in {
+                "level": params.get("level", []),
+                "age":   params.get("age", []),
+                "light": params.get("light", []),
+            }.items() if v}
+            self.send_json({
+                "table": people_analysis(filters),
+                "chart": people_analysis_chart(filters),
             })
 
         # ---- API: Level 3 ----

@@ -5,7 +5,9 @@
   <!-- Intro box -->
   <div class="intro-banner">
     <h2>On the roads in Victoria: Key updates at a Glanceses</h2>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc maximus, nulla ut commodo sagittis, sapien dui mattis dui, non pulvinar lorem felis nec erat.</p>
+    <div class="fact-inner" id="factInner">
+      <p class="fact-text" id="factText">Loading fact...</p>
+    </div>
   </div>
 
   <!-- 4 Key factors heading - centred with spacing -->
@@ -42,11 +44,9 @@
     <!-- Bar chart -->
     <div class="chart-panel" id="bar-graph-panel">
       <h3 class="chart-heading">High-Risk Postcodes</h3>
-      <div class="bar-legend">
-
-      </div>
+      <div class="bar-legend"></div>
       <div class="bar-canvas-wrap">
-        <canvas id="barChart" role="img" aria-label="Bar chart: Region 1 61.2k, Region 2 60.8k, Region 3 61.5k accidents">Region 1: 61.2k, Region 2: 60.8k, Region 3: 61.5k.</canvas>
+        <canvas id="barChart"></canvas>
       </div>
       <p class="chart-axis-label">accident number</p>
     </div>
@@ -56,7 +56,7 @@
       <h3 class="chart-heading">Accidents by vehicle</h3>
       <div class="pie-wrap">
         <div class="pie-box">
-          <canvas id="pieChart" width="260" height="260" role="img" aria-label="Pie chart: Vehicle1 32%, Vehicle2 24%, Vehicle3 18%, Vehicle4 15%, Vehicle5 11%">Vehicle1 32%, Vehicle2 24%, Vehicle3 18%, Vehicle4 15%, Vehicle5 11%.</canvas>
+          <canvas id="pieChart" width="260" height="260"></canvas>
           <div class="pie-tooltip" id="pieTooltip">
             <b id="tt-name"></b>
             <span id="tt-pct"></span>
@@ -85,18 +85,14 @@
 
   /* ── Stat boxes ── */
   function updateStats(stats) {
-    const boxes = document.querySelectorAll('.interactive-box .text-top');
+    const boxes  = document.querySelectorAll('.interactive-box .text-top');
     const labels = document.querySelectorAll('.interactive-box .text-bottom');
-
     boxes[0].textContent  = stats.total_accidents.toLocaleString();
     labels[0].textContent = 'Total crashes';
-
     boxes[1].textContent  = stats.total_killed.toLocaleString();
     labels[1].textContent = 'Fatalities';
-
     boxes[2].textContent  = stats.total_serious.toLocaleString();
     labels[2].textContent = 'Serious Injuries';
-
     boxes[3].textContent  = stats.total_postcodes.toLocaleString();
     labels[3].textContent = 'Postcodes Affected';
   }
@@ -104,17 +100,8 @@
   /* ── Bar chart ── */
   function renderBarChart(by_postcode) {
     const colors = by_postcode.labels.map((_, i) => COLORS[i % COLORS.length]);
-
-    // Update legend to match real postcodes
-    const legendEl = document.querySelector('.bar-legend');
-    legendEl.innerHTML = by_postcode.labels.slice(0, 3).map((label, i) =>
-      `<div class="bar-legend-item">
-        <span class="bar-legend-sq" style="background:${COLORS[i]}"></span>${label}
-      </div>`
-    ).join('');
-
+    document.querySelector('.bar-legend').innerHTML = '';
     if (barChartInstance) barChartInstance.destroy();
-
     barChartInstance = new Chart(document.getElementById('barChart'), {
       type: 'bar',
       data: {
@@ -156,7 +143,6 @@
       color: COLORS[i % COLORS.length]
     }));
 
-    // Rebuild legend
     const legendEl = document.getElementById('pieLegend');
     legendEl.innerHTML = '';
     segments.forEach(function(d) {
@@ -222,7 +208,47 @@
     });
   }
 
-  /* ── Load everything from API ── */
+  /* ── Fun Facts ── */
+  let allFacts = [];
+  let currentFactIndex = -1;
+
+  function pickRandomFact() {
+    if (allFacts.length === 0) return null;
+    let newIndex;
+    do {
+      newIndex = Math.floor(Math.random() * allFacts.length);
+    } while (newIndex === currentFactIndex && allFacts.length > 1);
+    currentFactIndex = newIndex;
+    return allFacts[currentFactIndex];
+  }
+
+  function showFactNow(fact) {
+    document.getElementById('factText').textContent = fact.Title_Fact + ' — ' + fact.Fact;
+  }
+
+  function displayFact(fact) {
+    const inner = document.getElementById('factInner');
+    inner.classList.add('fade-out');
+    setTimeout(function() {
+      document.getElementById('factText').textContent = fact.Title_Fact + ' — ' + fact.Fact;
+      inner.classList.remove('fade-out');
+    }, 500);
+  }
+
+  /* ── Load facts first instantly ── */
+  fetch('/api/fun-facts')
+    .then(function(res) { return res.json(); })
+    .then(function(facts) {
+      allFacts = facts;
+      const first = pickRandomFact();
+      if (first) showFactNow(first);
+      setInterval(function() {
+        const fact = pickRandomFact();
+        if (fact) displayFact(fact);
+      }, 5 * 60 * 1000);
+    });
+
+  /* ── Load charts and stats separately ── */
   API.home()
     .then(function(data) {
       updateStats(data.stats);
