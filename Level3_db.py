@@ -129,6 +129,7 @@ def get_accident_analysis(postcode=None, light=None, atmo=None, road=None):
     params = []
     node_join = ""
 
+
     if postcode:
         node_join = "JOIN Node n ON a.NODE_ID = n.NODE_ID"
         where_clauses.append("n.POSTCODE = ?")
