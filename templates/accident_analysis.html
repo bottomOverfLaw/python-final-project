@@ -1,5 +1,6 @@
 <link rel="stylesheet" href="../static/home.css">
 <link rel="stylesheet" href="../static/accident_analysis.css">
+<script src="../static/api.js"></script>
 
 <div class="aa-page">
 
@@ -22,11 +23,7 @@
     </button>
   </div>
 
-<<<<<<< HEAD
   <!-- Filter panel (toggled open/closed) -->
-=======
-  <!-- Filter panel -->
->>>>>>> 4ce6d07dc34cf73ff874696c5aab79a158066f28
   <div class="aa-filter-panel" id="filterPanel">
     <div class="aa-filter-groups">
 
@@ -96,24 +93,23 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
-<<<<<<< HEAD
 <script>
   Chart.register(ChartDataLabels);
 
-  /* Master dataset — replace with real DB/API data */
-  var masterData = [
-    {id:1,  accNo:'T20130000003', light:'Dark no street lights', road:'Dry', atmo:'Clear',     date:'1/01/2013', time:'00:20:36 AM', roadType:'HIGHWAY', intersection:'SUNNYCLIFFS',        people:4, postcode:'3000', year:'Year1'},
-    {id:2,  accNo:'T20130000007', light:'Dusk/dawn',             road:'Wet', atmo:'Raining',   date:'1/01/2013', time:'05:30:00 AM', roadType:'ROAD',    intersection:'BARKLY',             people:2, postcode:'3000', year:'Year2'},
+  var colors          = ['#534AB7', '#1D9E75', '#D85A30', '#185FA5', '#9B8DD4'];
+  var activeFilters   = { light: [], atmo: [], road: [] };
+  var currentPostcode = '';
+  var pieChartInst    = null;
   var lineChartInst   = null;
   var allRows         = [];
   var currentPage     = 1;
   var rowsPerPage     = 50;
 
+  // ── BUILD FILTER UI FROM API DATA ──
   function buildFilterUI(filterOptions) {
     Object.keys(filterOptions).forEach(function(type) {
       var container = document.getElementById(type + 'Opts');
       container.innerHTML = '';
->>>>>>> 4ce6d07dc34cf73ff874696c5aab79a158066f28
       filterOptions[type].forEach(function(opt) {
         var lbl = document.createElement('label');
         lbl.className = 'aa-check-label';
@@ -121,7 +117,9 @@
         container.appendChild(lbl);
       });
     });
+  }
 
+  // ── RENDER TABLE ──
   function renderTable(rows) {
     allRows = rows;
     currentPage = 1;
@@ -145,8 +143,8 @@
     pageRows.forEach(function(r) {
       var tr = document.createElement('tr');
       tr.innerHTML =
-        '<td>' + r.serial             + '</td>' +
-        '<td>' + r.ACCIDENT_NO        + '</td>' +
+        '<td>' + r.serial                + '</td>' +
+        '<td>' + r.ACCIDENT_NO           + '</td>' +
         '<td>' + (r.light        || '—') + '</td>' +
         '<td>' + (r.road         || '—') + '</td>' +
         '<td>' + (r.atmo         || '—') + '</td>' +
@@ -161,9 +159,11 @@
     renderPagination(allRows.length);
   }
 
+  // ── PAGINATION ──
   function renderPagination(totalRows) {
     var existing = document.getElementById('pagination');
     if (existing) existing.remove();
+
     var totalPages = Math.ceil(totalRows / rowsPerPage);
     if (totalPages <= 1) return;
 
@@ -175,7 +175,9 @@
     prev.textContent = '← Prev';
     prev.className = 'aa-page-btn';
     prev.disabled = currentPage === 1;
-    prev.addEventListener('click', function() { if (currentPage > 1) { currentPage--; renderPage(); } });
+    prev.addEventListener('click', function() {
+      if (currentPage > 1) { currentPage--; renderPage(); }
+    });
     wrap.appendChild(prev);
 
     for (var i = 1; i <= totalPages; i++) {
@@ -192,14 +194,27 @@
     next.textContent = 'Next →';
     next.className = 'aa-page-btn';
     next.disabled = currentPage === totalPages;
-    next.addEventListener('click', function() { if (currentPage < totalPages) { currentPage++; renderPage(); } });
+    next.addEventListener('click', function() {
+      if (currentPage < totalPages) { currentPage++; renderPage(); }
+    });
     wrap.appendChild(next);
 
     document.querySelector('.aa-table-wrap').after(wrap);
   }
 
+  // ── PIE CHART ──
   function renderPie(pie) {
     var total = pie.values.reduce(function(a, b) { return a + b; }, 0);
+
+    var legendEl = document.getElementById('pieLegend');
+    legendEl.innerHTML = '';
+    pie.labels.forEach(function(label, i) {
+      var item = document.createElement('div');
+      item.className = 'aa-pie-legend-item';
+      item.innerHTML = '<span class="aa-pie-dot" style="background:' + colors[i % colors.length] + '"></span>' + label;
+      legendEl.appendChild(item);
+    });
+
     if (pieChartInst) pieChartInst.destroy();
     pieChartInst = new Chart(document.getElementById('pieChart'), {
       type: 'pie',
@@ -225,22 +240,13 @@
                 return ctx.label + ': ' + pct + '%';
               }
             }
-          },
-          datalabels: {
-            color: '#fff',
-            font: { size: 11, weight: '500' },
-            formatter: function(val) {
-              if (val === 0) return '';
-              return Math.round(val / total * 100) + '%';
-            },
-            textShadowBlur: 4,
-            textShadowColor: 'rgba(0,0,0,0.5)'
           }
         }
       }
     });
   }
 
+  // ── LINE CHART ──
   function renderLine(line) {
     if (lineChartInst) lineChartInst.destroy();
     lineChartInst = new Chart(document.getElementById('lineChart'), {
@@ -267,7 +273,9 @@
           tooltip: {
             enabled: true,
             callbacks: {
-              label: function(ctx) { return 'Accidents: ' + ctx.parsed.y.toLocaleString(); }
+              label: function(ctx) {
+                return 'Accidents: ' + ctx.parsed.y.toLocaleString();
+              }
             }
           },
           datalabels: {
@@ -286,6 +294,7 @@
     });
   }
 
+  // ── REFRESH — fetch filtered data ──
   function refresh() {
     var qParams = {};
     if (currentPostcode) qParams.postcode = currentPostcode;
@@ -304,18 +313,24 @@
       });
   }
 
+  // ── INIT ──
   fetchJSON('/api/accident-analysis', {})
     .then(function(data) {
       buildFilterUI(data.filter_options);
       renderTable(data.table);
       renderPie(data.pie);
       renderLine(data.line);
+    })
+    .catch(function(err) {
+      console.error('Failed to load initial data:', err);
     });
 
+  // ── FILTER PANEL TOGGLE ──
   document.getElementById('filterToggle').addEventListener('click', function() {
     document.getElementById('filterPanel').classList.toggle('open');
   });
 
+  // ── COLLAPSIBLE CONDITION SECTIONS ──
   ['light', 'atmo', 'road'].forEach(function(type) {
     document.getElementById(type + 'Heading').addEventListener('click', function() {
       var opts  = document.getElementById(type + 'Opts');
@@ -325,6 +340,7 @@
     });
   });
 
+  // ── APPLY FILTERS ──
   document.getElementById('applyFilter').addEventListener('click', function() {
     activeFilters = { light: [], atmo: [], road: [] };
     document.querySelectorAll('.aa-filter-opts input:checked').forEach(function(cb) {
@@ -333,12 +349,13 @@
     document.getElementById('filterPanel').classList.remove('open');
     refresh();
   });
-  
 
+  // ── CANCEL ──
   document.getElementById('cancelFilter').addEventListener('click', function() {
     document.getElementById('filterPanel').classList.remove('open');
   });
 
+  // ── POSTCODE SEARCH ──
   document.getElementById('postcodeInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
       currentPostcode = this.value.trim();
