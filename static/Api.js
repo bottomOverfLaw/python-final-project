@@ -41,8 +41,8 @@ const API = {
 
     // Accident condition page
     accidentConditions: (condition, postcode = '') =>
-    fetchJSON("/api/accident-conditions", { condition, postcode }),
-   
+        fetchJSON("/api/accident-conditions", { condition, postcode }),
+
     // About page
     about: () => fetchJSON("/api/about"),
 
@@ -52,6 +52,10 @@ const API = {
     // People & Injury — stacked bar
     injurySummary: (levels = []) =>
         fetchJSON("/api/injury-summary", { level: levels }),
+
+    // People & Injury — stacked bar by gender
+    injurySummaryBySex: (levels = []) =>
+        fetchJSON("/api/injury-summary-by-sex", { level: levels }),
 
     // People & Injury — pictogram
     pictogram: (ages = [], levels = []) =>
@@ -65,9 +69,9 @@ const API = {
     peopleAnalysis: (filters = {}) =>
         fetchJSON("/api/people-analysis", filters),
 
-    // Sex rappresentation
+    // Sex representation
     injuryBySex: (levels = []) =>
-    fetchJSON("/api/injury-by-sex", { level: levels }),
+        fetchJSON("/api/injury-by-sex", { level: levels }),
 
     // Accident Analysis
     accidentAnalysis: (filters = {}) =>

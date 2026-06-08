@@ -10,7 +10,7 @@ import urllib.parse
 from Level1_db import get_home_stats, get_students, get_personas, get_fun_facts
 
 # ---- Level 2: People & Injury + Accident Condition ----
-from Level2_db import injury_summary, pictogram_data, ejected_hospital_table, injury_by_sex, \
+from Level2_db import injury_summary, injury_summary_by_sex, pictogram_data, ejected_hospital_table, \
     get_age_groups, get_injury_levels, get_road_user_types, get_light_conditions
 
 # ---- Level 3: People Analysis + Accident Analysis ----
@@ -84,13 +84,14 @@ class RequestHandler(BaseHTTPRequestHandler):
             levels = [int(x) for x in params.get("level", [])]
             self.send_json(injury_summary(levels or None))
 
+        elif path == "/api/injury-summary-by-sex":
+            levels = [int(x) for x in params.get("level", [])]
+            self.send_json(injury_summary_by_sex(levels or None))
+
         elif path == "/api/pictogram":
             ages   = params.get("age", None)
             levels = [int(x) for x in params.get("level", [])]
             self.send_json(pictogram_data(ages, levels or None))
-        elif path == "/api/injury-by-sex":
-            levels = [int(x) for x in params.get("level", [])]
-            self.send_json(injury_by_sex(levels or None))
 
         elif path == "/api/ejected-table":
             filters = {
@@ -174,7 +175,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_error(404, "Static file not found")
 
     def log_message(self, format, *args):
-        pass  # Suppress request logs to keep terminal clean
+        pass
 
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):

@@ -37,10 +37,8 @@
     display: flex;
     gap: 16px;
     align-items: flex-start;
-    flex-wrap: nowrap;        
+    flex-wrap: nowrap;
 }
-
-/* ── FILTER PANEL ── */
 
 /* ── FILTER TOGGLE BUTTON ── */
 .aa-filter-btn {
@@ -73,7 +71,7 @@
     background: #fff;
     padding: 12px;
     margin-top: 6px;
-    width: 100%;            /* ← matches filter-panel width */
+    width: 100%;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     box-sizing: border-box;
 }
@@ -98,7 +96,7 @@
     color: #555;
 }
 
-.filter-dropdown{
+.filter-dropdown {
     width: 100%;
 }
 
@@ -136,14 +134,10 @@
 
 .filter-content {
     display: none;
-
     margin-top: 4px;
-
     border: 1px solid #ddd;
     border-radius: 4px;
-
     background: white;
-
     padding: 8px;
 }
 
@@ -206,14 +200,17 @@
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    align-self: flex-end;
+    align-self: flex-start;
+    overflow: visible;
 }
 
 .bar-legend {
     display: flex;
-    flex-direction: row;
-    gap: 6px;
+    gap: 10px;
     font-size: 11px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .bar-legend-item {
@@ -230,15 +227,30 @@
     flex-shrink: 0;
 }
 
-.bar-legend {
+/* ── GENDER CHARTS ── */
+.gender-charts {
     display: flex;
-    gap: 10px;
-    font-size: 11px;
-    margin-top: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 20px;
+    align-items: flex-end;
+    overflow: visible;
+    padding-top: 40px;
 }
 
+.gender-chart-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    overflow: visible;
+}
+
+.gender-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #555;
+    text-align: center;
+    margin: 0;
+}
 
 /* ── PICTOGRAM PANEL ── */
 .pictogram-panel {
@@ -247,6 +259,8 @@
     flex-direction: column;
     gap: 10px;
     margin-left: 20px;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .chart-toggle {
@@ -297,24 +311,25 @@
     margin: 1px;
 }
 
-.dot.fatal   { background: #e35336; }
-.dot.serious { background: #f0b429; }
-.dot.other   { background: #ccd; }
-.dot.noinjury {background: #57b894;}
+.dot.fatal    { background: #e35336; }
+.dot.serious  { background: #f0b429; }
+.dot.other    { background: #ccd; }
+.dot.noinjury { background: #57b894; }
 
 /* ── AGE ROWS ── */
 .age-rows {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    min-width: 500px;   /* ← keeps the container width stable */
+    min-width: 200px;
+    max-width: 420px;
 }
 
 .age-row {
     display: flex;
     align-items: center;
     gap: 10px;
-    min-height: 50px;    /* ← reserves space even when hidden */
+    min-height: 50px;
 }
 
 .age-label {
@@ -334,12 +349,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 2px;
-    max-width: 400px;
-}
-
-.person-icon {
-    font-size: 11px;
-    line-height: 1;
+    max-width: 340px;
 }
 
 .person-icon.fatal   { color: #e35336; }
