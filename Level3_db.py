@@ -120,3 +120,98 @@ def people_analysis_chart(filters=None):
 # ══════════════════════════════════════════
 #  ACCIDENT ANALYSIS PAGE
 # ══════════════════════════════════════════
+def get_accident_analysis(postcode=None, light=None, atmo=None, road=None):
+    """
+    Table + chart data for accident analysis page.
+    Only joins Node table when postcode filter is needed.
+    """
+    where_clauses = ["1=1"]
+    params = []
+    node_join = ""
+
+
+    if postcode:
+        node_join = "JOIN Node n ON a.NODE_ID = n.NODE_ID"
+        where_clauses.append("n.POSTCODE = ?")
+        params.append(int(postcode))
+
+    if light:
+        ph = ",".join("?" * len(light))
+        where_clauses.append(f"lc.COND_NAME IN ({ph})")
+        params += light
+
+    where = "WHERE " + " AND ".join(where_clauses)
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    cur.execute(f"""
+        SELECT
+            a.ACCIDENT_NO,
+            lc.COND_NAME        AS light,
+            a.ROAD_TYPE         AS road_type,
+            a.ROAD_NAME_INT     AS intersection,
+            a.NO_PERSONS        AS people,
+            a.ACCIDENT_DATE     AS date,
+            a.ACCIDENT_TIME     AS time,
+            SUBSTR(a.ACCIDENT_DATE, -4, 4) AS year,
+            (SELECT ac.ATMOSPH_COND_DESC
+             FROM Atmospheric_Cond_Seq acs
+             JOIN Amospheric_Cond ac ON acs.ATMOSPH_COND = ac.ATMOSPH_COND
+             WHERE acs.ACCIDENT_NO = a.ACCIDENT_NO
+             AND acs.ATMOSPH_COND_SEQ = 1
+             LIMIT 1) AS atmo
+        FROM Accident a
+        {node_join}
+        JOIN Light_Condition lc ON a.LIGHT_CONDITION = lc.COND_ID
+        {where}
+        ORDER BY a.ACCIDENT_DATE DESC
+        LIMIT 200
+    """, params)
+    rows = [dict(r) for r in cur.fetchall()]
+
+    cur.execute("SELECT DISTINCT COND_NAME FROM Light_Condition ORDER BY COND_NAME")
+    light_opts = [r["COND_NAME"] for r in cur.fetchall()]
+
+    cur.execute("SELECT DISTINCT SURFACE_COND_DESC FROM Road_Surface_Cond ORDER BY SURFACE_COND_DESC")
+    road_opts = [r["SURFACE_COND_DESC"] for r in cur.fetchall()]
+
+    cur.execute("SELECT DISTINCT ATMOSPH_COND_DESC FROM Amospheric_Cond ORDER BY ATMOSPH_COND_DESC")
+    atmo_opts = [r["ATMOSPH_COND_DESC"] for r in cur.fetchall()]
+
+    conn.close()
+
+    for i, r in enumerate(rows):
+        r["serial"] = i + 1
+        r["road"]   = r.get("road_type") or "—"
+        if not r.get("atmo"):
+            r["atmo"] = "—"
+
+    road_type_counts = {}
+    for r in rows:
+        rt = r["road_type"] or "Unknown"
+        road_type_counts[rt] = road_type_counts.get(rt, 0) + 1
+
+    year_counts = {}
+    for r in rows:
+        yr = r["year"] or "Unknown"
+        year_counts[yr] = year_counts.get(yr, 0) + 1
+    sorted_years = sorted(year_counts.keys())
+
+    return {
+        "table": rows,
+        "pie": {
+            "labels": list(road_type_counts.keys()),
+            "values": list(road_type_counts.values()),
+        },
+        "line": {
+            "labels": sorted_years,
+            "values": [year_counts[y] for y in sorted_years],
+        },
+        "filter_options": {
+            "light": light_opts,
+            "atmo":  atmo_opts,
+            "road":  road_opts,
+        }
+    }

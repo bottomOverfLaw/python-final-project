@@ -22,7 +22,11 @@
     </button>
   </div>
 
+<<<<<<< HEAD
   <!-- Filter panel (toggled open/closed) -->
+=======
+  <!-- Filter panel -->
+>>>>>>> 4ce6d07dc34cf73ff874696c5aab79a158066f28
   <div class="aa-filter-panel" id="filterPanel">
     <div class="aa-filter-groups">
 
@@ -73,11 +77,10 @@
   <div class="aa-charts-row">
 
     <div class="aa-chart-panel">
-      <div class="aa-pie-legend" id="pieLegend"></div>
+      <h3 class="aa-chart-title">Accident by road type</h3>
       <div class="aa-pie-box">
         <canvas id="pieChart" width="260" height="260"></canvas>
       </div>
-      <p class="aa-chart-label">Accident by road type</p>
     </div>
 
     <div class="aa-chart-panel">
@@ -93,6 +96,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<<<<<<< HEAD
 <script>
   Chart.register(ChartDataLabels);
 
@@ -100,41 +104,16 @@
   var masterData = [
     {id:1,  accNo:'T20130000003', light:'Dark no street lights', road:'Dry', atmo:'Clear',     date:'1/01/2013', time:'00:20:36 AM', roadType:'HIGHWAY', intersection:'SUNNYCLIFFS',        people:4, postcode:'3000', year:'Year1'},
     {id:2,  accNo:'T20130000007', light:'Dusk/dawn',             road:'Wet', atmo:'Raining',   date:'1/01/2013', time:'05:30:00 AM', roadType:'ROAD',    intersection:'BARKLY',             people:2, postcode:'3000', year:'Year2'},
-    {id:3,  accNo:'T20130000013', light:'Day',                   road:'Dry', atmo:'Clear',     date:'1/01/2013', time:'11:11:00 AM', roadType:'ROAD',    intersection:'SIMPSONS',           people:1, postcode:'3000', year:'Year1'},
-    {id:4,  accNo:'T20130000032', light:'Dark street lights on', road:'Dry', atmo:'Not known', date:'1/01/2013', time:'00:02:00 AM', roadType:'ROAD',    intersection:'TAYLOR BAY LEFT ARM',people:1, postcode:'3000', year:'Year2'},
-    {id:5,  accNo:'T20130000045', light:'Day',                   road:'Wet', atmo:'Raining',   date:'2/01/2013', time:'08:15:00 AM', roadType:'HIGHWAY', intersection:'MAIN ST',            people:3, postcode:'3000', year:'Year3'},
-    {id:6,  accNo:'T20130000056', light:'Dusk/dawn',             road:'Dry', atmo:'Clear',     date:'3/01/2013', time:'06:45:00 AM', roadType:'FREEWAY', intersection:'BRIDGE RD',          people:2, postcode:'3000', year:'Year3'},
-    {id:7,  accNo:'T20130000078', light:'Dark no street lights', road:'Mud', atmo:'Raining',   date:'4/01/2013', time:'23:30:00',    roadType:'ROAD',    intersection:'NORTH AVE',          people:1, postcode:'3000', year:'Year4'},
-    {id:8,  accNo:'T20130000089', light:'Day',                   road:'Ice', atmo:'Snow',      date:'5/01/2013', time:'14:00:00',    roadType:'HIGHWAY', intersection:'SOUTH RD',           people:5, postcode:'3000', year:'Year4'},
-    {id:9,  accNo:'T20130000101', light:'Day',                   road:'Dry', atmo:'Clear',     date:'1/01/2013', time:'10:00:00 AM', roadType:'ROAD',    intersection:'PARK ST',            people:2, postcode:'3001', year:'Year1'},
-    {id:10, accNo:'T20130000112', light:'Dark street lights on', road:'Wet', atmo:'Raining',   date:'2/01/2013', time:'21:30:00',    roadType:'FREEWAY', intersection:'LAKE RD',            people:3, postcode:'3001', year:'Year2'},
-    {id:11, accNo:'T20130000124', light:'Dusk/dawn',             road:'Dry', atmo:'Windy',     date:'3/01/2013', time:'17:00:00',    roadType:'ROAD',    intersection:'HILL AVE',           people:1, postcode:'3001', year:'Year3'},
-    {id:12, accNo:'T20130000136', light:'Day',                   road:'Mud', atmo:'Raining',   date:'4/01/2013', time:'13:45:00',    roadType:'HIGHWAY', intersection:'CREEK RD',           people:2, postcode:'3001', year:'Year4'},
-    {id:13, accNo:'T20130000201', light:'Dark no street lights', road:'Dry', atmo:'Clear',     date:'1/01/2013', time:'02:00:00 AM', roadType:'ROAD',    intersection:'COAST RD',           people:1, postcode:'3002', year:'Year1'},
-    {id:14, accNo:'T20130000213', light:'Day',                   road:'Wet', atmo:'Fog',       date:'2/01/2013', time:'07:30:00 AM', roadType:'HIGHWAY', intersection:'RIVER ST',           people:4, postcode:'3002', year:'Year2'},
-    {id:15, accNo:'T20130000225', light:'Dark street lights on', road:'Ice', atmo:'Snow',      date:'3/01/2013', time:'22:15:00',    roadType:'FREEWAY', intersection:'MOUNTAIN RD',        people:2, postcode:'3002', year:'Year3'},
-    {id:16, accNo:'T20130000237', light:'Dusk/dawn',             road:'Dry', atmo:'Clear',     date:'4/01/2013', time:'18:30:00',    roadType:'ROAD',    intersection:'VALLEY DR',          people:1, postcode:'3002', year:'Year4'}
-  ];
+  var lineChartInst   = null;
+  var allRows         = [];
+  var currentPage     = 1;
+  var rowsPerPage     = 50;
 
-  var filterOptions = {
-    light: ['Day', 'Dusk/dawn', 'Dark no street lights', 'Dark street lights on'],
-    atmo:  ['Clear', 'Raining', 'Not known', 'Fog', 'Snow', 'Windy'],
-    road:  ['Dry', 'Wet', 'Mud', 'Ice']
-  };
-
-  var roadTypes  = ['HIGHWAY', 'ROAD', 'FREEWAY'];
-  var years      = ['Year1', 'Year2', 'Year3', 'Year4'];
-  var colors     = ['#534AB7', '#1D9E75', '#D85A30', '#185FA5', '#9B8DD4'];
-
-  var activeFilters  = { light: [], atmo: [], road: [] };
-  var currentPostcode = '';
-  var pieChartInst   = null;
-  var lineChartInst  = null;
-
-  /* Build checkbox options in filter panel */
-  function buildFilterUI() {
+  function buildFilterUI(filterOptions) {
     Object.keys(filterOptions).forEach(function(type) {
       var container = document.getElementById(type + 'Opts');
+      container.innerHTML = '';
+>>>>>>> 4ce6d07dc34cf73ff874696c5aab79a158066f28
       filterOptions[type].forEach(function(opt) {
         var lbl = document.createElement('label');
         lbl.className = 'aa-check-label';
@@ -142,73 +121,93 @@
         container.appendChild(lbl);
       });
     });
-  }
 
-  /* Apply postcode + active filters to master data */
-  function getFiltered() {
-    var pc = currentPostcode.trim();
-    return masterData.filter(function(row) {
-      if (pc && row.postcode !== pc) return false;
-      if (activeFilters.light.length && activeFilters.light.indexOf(row.light) === -1) return false;
-      if (activeFilters.atmo.length  && activeFilters.atmo.indexOf(row.atmo)   === -1) return false;
-      if (activeFilters.road.length  && activeFilters.road.indexOf(row.road)   === -1) return false;
-      return true;
-    });
-  }
-
-  /* Render table rows */
   function renderTable(rows) {
+    allRows = rows;
+    currentPage = 1;
+    renderPage();
+  }
+
+  function renderPage() {
     var tbody = document.getElementById('tableBody');
     tbody.innerHTML = '';
-    if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="10" class="aa-no-data">No records found for the selected filters.</td></tr>';
+
+    if (!allRows.length) {
+      tbody.innerHTML = '<tr><td colspan="10" class="aa-no-data">No records found.</td></tr>';
+      renderPagination(0);
       return;
     }
-    rows.forEach(function(r) {
+
+    var start    = (currentPage - 1) * rowsPerPage;
+    var end      = Math.min(start + rowsPerPage, allRows.length);
+    var pageRows = allRows.slice(start, end);
+
+    pageRows.forEach(function(r) {
       var tr = document.createElement('tr');
       tr.innerHTML =
-        '<td>' + r.id           + '</td>' +
-        '<td>' + r.accNo        + '</td>' +
-        '<td>' + r.light        + '</td>' +
-        '<td>' + r.road         + '</td>' +
-        '<td>' + r.atmo         + '</td>' +
-        '<td>' + r.date         + '</td>' +
-        '<td>' + r.time         + '</td>' +
-        '<td>' + r.roadType     + '</td>' +
-        '<td>' + r.intersection + '</td>' +
-        '<td>' + r.people       + '</td>';
+        '<td>' + r.serial             + '</td>' +
+        '<td>' + r.ACCIDENT_NO        + '</td>' +
+        '<td>' + (r.light        || '—') + '</td>' +
+        '<td>' + (r.road         || '—') + '</td>' +
+        '<td>' + (r.atmo         || '—') + '</td>' +
+        '<td>' + (r.date         || '—') + '</td>' +
+        '<td>' + (r.time         || '—') + '</td>' +
+        '<td>' + (r.road_type    || '—') + '</td>' +
+        '<td>' + (r.intersection || '—') + '</td>' +
+        '<td>' + (r.people       || '—') + '</td>';
       tbody.appendChild(tr);
     });
+
+    renderPagination(allRows.length);
   }
 
-  /* Render pie chart — accidents by road type */
-  function renderPie(rows) {
-    var counts = {};
-    roadTypes.forEach(function(rt) { counts[rt] = 0; });
-    rows.forEach(function(r) {
-      if (counts[r.roadType] !== undefined) counts[r.roadType]++;
-      else counts['Other'] = (counts['Other'] || 0) + 1;
-    });
-    var labels = Object.keys(counts).filter(function(k) { return counts[k] > 0; });
-    var data   = labels.map(function(l) { return counts[l]; });
+  function renderPagination(totalRows) {
+    var existing = document.getElementById('pagination');
+    if (existing) existing.remove();
+    var totalPages = Math.ceil(totalRows / rowsPerPage);
+    if (totalPages <= 1) return;
 
-    var legendEl = document.getElementById('pieLegend');
-    legendEl.innerHTML = '';
-    labels.forEach(function(label, i) {
-      var item = document.createElement('div');
-      item.className = 'aa-pie-legend-item';
-      item.innerHTML = '<span class="aa-pie-dot" style="background:' + colors[i % colors.length] + '"></span>' + label;
-      legendEl.appendChild(item);
-    });
+    var wrap = document.createElement('div');
+    wrap.id = 'pagination';
+    wrap.className = 'aa-pagination';
 
+    var prev = document.createElement('button');
+    prev.textContent = '← Prev';
+    prev.className = 'aa-page-btn';
+    prev.disabled = currentPage === 1;
+    prev.addEventListener('click', function() { if (currentPage > 1) { currentPage--; renderPage(); } });
+    wrap.appendChild(prev);
+
+    for (var i = 1; i <= totalPages; i++) {
+      (function(page) {
+        var btn = document.createElement('button');
+        btn.textContent = page;
+        btn.className = 'aa-page-btn' + (page === currentPage ? ' active' : '');
+        btn.addEventListener('click', function() { currentPage = page; renderPage(); });
+        wrap.appendChild(btn);
+      })(i);
+    }
+
+    var next = document.createElement('button');
+    next.textContent = 'Next →';
+    next.className = 'aa-page-btn';
+    next.disabled = currentPage === totalPages;
+    next.addEventListener('click', function() { if (currentPage < totalPages) { currentPage++; renderPage(); } });
+    wrap.appendChild(next);
+
+    document.querySelector('.aa-table-wrap').after(wrap);
+  }
+
+  function renderPie(pie) {
+    var total = pie.values.reduce(function(a, b) { return a + b; }, 0);
     if (pieChartInst) pieChartInst.destroy();
     pieChartInst = new Chart(document.getElementById('pieChart'), {
       type: 'pie',
       data: {
-        labels: labels,
+        labels: pie.labels,
         datasets: [{
-          data: data,
-          backgroundColor: colors,
+          data: pie.values,
+          backgroundColor: pie.labels.map(function(_, i) { return colors[i % colors.length]; }),
           borderColor: '#fff',
           borderWidth: 2,
           hoverOffset: 10
@@ -218,11 +217,22 @@
         responsive: false,
         plugins: {
           legend: { display: false },
-          tooltip: { enabled: true },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              label: function(ctx) {
+                var pct = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
+                return ctx.label + ': ' + pct + '%';
+              }
+            }
+          },
           datalabels: {
             color: '#fff',
             font: { size: 11, weight: '500' },
-            formatter: function(val, ctx) { return val > 0 ? ctx.chart.data.labels[ctx.dataIndex] : ''; },
+            formatter: function(val) {
+              if (val === 0) return '';
+              return Math.round(val / total * 100) + '%';
+            },
             textShadowBlur: 4,
             textShadowColor: 'rgba(0,0,0,0.5)'
           }
@@ -231,59 +241,81 @@
     });
   }
 
-  /* Render line chart — accident trend per road type per year */
-  function renderLine(rows) {
-    var datasets = roadTypes.map(function(rt, i) {
-      return {
-        label: rt,
-        data: years.map(function(yr) {
-          return rows.filter(function(r) { return r.roadType === rt && r.year === yr; }).length;
-        }),
-        borderColor: colors[i],
-        backgroundColor: 'transparent',
-        tension: 0.4,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        borderWidth: 2
-      };
-    });
-
+  function renderLine(line) {
     if (lineChartInst) lineChartInst.destroy();
     lineChartInst = new Chart(document.getElementById('lineChart'), {
       type: 'line',
-      data: { labels: years, datasets: datasets },
+      data: {
+        labels: line.labels,
+        datasets: [{
+          label: 'Accidents',
+          data: line.values,
+          borderColor: '#534AB7',
+          backgroundColor: 'rgba(83,74,183,0.08)',
+          tension: 0.4,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          borderWidth: 2,
+          fill: true
+        }]
+      },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 12, font: { size: 12 }, color: '#333' } },
-          datalabels: { display: false }
+          legend: { display: false },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              label: function(ctx) { return 'Accidents: ' + ctx.parsed.y.toLocaleString(); }
+            }
+          },
+          datalabels: {
+            color: '#534AB7',
+            font: { size: 11, weight: '600' },
+            anchor: 'end',
+            align: 'top',
+            formatter: function(val) { return val.toLocaleString(); }
+          }
         },
         scales: {
           x: { grid: { display: false }, ticks: { color: '#555', font: { size: 12 } } },
-          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#555', stepSize: 1 } }
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#555' } }
         }
       }
     });
   }
 
   function refresh() {
-    var rows = getFiltered();
-    renderTable(rows);
-    renderPie(rows);
-    renderLine(rows);
+    var qParams = {};
+    if (currentPostcode) qParams.postcode = currentPostcode;
+    activeFilters.light.forEach(function(v) { qParams.light = qParams.light || []; qParams.light.push(v); });
+    activeFilters.atmo.forEach(function(v)  { qParams.atmo  = qParams.atmo  || []; qParams.atmo.push(v);  });
+    activeFilters.road.forEach(function(v)  { qParams.road  = qParams.road  || []; qParams.road.push(v);  });
+
+    fetchJSON('/api/accident-analysis', qParams)
+      .then(function(data) {
+        renderTable(data.table);
+        renderPie(data.pie);
+        renderLine(data.line);
+      })
+      .catch(function(err) {
+        console.error('Failed to load accident analysis:', err);
+      });
   }
 
-  /* Init */
-  buildFilterUI();
-  refresh();
+  fetchJSON('/api/accident-analysis', {})
+    .then(function(data) {
+      buildFilterUI(data.filter_options);
+      renderTable(data.table);
+      renderPie(data.pie);
+      renderLine(data.line);
+    });
 
-  /* Filter panel toggle */
   document.getElementById('filterToggle').addEventListener('click', function() {
     document.getElementById('filterPanel').classList.toggle('open');
   });
 
-  /* Collapsible condition sections */
   ['light', 'atmo', 'road'].forEach(function(type) {
     document.getElementById(type + 'Heading').addEventListener('click', function() {
       var opts  = document.getElementById(type + 'Opts');
@@ -293,7 +325,6 @@
     });
   });
 
-  /* Apply filters */
   document.getElementById('applyFilter').addEventListener('click', function() {
     activeFilters = { light: [], atmo: [], road: [] };
     document.querySelectorAll('.aa-filter-opts input:checked').forEach(function(cb) {
@@ -302,16 +333,15 @@
     document.getElementById('filterPanel').classList.remove('open');
     refresh();
   });
+  
 
-  /* Cancel — close panel without applying */
   document.getElementById('cancelFilter').addEventListener('click', function() {
     document.getElementById('filterPanel').classList.remove('open');
   });
 
-  /* Postcode search on Enter */
   document.getElementById('postcodeInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
-      currentPostcode = this.value;
+      currentPostcode = this.value.trim();
       refresh();
     }
   });
