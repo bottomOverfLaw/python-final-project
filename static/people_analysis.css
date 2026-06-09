@@ -235,6 +235,32 @@
 .above-avg.positive { color: #e35336; }
 .above-avg.negative { color: #57b894; }
 
+.pagination {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    padding: 12px 0;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.page-btn:hover { background: #f0efea; }
+
+.page-btn.active {
+    background: rgba(227, 83, 54, 0.5);
+    color: white;
+    border-color: #e35336;
+}
+
 /* ── BAR CHART ── */
 .chart-area {
     padding: 10px 0;

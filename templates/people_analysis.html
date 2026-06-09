@@ -96,6 +96,7 @@
                             </tr>
                         </tbody>
                     </table>
+                    <div class="pagination" id="analysisPagination"></div>
                 </div>
 
                 <!-- BAR CHART -->
@@ -198,21 +199,21 @@ document.getElementById("btnCancelPA").addEventListener("click", () => {
 
 // ── APPLY ──
 document.getElementById("btnApplyPA").addEventListener("click", () => {
-    const checked = [...document.querySelectorAll(".filter-panel input:checked")];
+    const dropdowns = document.querySelectorAll(".filter-dropdown");
 
-    const injuryLevels = checked
-        .filter(cb => !isNaN(cb.value) && cb.value !== "")
+    // dropdown 0 = injury level
+    const injuryLevels = [...dropdowns[0].querySelectorAll("input:checked")]
         .map(cb => parseInt(cb.value));
 
-    const ageGroups = checked
-        .filter(cb => isNaN(cb.value))
+    // dropdown 1 = age group
+    const ageGroups = [...dropdowns[1].querySelectorAll("input:checked")]
         .map(cb => cb.value);
 
-    const lightConds = checked
-        .filter(cb => LIGHT_MAP[cb.value])
-        .map(cb => LIGHT_MAP[cb.value]);
+    // dropdown 2 = light condition
+    const lightConds = [...dropdowns[2].querySelectorAll("input:checked")]
+        .map(cb => parseInt(cb.value));
 
-    const anyChecked = checked.length > 0;
+    const anyChecked = injuryLevels.length > 0 || ageGroups.length > 0 || lightConds.length > 0;
 
     if (!anyChecked) { loadAnalysis({}); return; }
 
@@ -264,9 +265,15 @@ function renderTable(data) {
     const tbody = document.getElementById("tableBody");
     if (!data.length) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#aaa;">No data</td></tr>`;
+        document.getElementById("analysisPagination").innerHTML = "";
         return;
     }
-    tbody.innerHTML = data.map((r, i) => `
+
+    const totalPages = Math.ceil(data.length / PAGE_SIZE);
+    const start      = (currentPage - 1) * PAGE_SIZE;
+    const pageData   = data.slice(start, start + PAGE_SIZE);
+
+    tbody.innerHTML = pageData.map((r, i) => `
         <tr ${i % 2 === 1 ? 'class="row-highlight"' : ''}>
             <td>${r.age}</td>
             <td>${r.person_type}</td>
@@ -277,7 +284,14 @@ function renderTable(data) {
             <td>${r.injury}</td>
         </tr>
     `).join("");
+
+    document.getElementById("analysisPagination").innerHTML =
+        Array.from({ length: totalPages }, (_, i) => `
+            <button class="page-btn ${i + 1 === currentPage ? "active" : ""}"
+                onclick="goToPage(${i + 1})">${i + 1}</button>
+        `).join("");
 }
+
 
 // ── RENDER CHART ──
 function renderChart(data) {
@@ -332,12 +346,23 @@ async function loadAnalysis(filters) {
     try {
         const response = await API.peopleAnalysis(filters);
         currentData = response.table;
+        currentPage = 1;        // ← reset
         renderTable(response.table);
         renderChart(response.chart);
     } catch (err) {
         console.error("Error loading analysis data:", err);
     }
 }
+
+// ── Pagination ──
+const PAGE_SIZE = 20;
+let currentPage = 1;
+
+function goToPage(page) {
+    currentPage = page;
+    renderTable(currentData);
+}
+
 
 // ── INIT ──
 loadFilterOptions().then(() => loadAnalysis({}));

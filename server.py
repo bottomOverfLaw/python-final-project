@@ -128,10 +128,19 @@ class RequestHandler(BaseHTTPRequestHandler):
                 "age":   params.get("age", []),
                 "light": params.get("light", []),
             }.items() if v}
-            self.send_json({
-                "table": people_analysis(filters),
-                "chart": people_analysis_chart(filters),
-            })
+            table = people_analysis(filters)
+            
+            # derive chart from table instead of second query
+            chart_data = {}
+            for r in table:
+                age = r["age"]
+                if age not in chart_data:
+                    chart_data[age] = []
+                chart_data[age].append(r["injury_rate"])
+            chart = [{"age": age, "injury_rate": round(sum(rates)/len(rates), 2)} 
+                    for age, rates in chart_data.items()]
+            
+            self.send_json({"table": table, "chart": chart})
 
         elif path == "/api/accident-analysis":
             postcode = params.get("postcode", [None])[0]
