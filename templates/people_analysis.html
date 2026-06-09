@@ -6,54 +6,47 @@
         <h2 class="section-title">Analysis:</h2>
         <div class="section-body">
 
-            <!-- LEFT FILTER -->
-            <div class="filter-panel">
-                <div class="filter-icon">&#9663; Filter</div>
+        <!-- LEFT FILTER -->
+        <div class="filter-panel">
+            <button class="aa-filter-btn" id="filterTogglePA">
+                <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
+                    <line x1="3" y1="5"  x2="17" y2="5"  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <line x1="7" y1="15" x2="13" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+                Filter
+            </button>
+            <div class="aa-filter-panel" id="filterPanelPA">
                 <div class="filter-group">
-                    
+
                     <div class="filter-dropdown">
                         <button class="filter-toggle">Injury level <span>&#8964;</span></button>
                         <div class="filter-content">
-                            <div class="checkbox-group">
-                                <label><input type="checkbox" value="fatal"> fatal</label>
-                                <label><input type="checkbox" value="serious"> serious</label>
-                                <label><input type="checkbox" value="other injury"> other injury</label>
-                                <label><input type="checkbox" value="no injury"> no injury</label>
-                            </div>
+                            <div class="checkbox-group" id="injuryOpts"></div>
                         </div>
                     </div>
 
                     <div class="filter-dropdown">
                         <button class="filter-toggle">Age group <span>&#8964;</span></button>
                         <div class="filter-content">
-                            <div class="checkbox-group">
-                                <label><input type="checkbox" value="0-4"> 0-4</label>
-                                <label><input type="checkbox" value="18-21"> 18-21</label>
-                                <label><input type="checkbox" value="70+"> 70+</label>
-                                <label><input type="checkbox" value="Unknown"> Unknown</label>
-                            </div>
+                            <div class="checkbox-group" id="ageOpts"></div>
                         </div>
                     </div>
 
                     <div class="filter-dropdown">
                         <button class="filter-toggle">Light condition <span>&#8964;</span></button>
                         <div class="filter-content">
-                            <div class="checkbox-group">
-                                <label><input type="checkbox" value="day"> day</label>
-                                <label><input type="checkbox" value="dusk/dawn"> dusk/dawn</label>
-                                <label><input type="checkbox" value="dark no street light"> dark no street light</label>
-                                <label><input type="checkbox" value="..."> ...</label>
-                            </div>
+                            <div class="checkbox-group" id="lightOpts"></div>
                         </div>
                     </div>
 
                 </div>
-
                 <div class="filter-buttons">
-                    <button class="btn-apply">apply</button>
-                    <button class="btn-cancel">cancel</button>
+                    <button class="btn-apply" id="btnApplyPA">apply</button>
+                    <button class="btn-cancel" id="btnCancelPA">cancel</button>
                 </div>
             </div>
+        </div>
 
             <!-- MAIN CONTENT: TABLE + CHART -->
             <div class="main-content">
@@ -67,7 +60,8 @@
                                 <th>Age group <span class="sort-arrow" data-col="0">&#8964;</span></th>
                                 <th>Type of person <span class="sort-arrow" data-col="1">&#8964;</span></th>
                                 <th>Speed zone <span class="sort-arrow" data-col="2">&#8964;</span></th>
-                                <th>Injury rate <span class="sort-arrow" data-col="3">&#8964;</span></th>
+                                <th>Light condition <span class="sort-arrow" data-col="3">&#8964;</span></th>
+                                <th>Injury rate <span class="sort-arrow" data-col="4">&#8964;</span></th>
                                 <th class="col-above">Above average</th>
                                 <th>Injury</th>
                             </tr>
@@ -77,6 +71,7 @@
                                 <td>18-21</td>
                                 <td>Driver</td>
                                 <td>100</td>
+                                <td>Dawn</td>
                                 <td>6.4%</td>
                                 <td class="above-avg positive">+2.1pp</td>
                                 <td>Fatal</td>
@@ -85,6 +80,7 @@
                                 <td>70+</td>
                                 <td>Pedestrian</td>
                                 <td>50</td>
+                                <td>Dusk</td>
                                 <td>5.8%</td>
                                 <td class="above-avg positive">+1.5pp</td>
                                 <td>Fatal</td>
@@ -93,6 +89,7 @@
                                 <td>22-24</td>
                                 <td>Passengers</td>
                                 <td>50</td>
+                                <td>Light</td>
                                 <td>3.9%</td>
                                 <td class="above-avg negative">-0.5pp</td>
                                 <td>Fatal</td>
@@ -134,7 +131,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script>
 /* people_analysis.js — DB via API */
-
 Chart.register(ChartDataLabels);
 
 let injuryChart = null;
@@ -142,6 +138,11 @@ let currentData = [];
 
 const INJURY_MAP = { "fatal": 1, "serious": 2, "other injury": 3, "no injury": 4 };
 const LIGHT_MAP  = { "day": 1, "dusk/dawn": 2, "dark no street light": 3, "...": 9 };
+
+// ── FILTER PANEL TOGGLE ──
+document.getElementById("filterTogglePA").addEventListener("click", () => {
+    document.getElementById("filterPanelPA").classList.toggle("open");
+});
 
 // ── DROPDOWNS ──
 document.querySelectorAll(".filter-dropdown").forEach(dd => {
@@ -152,22 +153,85 @@ document.querySelectorAll(".filter-dropdown").forEach(dd => {
 
 // ── SHOW APPLY/CANCEL ONLY WHEN CHECKED ──
 function updateFilterButtons() {
-    const panel = document.querySelector(".filter-panel");
-    const anyChecked = panel.querySelectorAll("input:checked").length > 0;
-    const btns = panel.querySelector(".filter-buttons");
+    const anyChecked = document.querySelectorAll(".filter-panel input:checked").length > 0;
+    const btns = document.querySelector(".filter-buttons");
     if (btns) btns.style.display = anyChecked ? "flex" : "none";
 }
 
-// Hide ALL filter buttons on load
-document.querySelectorAll(".filter-buttons").forEach(b => b.style.display = "none");
-document.querySelectorAll(".filter-panel input[type='checkbox']").forEach(cb => {
-    cb.addEventListener("change", updateFilterButtons);
-});
+document.querySelector(".filter-buttons").style.display = "none";
 
-document.querySelector(".btn-cancel").addEventListener("click", () => {
+function attachCheckboxListeners() {
+    document.querySelectorAll(".filter-panel input[type='checkbox']").forEach(cb => {
+        cb.addEventListener("change", updateFilterButtons);
+    });
+}
+
+// ── LOAD FILTER OPTIONS FROM DB ──
+async function loadFilterOptions() {
+    const options = await API.filterOptions();
+
+    document.getElementById("injuryOpts").innerHTML =
+        options.injury_levels.map(o => `
+            <label><input type="checkbox" value="${o.id}"> ${o.label}</label>
+        `).join("");
+
+    document.getElementById("ageOpts").innerHTML =
+        options.age_groups.map(age => `
+            <label><input type="checkbox" value="${age}"> ${age}</label>
+        `).join("");
+
+    document.getElementById("lightOpts").innerHTML =
+        options.light_conditions.map(o => `
+            <label><input type="checkbox" value="${o.id}"> ${o.label}</label>
+        `).join("");
+
+    attachCheckboxListeners();
+}
+
+// ── CANCEL ──
+document.getElementById("btnCancelPA").addEventListener("click", () => {
     document.querySelectorAll(".filter-panel input").forEach(cb => cb.checked = false);
+    document.getElementById("filterPanelPA").classList.remove("open");
     updateFilterButtons();
     loadAnalysis({});
+});
+
+// ── APPLY ──
+document.getElementById("btnApplyPA").addEventListener("click", () => {
+    const checked = [...document.querySelectorAll(".filter-panel input:checked")];
+
+    const injuryLevels = checked
+        .filter(cb => !isNaN(cb.value) && cb.value !== "")
+        .map(cb => parseInt(cb.value));
+
+    const ageGroups = checked
+        .filter(cb => isNaN(cb.value))
+        .map(cb => cb.value);
+
+    const lightConds = checked
+        .filter(cb => LIGHT_MAP[cb.value])
+        .map(cb => LIGHT_MAP[cb.value]);
+
+    const anyChecked = checked.length > 0;
+
+    if (!anyChecked) { loadAnalysis({}); return; }
+
+    if (injuryLevels.length > 0 && ageGroups.length === 0) {
+        showPopup("Warning", "Only injury level has been selected. Do you want to continue anyway?",
+            () => {
+                document.getElementById("filterPanelPA").classList.remove("open");
+                loadAnalysis({ level: injuryLevels, light: lightConds });
+            });
+        return;
+    }
+
+    if (ageGroups.length > 0 && injuryLevels.length === 0) {
+        showPopup("Error", "Please also select an injury level to run the analysis.");
+        return;
+    }
+
+    document.getElementById("filterPanelPA").classList.remove("open");
+    loadAnalysis({ level: injuryLevels, age: ageGroups, light: lightConds });
 });
 
 // ── POPUP ──
@@ -195,48 +259,11 @@ document.getElementById("btnPopupCancel").addEventListener("click", () => {
     pendingAction = null;
 });
 
-// ── COLLECT FILTERS ──
-function getFilters() {
-    const checked = [...document.querySelectorAll(".filter-panel input:checked")];
-    const injuryLevels = checked.filter(cb => INJURY_MAP[cb.value]).map(cb => INJURY_MAP[cb.value]);
-    const ageGroups    = checked.filter(cb => ["0-4","18-21","70+","Unknown"].includes(cb.value)).map(cb => cb.value);
-    const lightConds   = checked.filter(cb => LIGHT_MAP[cb.value]).map(cb => LIGHT_MAP[cb.value]);
-    return { injuryLevels, ageGroups, lightConds };
-}
-
-// ── ANALYSIS BUTTON ──
-document.getElementById("btnAnalysis").addEventListener("click", () => {
-    const { injuryLevels, ageGroups, lightConds } = getFilters();
-    const anyChecked = document.querySelectorAll(".filter-panel input:checked").length > 0;
-
-    if (!anyChecked) { loadAnalysis({}); return; }
-
-    if (injuryLevels.length > 0 && ageGroups.length === 0) {
-        showPopup("Warning", "Only injury level has been selected. Do you want to continue anyway?",
-            () => loadAnalysis({ level: injuryLevels, light: lightConds }));
-        return;
-    }
-
-    if (ageGroups.length > 0 && injuryLevels.length === 0) {
-        showPopup("Error", "Please also select an injury level to run the analysis.");
-        return;
-    }
-
-    loadAnalysis({ level: injuryLevels, age: ageGroups, light: lightConds });
-});
-
-// ── CLEAR BUTTON ──
-document.getElementById("btnClear").addEventListener("click", () => {
-    document.querySelectorAll(".filter-panel input").forEach(cb => cb.checked = false);
-    updateFilterButtons();
-    loadAnalysis({});
-});
-
 // ── RENDER TABLE ──
 function renderTable(data) {
     const tbody = document.getElementById("tableBody");
     if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#aaa;">No data</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#aaa;">No data</td></tr>`;
         return;
     }
     tbody.innerHTML = data.map((r, i) => `
@@ -244,9 +271,10 @@ function renderTable(data) {
             <td>${r.age}</td>
             <td>${r.person_type}</td>
             <td>${r.speed_zone}</td>
+            <td>${r.light_condition}</td>
             <td>${r.injury_rate}%</td>
             <td class="above-avg ${r.above_class}">${r.above}</td>
-            <td>Fatal</td>
+            <td>${r.injury}</td>
         </tr>
     `).join("");
 }
@@ -258,13 +286,13 @@ function renderChart(data) {
     injuryChart = new Chart(ctx, {
         type: "bar",
         data: {
-            labels: data.map(d => d.age),           // chart has age + injury_rate
-            datasets: [{ 
-                label: "Injury rate", 
+            labels: data.map(d => d.age),
+            datasets: [{
+                label: "Injury rate",
                 data: data.map(d => d.injury_rate),
-                backgroundColor: "#2e6d8e", 
-                borderRadius: 4, 
-                borderSkipped: false 
+                backgroundColor: "#2e6d8e",
+                borderRadius: 4,
+                borderSkipped: false
             }]
         },
         options: {
@@ -284,7 +312,7 @@ document.querySelectorAll(".sort-arrow").forEach(arrow => {
     let asc = true;
     arrow.addEventListener("click", () => {
         const col  = parseInt(arrow.dataset.col);
-        const keys = ["age", "person_type", "speed_zone", "injury_rate"];
+        const keys = ["age", "person_type", "speed_zone", "light_condition", "injury_rate"];
         const key  = keys[col];
         const sorted = [...currentData].sort((a, b) =>
             typeof a[key] === "number"
@@ -311,5 +339,6 @@ async function loadAnalysis(filters) {
     }
 }
 
-loadAnalysis({});
+// ── INIT ──
+loadFilterOptions().then(() => loadAnalysis({}));
 </script>

@@ -24,10 +24,6 @@ def query(sql, params=()):
 # ══════════════════════════════════════════
 
 def people_analysis(filters=None):
-    """
-    Injury rate by age group × person type × speed zone.
-    filters: dict with optional keys level, age, light
-    """
     filters = filters or {}
     where_clauses = [
         "p.INJ_LEVEL IS NOT NULL",
@@ -53,20 +49,23 @@ def people_analysis(filters=None):
     where = "WHERE " + " AND ".join(where_clauses)
 
     rows = query(f"""
-        SELECT
-            CASE WHEN p.AGE_GROUP = '5-Dec' THEN '5-12' ELSE p.AGE_GROUP END AS age,
-            ru.ROAD_USER_TYPE_DESC AS person_type,
-            a.SPEED_ZONE AS speed_zone,
-            ROUND(100.0 * SUM(CASE WHEN p.INJ_LEVEL = 1 THEN 1 ELSE 0 END) / COUNT(*), 2) AS injury_rate,
-            COUNT(*) AS total
-        FROM Person p
-        JOIN Accident a   ON p.ACCIDENT_NO   = a.ACCIDENT_NO
-        JOIN Road_User ru ON p.ROAD_USER_TYPE = ru.ROAD_USER_TYPE
-        {where}
-        GROUP BY p.AGE_GROUP, p.ROAD_USER_TYPE, a.SPEED_ZONE
-        HAVING total > 50
-        ORDER BY injury_rate DESC
-        LIMIT 20
+    SELECT
+        CASE WHEN p.AGE_GROUP = '5-Dec' THEN '5-12' ELSE p.AGE_GROUP END AS age,
+        ru.ROAD_USER_TYPE_DESC AS person_type,
+        a.SPEED_ZONE AS speed_zone,
+        COALESCE(lc.COND_NAME, 'Unknown') AS light_condition,
+        COALESCE(i.INJ_LEVEL_DESC, 'Unknown') AS injury,
+        ROUND(100.0 * SUM(CASE WHEN p.INJ_LEVEL = 1 THEN 1 ELSE 0 END) / COUNT(*), 2) AS injury_rate,
+        COUNT(*) AS total
+    FROM Person p
+    JOIN Accident a       ON p.ACCIDENT_NO   = a.ACCIDENT_NO
+    JOIN Road_User ru     ON p.ROAD_USER_TYPE = ru.ROAD_USER_TYPE
+    LEFT JOIN Light_Condition lc ON a.LIGHT_CONDITION = lc.COND_ID
+    LEFT JOIN Injury i    ON p.INJ_LEVEL = i.INJ_LEVEL
+    {where}
+    GROUP BY p.AGE_GROUP, p.ROAD_USER_TYPE, a.SPEED_ZONE, a.LIGHT_CONDITION, p.INJ_LEVEL
+    HAVING total > 50
+    ORDER BY injury_rate DESC
     """, params)
 
     if rows:

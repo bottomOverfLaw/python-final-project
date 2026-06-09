@@ -5,7 +5,6 @@
     padding: 0;
 }
 
-
 /* ── PAGE WRAPPER ── */
 .page-wrapper {
     max-width: 1100px;
@@ -37,8 +36,40 @@
 }
 
 /* ── FILTER PANEL ── */
+.filter-panel {
+    width: 160px;
+    min-width: 160px;
+    max-width: 160px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-self: flex-start;
+}
 
-/* ── FILTER PANEL (hidden by default) ── */
+/* ── FILTER TOGGLE BUTTON ── */
+.aa-filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background: #fff;
+    font-size: 13px;
+    color: #444;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.aa-filter-btn:hover {
+    background: #f0efea;
+    border-color: #999;
+}
+
+/* ── FILTER PANEL DROPDOWN ── */
 .aa-filter-panel {
     display: none;
     flex-direction: column;
@@ -48,7 +79,7 @@
     background: #fff;
     padding: 12px;
     margin-top: 6px;
-    width: 100%;            /* ← matches filter-panel width */
+    width: 100%;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     box-sizing: border-box;
 }
@@ -57,23 +88,8 @@
     display: flex;
 }
 
-.filter-panel {
-    min-width: 130px;
-    max-width: 150px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-self: flex-start;
-}
-
-.filter-icon {
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #555;
-}
-
-.filter-dropdown{
+/* ── FILTER DROPDOWN ── */
+.filter-dropdown {
     width: 100%;
 }
 
@@ -99,32 +115,13 @@
 
 .filter-toggle:hover { background: #f0efea; }
 
-.filter-label {
-    font-size: 12px;
-    font-weight: 600;
-    background: #f0e8dc;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 3px 8px;
-    display: block;
-}
-
 .filter-content {
     display: none;
-
     margin-top: 4px;
-
     border: 1px solid #ddd;
     border-radius: 4px;
-
     background: white;
-
     padding: 8px;
-}
-
-.filter-static-label {
-    font-size: 12px;
-    font-weight: 600;
 }
 
 .filter-buttons {
@@ -134,8 +131,8 @@
 }
 
 .btn-apply {
-    padding: 7px 10px;
-    background: #36afc8;
+    padding: 7px 16px;
+    background: rgba(227, 83, 54, 0.5);
     color: white;
     border: none;
     border-radius: 6px;
@@ -144,10 +141,10 @@
     transition: background 0.15s;
 }
 
-.btn-apply:hover { background: #3d35a0; color: white; }
+.btn-apply:hover { background: #e35336; }
 
 .btn-cancel {
-    padding: 7px 7px;
+    padding: 7px 16px;
     background: #fff;
     color: #444;
     border: 1px solid #ccc;
@@ -170,51 +167,17 @@
     display: flex;
     align-items: center;
     gap: 5px;
+    cursor: pointer;
 }
-
-.mt-10 { margin-top: 10px; }
-.mt-6  { margin-top: 6px; }
 
 /* ── MAIN CONTENT ── */
 .main-content {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
-
-/* ── ACTION BUTTONS ── */
-.action-buttons {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-}
-
-.btn-analysis {
-    padding: 5px 16px;
-    font-size: 12px;
-    font-weight: 600;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: #f0e8dc;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.btn-analysis:hover { background: #36afc8; color: white; }
-
-.btn-clear {
-    padding: 5px 16px;
-    font-size: 12px;
-    font-weight: 600;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: #f0e8dc;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.btn-clear:hover { background: #e35336; color: white; }
 
 /* ── TABLE ── */
 .table-wrapper {
@@ -241,7 +204,7 @@
 }
 
 .col-above {
-    background-color: #2a9ab5;  /* slightly darker for emphasis */
+    background-color: #2a9ab5;
 }
 
 .sort-arrow {
@@ -268,12 +231,9 @@
     background-color: #c5e5f0 !important;
 }
 
-.above-avg {
-    font-weight: 700;
-}
-
-.above-avg.positive { color: #e35336; }   /* red for above average */
-.above-avg.negative { color: #57b894; }   /* green for below average */
+.above-avg { font-weight: 700; }
+.above-avg.positive { color: #e35336; }
+.above-avg.negative { color: #57b894; }
 
 /* ── BAR CHART ── */
 .chart-area {

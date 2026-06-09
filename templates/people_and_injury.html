@@ -252,33 +252,45 @@ document.querySelectorAll(".filter-buttons").forEach(b => b.style.display = "non
 
 // ── APPLY/CANCEL ──
 document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(1) .btn-apply").forEach(btn => {
-    btn.addEventListener("click", loadBarCharts);
+    btn.addEventListener("click", () => {
+        document.getElementById("filterPanelS1").classList.remove("open");  // ← close
+        loadBarCharts();
+    });
 });
 document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(1) .btn-cancel").forEach(btn => {
     btn.addEventListener("click", () => {
         btn.closest(".filter-panel").querySelectorAll("input").forEach(cb => cb.checked = false);
+        document.getElementById("filterPanelS1").classList.remove("open");  // ← close
         updateFilterButtons();
         loadBarCharts();
     });
 });
 
 document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(4) .btn-apply").forEach(btn => {
-    btn.addEventListener("click", loadPictogram);
+    btn.addEventListener("click", () => {
+        document.getElementById("filterPanelS1Right").classList.remove("open");  // ← close
+        loadPictogram();
+    });
 });
 document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(4) .btn-cancel").forEach(btn => {
     btn.addEventListener("click", () => {
         btn.closest(".filter-panel").querySelectorAll("input").forEach(cb => cb.checked = false);
+        document.getElementById("filterPanelS1Right").classList.remove("open");  // ← close
         updateFilterButtons();
         loadPictogram();
     });
 });
 
 document.querySelectorAll(".dashboard-section:nth-child(2) .btn-apply").forEach(btn => {
-    btn.addEventListener("click", loadSection2);
+    btn.addEventListener("click", () => {
+        document.getElementById("filterPanelS2").classList.remove("open");  // ← close
+        loadSection2();
+    });
 });
 document.querySelectorAll(".dashboard-section:nth-child(2) .btn-cancel").forEach(btn => {
     btn.addEventListener("click", () => {
         btn.closest(".filter-panel").querySelectorAll("input").forEach(cb => cb.checked = false);
+        document.getElementById("filterPanelS2").classList.remove("open");  // ← close
         updateFilterButtons();
         loadSection2();
     });
