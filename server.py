@@ -7,14 +7,14 @@ import urllib.parse
 
 
 # ---- Level 1: Home & About -----
-from Level1_db import get_home_stats, get_students, get_personas, get_fun_facts
+from Level1_query import get_home_stats, get_students, get_personas, get_fun_facts
 
 # ---- Level 2: People & Injury + Accident Condition ----
-from Level2_db import injury_summary, injury_summary_by_sex, pictogram_data, ejected_hospital_table, \
+from Level2_query import injury_summary, injury_summary_by_sex, pictogram_data, ejected_hospital_table, \
     get_age_groups, get_injury_levels, get_road_user_types, get_light_conditions
 
 # ---- Level 3: People Analysis + Accident Analysis ----
-from Level3_db import people_analysis, people_analysis_chart, get_accident_analysis
+from Level3_query import people_analysis, people_analysis_chart, get_accident_analysis
 
 MIME = {
     ".css" : "text/css", ".js" : "application/javascript",
@@ -114,7 +114,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         elif path == "/api/accident-conditions":
             condition = params.get("condition", ["road"])[0]
             postcode  = params.get("postcode",  [None])[0]
-            from Level2_db import get_accident_conditions
+            from Level2_query import get_accident_conditions
             result = get_accident_conditions(condition, postcode)
             if result is None:
                 self.send_error(400, "Invalid condition")
