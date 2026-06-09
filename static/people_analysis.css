@@ -37,27 +37,43 @@
 }
 
 /* ── FILTER PANEL ── */
+
+/* ── FILTER PANEL (hidden by default) ── */
+.aa-filter-panel {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    padding: 12px;
+    margin-top: 6px;
+    width: 100%;            /* ← matches filter-panel width */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-sizing: border-box;
+}
+
+.aa-filter-panel.open {
+    display: flex;
+}
+
 .filter-panel {
-    min-width: 140px;
-    max-width: 155px;
+    min-width: 130px;
+    max-width: 150px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    align-self: flex-start;
 }
 
 .filter-icon {
     font-size: 13px;
     font-weight: 600;
+    margin-bottom: 8px;
     color: #555;
 }
 
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.filter-dropdown {
+.filter-dropdown{
     width: 100%;
 }
 
@@ -68,30 +84,80 @@
 .filter-toggle {
     width: 100%;
     border: 1px solid #ccc;
-    border-radius: 4px;
-    background: #f0e8dc;
-    padding: 6px 8px;
-    font-size: 12px;
+    border-radius: 6px;
+    background: #f9f9f9;
+    padding: 6px 10px;
+    font-size: 13px;
     font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: space-between;
     cursor: pointer;
     transition: background 0.2s;
+    color: #333;
 }
 
-.filter-toggle:hover {
-    background: #e8dccd;
+.filter-toggle:hover { background: #f0efea; }
+
+.filter-label {
+    font-size: 12px;
+    font-weight: 600;
+    background: #f0e8dc;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 3px 8px;
+    display: block;
 }
 
 .filter-content {
     display: none;
+
     margin-top: 4px;
+
     border: 1px solid #ddd;
     border-radius: 4px;
+
     background: white;
+
     padding: 8px;
 }
+
+.filter-static-label {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.btn-apply {
+    padding: 7px 10px;
+    background: #36afc8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-apply:hover { background: #3d35a0; color: white; }
+
+.btn-cancel {
+    padding: 7px 7px;
+    background: #fff;
+    color: #444;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-cancel:hover { background: #f0efea; }
 
 .checkbox-group {
     display: flex;
@@ -104,25 +170,10 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    cursor: pointer;
 }
 
-.filter-buttons {
-    display: flex;
-    gap: 6px;
-}
-
-.btn-apply, .btn-cancel {
-    font-size: 11px;
-    padding: 3px 8px;
-    border: 1px solid #aaa;
-    border-radius: 3px;
-    cursor: pointer;
-    background: #f5f5f5;
-}
-
-.btn-apply:hover  { background: #36afc8; color: white; }
-.btn-cancel:hover { background: #e35336; color: white; }
+.mt-10 { margin-top: 10px; }
+.mt-6  { margin-top: 6px; }
 
 /* ── MAIN CONTENT ── */
 .main-content {
