@@ -430,7 +430,7 @@
 .page-btn:hover { background: #f0efea; }
 
 .page-btn.active {
-    background: rgba(227, 83, 54, 0.5);
+    background: #3d35a0;
     color: white;
-    border-color: #e35336;
+    border-color: #3d35b0;
 }

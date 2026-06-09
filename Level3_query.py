@@ -66,6 +66,7 @@ def people_analysis(filters=None):
     GROUP BY p.AGE_GROUP, p.ROAD_USER_TYPE, a.SPEED_ZONE, a.LIGHT_CONDITION, p.INJ_LEVEL
     HAVING total > 50
     ORDER BY injury_rate DESC
+    LIMIT 500
     """, params)
 
     if rows:
@@ -183,7 +184,7 @@ def get_accident_analysis(postcode=None, light=None, atmo=None, road=None):
         atmo_opts = [r["ATMOSPH_COND_DESC"] for r in cur.fetchall()]
         _filter_options_cache = {"light": light_opts, "atmo": atmo_opts, "road": road_opts}
 
-    conn.close()  # ← close AFTER the cache block
+    conn.close() 
 
     for i, r in enumerate(rows):
         r["serial"] = i + 1
