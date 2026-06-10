@@ -48,31 +48,32 @@
             </div>
         </div>
 
-            <!-- MAIN CONTENT: TABLE + CHART -->
-            <div class="main-content">
+        <!-- MAIN CONTENT: TABLE + CHART -->
+        <div class="main-content">
 
-
-                <!-- TABLE -->
-                <div class="table-wrapper">
-                    <table class="data-table" id="analysisTable">
-                        <thead>
-                            <tr>
-                                <th>Age group <span class="sort-arrow" data-col="0">&#8964;</span></th>
-                                <th>Type of person <span class="sort-arrow" data-col="1">&#8964;</span></th>
-                                <th>Speed zone <span class="sort-arrow" data-col="2">&#8964;</span></th>
-                                <th>Light condition <span class="sort-arrow" data-col="3">&#8964;</span></th>
-                                <th>Injury rate <span class="sort-arrow" data-col="4">&#8964;</span></th>
-                                <th class="col-above">Above average</th>
-                                <th>Injury</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
+            <!-- TABLE -->
+            <div class="table-wrapper">
+                <table class="data-table" id="analysisTable">
+                    <thead>
+                        <tr>
+                            <th>Age group <span class="sort-arrow" data-col="0">&#8964;</span></th>
+                            <th>Type of person <span class="sort-arrow" data-col="1">&#8964;</span></th>
+                            <th>Speed zone <span class="sort-arrow" data-col="2">&#8964;</span></th>
+                            <th>Light condition</th>
+                            <th>Total people <span class="sort-arrow" data-col="3">&#8964;</span></th>
+                            <th>Injury rate <span class="sort-arrow" data-col="4">&#8964;</span></th>
+                            <th class="col-above">Above average</th>
+                            <th>Injury</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
                             <tr>
                                 <td>18-21</td>
                                 <td>Driver</td>
                                 <td>100</td>
                                 <td>Dawn</td>
                                 <td>6.4%</td>
+                                <td>50</td>
                                 <td class="above-avg positive">+2.1pp</td>
                                 <td>Fatal</td>
                             </tr>
@@ -82,6 +83,7 @@
                                 <td>50</td>
                                 <td>Dusk</td>
                                 <td>5.8%</td>
+                                <td>45</td>
                                 <td class="above-avg positive">+1.5pp</td>
                                 <td>Fatal</td>
                             </tr>
@@ -91,25 +93,26 @@
                                 <td>50</td>
                                 <td>Light</td>
                                 <td>3.9%</td>
+                                <td>60</td>
                                 <td class="above-avg negative">-0.5pp</td>
                                 <td>Fatal</td>
                             </tr>
                         </tbody>
-                    </table>
-                    <div class="pagination" id="analysisPagination"></div>
-                </div>
-
-                <!-- BAR CHART -->
-                <div class="chart-area">
-                    <div class="chart-legend">
-                        <span class="legend-bar-box"></span> Injury rate
-                    </div>
-                    <div style="position:relative; width:100%; height:220px;">
-                        <canvas id="injuryRateChart" role="img" aria-label="Bar chart: Injury rate by age group"></canvas>
-                    </div>
-                </div>
-
+                </table>
+                <div class="pagination" id="analysisPagination"></div>
             </div>
+
+            <!-- BAR CHART -->
+            <div class="chart-area">
+                <div class="chart-legend">
+                    <span class="legend-bar-box"></span> Injury rate
+                </div>
+                <div style="position:relative; width:100%; height:220px;">
+                    <canvas id="injuryRateChart" role="img" aria-label="Bar chart: Injury rate by age group"></canvas>
+                </div>
+            </div>
+
+        </div>
         </div>
     </section>
 
@@ -131,14 +134,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script>
-/* people_analysis.js — DB via API */
 Chart.register(ChartDataLabels);
 
 let injuryChart = null;
 let currentData = [];
-
-const INJURY_MAP = { "fatal": 1, "serious": 2, "other injury": 3, "no injury": 4 };
-const LIGHT_MAP  = { "day": 1, "dusk/dawn": 2, "dark no street light": 3, "...": 9 };
+const PAGE_SIZE = 20;
+let currentPage = 1;
 
 // ── FILTER PANEL TOGGLE ──
 document.getElementById("filterTogglePA").addEventListener("click", () => {
@@ -201,15 +202,12 @@ document.getElementById("btnCancelPA").addEventListener("click", () => {
 document.getElementById("btnApplyPA").addEventListener("click", () => {
     const dropdowns = document.querySelectorAll(".filter-dropdown");
 
-    // dropdown 0 = injury level
     const injuryLevels = [...dropdowns[0].querySelectorAll("input:checked")]
         .map(cb => parseInt(cb.value));
 
-    // dropdown 1 = age group
     const ageGroups = [...dropdowns[1].querySelectorAll("input:checked")]
         .map(cb => cb.value);
 
-    // dropdown 2 = light condition
     const lightConds = [...dropdowns[2].querySelectorAll("input:checked")]
         .map(cb => parseInt(cb.value));
 
@@ -264,7 +262,7 @@ document.getElementById("btnPopupCancel").addEventListener("click", () => {
 function renderTable(data) {
     const tbody = document.getElementById("tableBody");
     if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#aaa;">No data</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#aaa;">No data</td></tr>`;
         document.getElementById("analysisPagination").innerHTML = "";
         return;
     }
@@ -279,6 +277,7 @@ function renderTable(data) {
             <td>${r.person_type}</td>
             <td>${r.speed_zone}</td>
             <td>${r.light_condition}</td>
+            <td class="text-center font-weight-bold">${Number(r.total).toLocaleString()}</td>
             <td>${r.injury_rate}%</td>
             <td class="above-avg ${r.above_class}">${r.above}</td>
             <td>${r.injury}</td>
@@ -292,6 +291,11 @@ function renderTable(data) {
         `).join("");
 }
 
+// ── PAGINATION ──
+function goToPage(page) {
+    currentPage = page;
+    renderTable(currentData);
+}
 
 // ── RENDER CHART ──
 function renderChart(data) {
@@ -326,7 +330,7 @@ document.querySelectorAll(".sort-arrow").forEach(arrow => {
     let asc = true;
     arrow.addEventListener("click", () => {
         const col  = parseInt(arrow.dataset.col);
-        const keys = ["age", "person_type", "speed_zone", "light_condition", "injury_rate"];
+        const keys = ["age", "person_type", "speed_zone", "total_people", "injury_rate"];
         const key  = keys[col];
         const sorted = [...currentData].sort((a, b) =>
             typeof a[key] === "number"
@@ -346,23 +350,13 @@ async function loadAnalysis(filters) {
     try {
         const response = await API.peopleAnalysis(filters);
         currentData = response.table;
-        currentPage = 1;        // ← reset
+        currentPage = 1;
         renderTable(response.table);
         renderChart(response.chart);
     } catch (err) {
         console.error("Error loading analysis data:", err);
     }
 }
-
-// ── Pagination ──
-const PAGE_SIZE = 20;
-let currentPage = 1;
-
-function goToPage(page) {
-    currentPage = page;
-    renderTable(currentData);
-}
-
 
 // ── INIT ──
 loadFilterOptions().then(() => loadAnalysis({}));
