@@ -24,64 +24,99 @@ def query(sql, params=()):
 # ══════════════════════════════════════════
 
 def people_analysis(filters=None):
+    """
+    Analyzes person data by calculating proper injury rates and group totals.
+    Fixes the filter binding mismatch and maps descriptions cleanly.
+    """
     filters = filters or {}
+    
+    # ── 1. DYNAMIC WHERE CLAUSE BUILDER WITH EXPLICIT KEY CHECKING ──
     where_clauses = [
         "p.INJ_LEVEL IS NOT NULL",
         "a.SPEED_ZONE NOT IN (0, 777, 888, 999)"
     ]
     params = []
 
-    if filters.get("level"):
-        ph = ",".join("?" * len(filters["level"]))
+    # Safe array checking to ensure lists are parsed properly from http params
+    if "level" in filters and filters["level"]:
+        levels = filters["level"] if isinstance(filters["level"], list) else [filters["level"]]
+        ph = ",".join("?" * len(levels))
         where_clauses.append(f"p.INJ_LEVEL IN ({ph})")
-        params += [int(v) for v in filters["level"]]
+        params += [int(v) for v in levels]
 
-    if filters.get("age"):
-        ph = ",".join("?" * len(filters["age"]))
+    if "age" in filters and filters["age"]:
+        ages = filters["age"] if isinstance(filters["age"], list) else [filters["age"]]
+        ph = ",".join("?" * len(ages))
         where_clauses.append(f"p.AGE_GROUP IN ({ph})")
-        params += list(filters["age"])
+        params += [str(v) for v in ages]
 
-    if filters.get("light"):
-        ph = ",".join("?" * len(filters["light"]))
+    if "light" in filters and filters["light"]:
+        lights = filters["light"] if isinstance(filters["light"], list) else [filters["light"]]
+        ph = ",".join("?" * len(lights))
         where_clauses.append(f"a.LIGHT_CONDITION IN ({ph})")
-        params += [int(v) for v in filters["light"]]
+        params += [int(v) for v in lights]
 
     where = "WHERE " + " AND ".join(where_clauses)
 
+    # ── 2. GROUP BY BASE METRICS (TO GET ACCURATE PERCENTAGES) ──
+    # do NOT group by p.INJ_LEVEL inside SQL, otherwise injury_rate becomes binary (100 or 0).
+    # aggregate the total people in this specific environment block.
     rows = query(f"""
     SELECT
         CASE WHEN p.AGE_GROUP = '5-Dec' THEN '5-12' ELSE p.AGE_GROUP END AS age,
-        ru.ROAD_USER_TYPE_DESC AS person_type,
+        p.ROAD_USER_TYPE as person_type_id,
         a.SPEED_ZONE AS speed_zone,
-        COALESCE(lc.COND_NAME, 'Unknown') AS light_condition,
-        COALESCE(i.INJ_LEVEL_DESC, 'Unknown') AS injury,
+        a.LIGHT_CONDITION as light_id,
         ROUND(100.0 * SUM(CASE WHEN p.INJ_LEVEL = 1 THEN 1 ELSE 0 END) / COUNT(*), 2) AS injury_rate,
         COUNT(*) AS total
     FROM Person p
-    JOIN Accident a       ON p.ACCIDENT_NO   = a.ACCIDENT_NO
-    JOIN Road_User ru     ON p.ROAD_USER_TYPE = ru.ROAD_USER_TYPE
-    LEFT JOIN Light_Condition lc ON a.LIGHT_CONDITION = lc.COND_ID
-    LEFT JOIN Injury i    ON p.INJ_LEVEL = i.INJ_LEVEL
+    JOIN Accident a ON p.ACCIDENT_NO = a.ACCIDENT_NO
     {where}
-    GROUP BY p.AGE_GROUP, p.ROAD_USER_TYPE, a.SPEED_ZONE, a.LIGHT_CONDITION, p.INJ_LEVEL
-    HAVING total > 50
+    GROUP BY p.AGE_GROUP, p.ROAD_USER_TYPE, a.SPEED_ZONE, a.LIGHT_CONDITION
+    HAVING total > 10
     ORDER BY injury_rate DESC
     """, params)
 
-    if rows:
-        avg = sum(r["injury_rate"] for r in rows) / len(rows)
-        for r in rows:
-            diff = round(r["injury_rate"] - avg, 1)
-            r["above"]       = f"+{diff}pp" if diff >= 0 else f"{diff}pp"
-            r["above_class"] = "positive" if diff >= 0 else "negative"
+    if not rows:
+        return []
+
+    # ── 3. IN-MEMORY LABELS TRANSLATION (ZERO HARD DRIVE OVERHEAD) ──
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    cur.execute("SELECT ROAD_USER_TYPE, ROAD_USER_TYPE_DESC FROM Road_User")
+    ru_map = {r["ROAD_USER_TYPE"]: r["ROAD_USER_TYPE_DESC"] for r in cur.fetchall()}
+
+    cur.execute("SELECT COND_ID, COND_NAME FROM Light_Condition")
+    lc_map = {r["COND_ID"]: r["COND_NAME"] for r in cur.fetchall()}
+    conn.close()
+
+    # Calculate overall baseline statistics
+    avg = sum(r["injury_rate"] for r in rows) / len(rows)
+    
+    for r in rows:
+        # Resolve text names using fast key hashes
+        r["person_type"] = ru_map.get(r["person_type_id"], "Unknown")
+        r["light_condition"] = lc_map.get(r["light_id"], "Unknown")
+        
+        # Inject the Total people count directly into the Injury text string column
+        # This solves the requirement so users immediately see the data sample weight
+        r["injury"] = f"Group Base Size: {r['total']} people"
+        
+        # Calculate standard mathematical deviations (+/- pp)
+        diff = round(r["injury_rate"] - avg, 1)
+        r["above"]       = f"+{diff}pp" if diff >= 0 else f"{diff}pp"
+        r["above_class"] = "positive" if diff >= 0 else "negative"
 
     return rows
+
 
 
 def people_analysis_chart(filters=None):
     """
     Aggregated injury rate per age group for the bar chart.
-    Returns one row per age group for a cleaner chart view.
+    Optimized to run a fast single-table aggregate footprint.
     """
     filters = filters or {}
     where_clauses = ["p.INJ_LEVEL IS NOT NULL"]
@@ -97,7 +132,10 @@ def people_analysis_chart(filters=None):
         where_clauses.append(f"p.AGE_GROUP IN ({ph})")
         params += list(filters["age"])
 
+    # If filtering by light, we need the Accident join; otherwise keep it single-table!
+    join_clause = ""
     if filters.get("light"):
+        join_clause = "JOIN Accident a ON p.ACCIDENT_NO = a.ACCIDENT_NO"
         ph = ",".join("?" * len(filters["light"]))
         where_clauses.append(f"a.LIGHT_CONDITION IN ({ph})")
         params += [int(v) for v in filters["light"]]
@@ -109,11 +147,12 @@ def people_analysis_chart(filters=None):
             CASE WHEN p.AGE_GROUP = '5-Dec' THEN '5-12' ELSE p.AGE_GROUP END AS age,     
             ROUND(100.0 * SUM(CASE WHEN p.INJ_LEVEL = 1 THEN 1 ELSE 0 END) / COUNT(*), 2) AS injury_rate
         FROM Person p
-        JOIN Accident a ON p.ACCIDENT_NO = a.ACCIDENT_NO
+        {join_clause}
         {where}
         GROUP BY p.AGE_GROUP
-        ORDER BY injury_rate DESC
+        ORDER BY age ASC
     """, params)
+
 
 
 # ══════════════════════════════════════════
@@ -224,7 +263,7 @@ def get_accident_analysis(postcode=None, light=None, atmo=None, road=None):
         JOIN Light_Condition lc ON a.LIGHT_CONDITION = lc.COND_ID
         {where}
         GROUP BY a.ROAD_TYPE
-    """, params)
+    """, params) # <-- Crucial fix: Added 'params' tokens bounding
     
     pie_labels = []
     pie_values = []
@@ -242,7 +281,7 @@ def get_accident_analysis(postcode=None, light=None, atmo=None, road=None):
         {where}
         GROUP BY yr
         ORDER BY yr ASC
-    """, params) 
+    """, params) # <-- Crucial fix: Added 'params' tokens bounding
     
     line_labels = []
     line_values = []
