@@ -66,7 +66,6 @@ def people_analysis(filters=None):
     GROUP BY p.AGE_GROUP, p.ROAD_USER_TYPE, a.SPEED_ZONE, a.LIGHT_CONDITION, p.INJ_LEVEL
     HAVING total > 50
     ORDER BY injury_rate DESC
-    LIMIT 500
     """, params)
 
     if rows:
@@ -125,23 +124,45 @@ _filter_options_cache = None
 def get_accident_analysis(postcode=None, light=None, atmo=None, road=None):
     """
     Table + chart data for accident analysis page.
-    Only joins Node table when postcode filter is needed.
+    Ensures safe token parameter bounds across all separate execution steps.
     """
     global _filter_options_cache
     
+    # ── 1. DYNAMIC WHERE CLAUSE BUILDER ──
     where_clauses = ["1=1"]
     params = []
     node_join = ""
+    atmo_join = ""
+    road_join = ""
 
+    # Postcode Filter
     if postcode:
         node_join = "JOIN Node n ON a.NODE_ID = n.NODE_ID"
         where_clauses.append("n.POSTCODE = ?")
         params.append(int(postcode))
 
+    # Light Condition Filter
     if light:
         ph = ",".join("?" * len(light))
         where_clauses.append(f"lc.COND_NAME IN ({ph})")
         params += light
+
+    # Atmospheric Condition Filter
+    if atmo:
+        atmo_join = """
+            JOIN Atmospheric_Cond_Seq acs_f ON a.ACCIDENT_NO = acs_f.ACCIDENT_NO AND acs_f.ATMOSPH_COND_SEQ = 1
+            JOIN Amospheric_Cond ac_f ON acs_f.ATMOSPH_COND = ac_f.ATMOSPH_COND
+        """
+        ph = ",".join("?" * len(atmo))
+        where_clauses.append(f"ac_f.ATMOSPH_COND_DESC IN ({ph})")
+        params += atmo
+
+    # Road Surface Condition Filter
+    if road:
+        road_join = "JOIN Road_Surface_Cond rsc_f ON a.ACCIDENT_NO = rsc_f.ACCIDENT_NO"
+        ph = ",".join("?" * len(road))
+        where_clauses.append(f"rsc_f.SURFACE_COND_DESC IN ({ph})")
+        params += road
 
     where = "WHERE " + " AND ".join(where_clauses)
 
@@ -149,6 +170,20 @@ def get_accident_analysis(postcode=None, light=None, atmo=None, road=None):
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
+    # ── 2. VALIDIATE DROPDOWN VALUE CACHE ONCE ──
+    if _filter_options_cache is None:
+        cur.execute("SELECT DISTINCT COND_NAME FROM Light_Condition WHERE COND_NAME IS NOT NULL ORDER BY COND_NAME")
+        light_opts = [r["COND_NAME"] for r in cur.fetchall()]
+        
+        cur.execute("SELECT DISTINCT SURFACE_COND_DESC FROM Road_Surface_Cond WHERE SURFACE_COND_DESC IS NOT NULL ORDER BY SURFACE_COND_DESC")
+        road_opts = [r["SURFACE_COND_DESC"] for r in cur.fetchall()]
+        
+        cur.execute("SELECT DISTINCT ATMOSPH_COND_DESC FROM Amospheric_Cond WHERE ATMOSPH_COND_DESC IS NOT NULL ORDER BY ATMOSPH_COND_DESC")
+        atmo_opts = [r["ATMOSPH_COND_DESC"] for r in cur.fetchall()]
+        
+        _filter_options_cache = {"light": light_opts, "atmo": atmo_opts, "road": road_opts}
+
+    # ── 3. QUERY TABLE DATA (CAPPED AT 200 ROWS FOR PERFORMANCE) ──
     cur.execute(f"""
         SELECT
             a.ACCIDENT_NO,
@@ -158,54 +193,70 @@ def get_accident_analysis(postcode=None, light=None, atmo=None, road=None):
             a.NO_PERSONS                        AS people,
             a.ACCIDENT_DATE                     AS date,
             a.ACCIDENT_TIME                     AS time,
-            SUBSTR(a.ACCIDENT_DATE, -4, 4)      AS year,
             COALESCE(ac.ATMOSPH_COND_DESC, '—') AS atmo
         FROM Accident a
         {node_join}
+        {atmo_join}
+        {road_join}
         JOIN Light_Condition lc ON a.LIGHT_CONDITION = lc.COND_ID
-        LEFT JOIN Atmospheric_Cond_Seq acs
-            ON a.ACCIDENT_NO = acs.ACCIDENT_NO
-            AND acs.ATMOSPH_COND_SEQ = 1
-        LEFT JOIN Amospheric_Cond ac
-            ON acs.ATMOSPH_COND = ac.ATMOSPH_COND
+        LEFT JOIN Atmospheric_Cond_Seq acs ON a.ACCIDENT_NO = acs.ACCIDENT_NO AND acs.ATMOSPH_COND_SEQ = 1
+        LEFT JOIN Amospheric_Cond ac ON acs.ATMOSPH_COND = ac.ATMOSPH_COND
         {where}
         ORDER BY a.ACCIDENT_DATE DESC
         LIMIT 200
     """, params)
-    rows = [dict(r) for r in cur.fetchall()]
+    
+    table_rows = [dict(r) for r in cur.fetchall()]
 
-    # ── CACHE FILTER OPTIONS ──
-    if _filter_options_cache is None:
-        cur.execute("SELECT DISTINCT COND_NAME FROM Light_Condition ORDER BY COND_NAME")
-        light_opts = [r["COND_NAME"] for r in cur.fetchall()]
-        cur.execute("SELECT DISTINCT SURFACE_COND_DESC FROM Road_Surface_Cond ORDER BY SURFACE_COND_DESC")
-        road_opts = [r["SURFACE_COND_DESC"] for r in cur.fetchall()]
-        cur.execute("SELECT DISTINCT ATMOSPH_COND_DESC FROM Amospheric_Cond ORDER BY ATMOSPH_COND_DESC")
-        atmo_opts = [r["ATMOSPH_COND_DESC"] for r in cur.fetchall()]
-        _filter_options_cache = {"light": light_opts, "atmo": atmo_opts, "road": road_opts}
+    for i, r in enumerate(table_rows, start=1):
+        r["serial"] = i
+        r["road"] = r.get("road_type") or "—"
+        date_str = r["date"] or ""
+        r["year"] = date_str[-4:] if len(date_str) >= 4 else "Unknown"
 
-    conn.close() 
+    # ── 4. QUERY PIE CHART DATA (PASSING THE PARAMS CORRECTLY!) ──
+    cur.execute(f"""
+        SELECT a.ROAD_TYPE, COUNT(*) as total
+        FROM Accident a
+        {node_join}
+        {atmo_join}
+        {road_join}
+        JOIN Light_Condition lc ON a.LIGHT_CONDITION = lc.COND_ID
+        {where}
+        GROUP BY a.ROAD_TYPE
+    """, params)
+    
+    pie_labels = []
+    pie_values = []
+    for r in cur.fetchall():
+        pie_labels.append(r["ROAD_TYPE"] or "Unknown")
+        pie_values.append(r["total"])
 
-    for i, r in enumerate(rows):
-        r["serial"] = i + 1
-        r["road"]   = r.get("road_type") or "—"
-        if not r.get("atmo"):
-            r["atmo"] = "—"
+    # ── 5. QUERY LINE CHART DATA (PASSING THE PARAMS CORRECTLY!) ──
+    cur.execute(f"""
+        SELECT SUBSTR(a.ACCIDENT_DATE, -4, 4) AS yr, COUNT(*) as total
+        FROM Accident a
+        {node_join}
+        {atmo_join}
+        {road_join}
+        {where}
+        GROUP BY yr
+        ORDER BY yr ASC
+    """, params) 
+    
+    line_labels = []
+    line_values = []
+    for r in cur.fetchall():
+        if r["yr"] and r["yr"].isdigit():
+            line_labels.append(r["yr"])
+            line_values.append(r["total"])
 
-    road_type_counts = {}
-    for r in rows:
-        rt = r["road_type"] or "Unknown"
-        road_type_counts[rt] = road_type_counts.get(rt, 0) + 1
-
-    year_counts = {}
-    for r in rows:
-        yr = r["year"] or "Unknown"
-        year_counts[yr] = year_counts.get(yr, 0) + 1
-    sorted_years = sorted(year_counts.keys())
+    conn.close()
 
     return {
-        "table": rows,
-        "pie":   {"labels": list(road_type_counts.keys()), "values": list(road_type_counts.values())},
-        "line":  {"labels": sorted_years, "values": [year_counts[y] for y in sorted_years]},
+        "table": table_rows,
+        "pie":   {"labels": pie_labels, "values": pie_values},
+        "line":  {"labels": line_labels, "values": line_values},
         "filter_options": _filter_options_cache
     }
+

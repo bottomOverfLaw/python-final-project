@@ -203,48 +203,80 @@
   }
 
   // ── PIE CHART ──
-  function renderPie(pie) {
-    var total = pie.values.reduce(function(a, b) { return a + b; }, 0);
+  // ── PIE CHART (FIXED & HYPER-FAST) ──
+function renderPie(pie) {
+    // 1. Limita i dati se ci sono troppe categorie (Massimo 10 fette + 1 fette "Other")
+    var maxSlices = 10;
+    var finalLabels = [];
+    var finalValues = [];
+    var otherTotal = 0;
 
-    var legendEl = document.getElementById('pieLegend');
-    legendEl.innerHTML = '';
-    pie.labels.forEach(function(label, i) {
-      var item = document.createElement('div');
-      item.className = 'aa-pie-legend-item';
-      item.innerHTML = '<span class="aa-pie-dot" style="background:' + colors[i % colors.length] + '"></span>' + label;
-      legendEl.appendChild(item);
+    // Ordina i dati dal più grande al più piccolo per un grafico pulito
+    var zipped = pie.labels.map((l, i) => ({ label: l, val: pie.values[i] }));
+    zipped.sort((a, b) => b.val - a.val);
+
+    zipped.forEach(function(item, idx) {
+        if (idx < maxSlices) {
+            finalLabels.push(item.label || 'Unknown');
+            finalValues.push(item.val);
+        } else {
+            otherTotal += item.val;
+        }
     });
+
+    if (otherTotal > 0) {
+        finalLabels.push('Other');
+        finalValues.push(otherTotal);
+    }
+
+    var total = finalValues.reduce(function(a, b) { return a + b; }, 0);
+    var legendEl = document.getElementById('pieLegend');
+    if (legendEl) {
+        legendEl.innerHTML = '';
+        finalLabels.forEach(function(label, i) {
+            var item = document.createElement('div');
+            item.className = 'aa-pie-legend-item';
+            item.innerHTML = '<span class="aa-pie-dot" style="background:' + colors[i % colors.length] + '"></span>' + label;
+            legendEl.appendChild(item);
+        });
+    }
 
     if (pieChartInst) pieChartInst.destroy();
+    
     pieChartInst = new Chart(document.getElementById('pieChart'), {
-      type: 'pie',
-      data: {
-        labels: pie.labels,
-        datasets: [{
-          data: pie.values,
-          backgroundColor: pie.labels.map(function(_, i) { return colors[i % colors.length]; }),
-          borderColor: '#fff',
-          borderWidth: 2,
-          hoverOffset: 10
-        }]
-      },
-      options: {
-        responsive: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            enabled: true,
-            callbacks: {
-              label: function(ctx) {
-                var pct = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
-                return ctx.label + ': ' + pct + '%';
-              }
+        type: 'pie',
+        data: {
+            labels: finalLabels,
+            datasets: [{
+                data: finalValues,
+                backgroundColor: finalLabels.map(function(_, i) { return colors[i % colors.length]; }),
+                borderColor: '#fff',
+                borderWidth: 2,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: false,
+            plugins: {
+                // 🚨 IL FIX CRITICO: Disattiva esplicitamente i datalabels su questo grafico!
+                datalabels: {
+                    display: false 
+                },
+                legend: { display: false },
+                tooltip: {
+                    enabled: true,
+                    callbacks: {
+                        label: function(ctx) {
+                            var pct = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
+                            return ctx.label + ': ' + pct + '% (' + ctx.parsed.toLocaleString() + ')';
+                        }
+                    }
+                }
             }
-          }
         }
-      }
     });
-  }
+}
+
 
   // ── LINE CHART ──
   function renderLine(line) {

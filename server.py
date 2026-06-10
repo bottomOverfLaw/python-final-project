@@ -4,7 +4,7 @@ import sqlite3
 import os
 import json
 import urllib.parse
-
+import time
 
 # ---- Level 1: Home & About -----
 from Level1_query import get_home_stats, get_students, get_personas, get_fun_facts
@@ -27,7 +27,6 @@ print("LOADING SERVER CODE")
 def render_page(page_title, content_html):
     with open("templates/base.html", "r", encoding="utf-8") as f:
         base = f.read()
-
     with open("templates/navbar.html", "r", encoding="utf-8") as f:
         navbar = f.read()
     with open("templates/footer.html", "r", encoding="utf-8") as f:
@@ -37,7 +36,6 @@ def render_page(page_title, content_html):
     base = base.replace("{{PAGE_TITLE}}", page_title)
     base = base.replace("{{PAGE_CONTENT}}", content_html)
     base = base.replace("{{FOOTER}}", footer)
-
     return base
 
 class RequestHandler(BaseHTTPRequestHandler):
@@ -130,7 +128,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             }.items() if v}
             table = people_analysis(filters)
             
-            # derive chart from table instead of second query
             chart_data = {}
             for r in table:
                 age = r["age"]
@@ -142,12 +139,29 @@ class RequestHandler(BaseHTTPRequestHandler):
             
             self.send_json({"table": table, "chart": chart})
 
+        # --- FIX: Clean, Production Endpoint for Accident Analysis ---
         elif path == "/api/accident-analysis":
-            postcode = params.get("postcode", [None])[0]
-            light    = params.get("light", []) or None
-            atmo     = params.get("atmo",  []) or None
-            road     = params.get("road",  []) or None
-            self.send_json(get_accident_analysis(postcode, light, atmo, road))
+            try:
+                # Extract actual browser filter arrays safely
+                postcode_val = params.get("postcode", [None])[0]
+                light_vals = params.get("light", [])
+                atmo_vals = params.get("atmo", [])
+                road_vals = params.get("road", [])
+
+                # Run database logic cleanly passing empty lists as None
+                data = get_accident_analysis(
+                    postcode=postcode_val if postcode_val != "" else None,
+                    light=light_vals if len(light_vals) > 0 else None,
+                    atmo=atmo_vals if len(atmo_vals) > 0 else None,
+                    road=road_vals if len(road_vals) > 0 else None
+                )
+                
+                # Directly send the response payload back to the frontend javascript
+                self.send_json(data)
+
+            except Exception as e:
+                print(f"❌ API SERVER ERROR: {e}")
+                self.send_json({"error": str(e), "table": [], "pie": {"labels":[], "values":[]}, "line": {"labels":[], "values":[]}})
 
         else:
             self.send_error(404, "Not found")
@@ -190,13 +204,13 @@ class RequestHandler(BaseHTTPRequestHandler):
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
-
-def run():
+# ── FIX: Proper entry point initialization wrapper blocks ──
+if __name__ == "__main__":
     server_address = ("", 8000)
     httpd = ThreadedHTTPServer(server_address, RequestHandler)
     print("Server running at http://localhost:8000")
-    httpd.serve_forever()
-
-
-if __name__ == "__main__":
-    run()
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\nShutting down server.")
+        httpd.server_close()
