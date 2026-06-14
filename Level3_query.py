@@ -26,7 +26,7 @@ def query(sql, params=()):
 def people_analysis(filters=None):
     """
     Analyzes person data by calculating proper injury rates and group totals.
-    Fixes the filter binding mismatch and maps descriptions cleanly.
+    Maps actual injury descriptions directly instead of hiding them behind group sizes.
     """
     filters = filters or {}
     
@@ -58,29 +58,35 @@ def people_analysis(filters=None):
 
     where = "WHERE " + " AND ".join(where_clauses)
 
-    # ── 2. GROUP BY BASE METRICS (TO GET ACCURATE PERCENTAGES) ──
-    # do NOT group by p.INJ_LEVEL inside SQL, otherwise injury_rate becomes binary (100 or 0).
-    # aggregate the total people in this specific environment block.
-    rows = query(f"""
-    SELECT
-        CASE WHEN p.AGE_GROUP = '5-Dec' THEN '5-12' ELSE p.AGE_GROUP END AS age,
-        p.ROAD_USER_TYPE as person_type_id,
-        a.SPEED_ZONE AS speed_zone,
-        a.LIGHT_CONDITION as light_id,
-        ROUND(100.0 * SUM(CASE WHEN p.INJ_LEVEL = 1 THEN 1 ELSE 0 END) / COUNT(*), 2) AS injury_rate,
-        COUNT(*) AS total
-    FROM Person p
-    JOIN Accident a ON p.ACCIDENT_NO = a.ACCIDENT_NO
-    {where}
-    GROUP BY p.AGE_GROUP, p.ROAD_USER_TYPE, a.SPEED_ZONE, a.LIGHT_CONDITION
-    HAVING total > 10
-    ORDER BY injury_rate DESC
+    # ── 2. SINGLE FLAT SCAN (LEVERAGING PYTHON MEMORY SPEEDS) ──
+    # Instead of nested SQL joins/groupings, pull flat records and let Python handle the math instantly.
+    raw_rows = query(f"""
+        SELECT
+            CASE WHEN p.AGE_GROUP = '5-Dec' THEN '5-12' ELSE p.AGE_GROUP END AS age,
+            p.ROAD_USER_TYPE as person_type_id,
+            a.SPEED_ZONE AS speed_zone,
+            a.LIGHT_CONDITION as light_id,
+            p.INJ_LEVEL as injury_id
+        FROM Person p
+        JOIN Accident a ON p.ACCIDENT_NO = a.ACCIDENT_NO
+        {where}
     """, params)
 
-    if not rows:
+    if not raw_rows:
         return []
 
-    # ── 3. IN-MEMORY LABELS TRANSLATION (ZERO HARD DRIVE OVERHEAD) ──
+    # Count base environments and specific injury splits using fast in-memory dicts
+    env_counts = {}   # Key: (age, person_type_id, speed_zone, light_id) -> total count
+    split_counts = {} # Key: (age, person_type_id, speed_zone, light_id, injury_id) -> sub total
+
+    for r in raw_rows:
+        env_key = (r["age"], r["person_type_id"], r["speed_zone"], r["light_id"])
+        split_key = (r["age"], r["person_type_id"], r["speed_zone"], r["light_id"], r["injury_id"])
+        
+        env_counts[env_key] = env_counts.get(env_key, 0) + 1
+        split_counts[split_key] = split_counts.get(split_key, 0) + 1
+
+    # ── 3. IN-MEMORY LABELS TRANSLATION ──
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
@@ -90,27 +96,72 @@ def people_analysis(filters=None):
 
     cur.execute("SELECT COND_ID, COND_NAME FROM Light_Condition")
     lc_map = {r["COND_ID"]: r["COND_NAME"] for r in cur.fetchall()}
+
+    try:
+        cur.execute("SELECT INJ_LEVEL, INJ_LEVEL_DESC FROM Injury_Level")
+        inj_map = {r["INJ_LEVEL"]: r["INJ_LEVEL_DESC"].replace("-", " ") for r in cur.fetchall()}
+    except sqlite3.OperationalError:
+        # Crucial fix: Changed "Non-Injury" to "Non Injury" to remain constant
+        inj_map = {1: "Fatal", 2: "Serious Injury", 3: "Other Injury", 4: "Non Injury"}
+        
     conn.close()
 
-    # Calculate overall baseline statistics
-    avg = sum(r["injury_rate"] for r in rows) / len(rows)
+    # ── 4. CONSTRUCT FINAL RESTRUCTURED DATASET ──
+    rows = []
+    for split_key, sub_total in split_counts.items():
+        age, pt_id, sz, l_id, inj_id = split_key
+
+        env_key = (age, pt_id, sz, l_id)
+        env_total = env_counts[env_key]
+        
+        
+        # Enforce your group threshold requirement
+        if env_total <= 10:
+            continue
+
+        rate = round((100.0 * sub_total) / env_total, 2)
+        
+        rows.append({
+            "age": age,
+            "person_type_id": pt_id,
+            "person_type": ru_map.get(pt_id, "Unknown"),
+            "speed_zone": sz,
+            "light_id": l_id,
+            "light_condition": lc_map.get(l_id, "Unknown"),
+            "injury_id": inj_id,
+            "injury": inj_map.get(inj_id, f"Injury Level {inj_id}"),
+            "injury_rate": rate,
+            "total": sub_total
+        })
+
+    if not rows:
+        return []
     
+    # ── 5. CALCULATE BASELINE STATISTICS WITH SMART COLORS ──
+    if not rows:
+        return []
+
+    avg = sum(r["injury_rate"] for r in rows) / len(rows)
     for r in rows:
-        # Resolve text names using fast key hashes
-        r["person_type"] = ru_map.get(r["person_type_id"], "Unknown")
-        r["light_condition"] = lc_map.get(r["light_id"], "Unknown")
-        
-        # Inject the Total people count directly into the Injury text string column
-        # This solves the requirement so users immediately see the data sample weight
-        r["injury"] = f"Group Base Size: {r['total']} people"
-        
-        # Calculate standard mathematical deviations (+/- pp)
+        # Keep string text styling constant across rows
+        if "injury" in r:
+            r["injury"] = r["injury"].replace("-", " ")
+
         diff = round(r["injury_rate"] - avg, 1)
-        r["above"]       = f"+{diff}pp" if diff >= 0 else f"{diff}pp"
-        r["above_class"] = "positive" if diff >= 0 else "negative"
+        r["above"] = f"+{diff}pp" if diff >= 0 else f"{diff}pp"
+        
+        # ── HUMAN CONTEXT COLOR FIX ──
+        if "Non Injury" in r["injury"]:
+            # For Non-Injury, higher rate is GOOD (Green/Negative), lower rate is BAD (Red/Positive)
+            r["above_class"] = "negative" if diff >= 0 else "positive"
+        else:
+            # For Fatal, Serious, and Other: higher rate is BAD (Red/Positive), lower rate is GOOD (Green/Negative)
+            r["above_class"] = "positive" if diff >= 0 else "negative"
+
+    # Sort final records by injury rate descending
+    rows.sort(key=lambda x: x["injury_rate"], reverse=True)
 
     return rows
-
 
 
 def people_analysis_chart(filters=None):
