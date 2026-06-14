@@ -259,4 +259,34 @@
       console.error('Failed to load home data:', err);
     });
 
+/* ── Background Prefetch (Protected Against Crash & Storage Limits) ── */
+  document.addEventListener("DOMContentLoaded", () => {
+    // Clear out any broken older cache files first
+    window.sessionStorage.removeItem('prefetchPeopleData');
+
+    setTimeout(() => {
+        console.log("⚡ Quietly prefetching People Analysis data in the background...");
+        
+        // Query the API endpoint cleanly
+        fetch('/api/people-analysis') 
+            .then(response => {
+                if (!response.ok) throw new Error("Server database response was not OK");
+                return response.json();
+            })
+            .then(data => {
+                // Double check we actually got structural data back
+                if (data && data.table) {
+                    try {
+                        // Attempt to securely write payload to session space
+                        window.sessionStorage.setItem('prefetchPeopleData', JSON.stringify(data));
+                        console.log("✅ Success! People Analysis cached and ready for instant use.");
+                    } catch (storageErr) {
+                        console.warn("⚠️ Data payload too massive for browser sessionStorage cache. Defaulting to live queries.");
+                    }
+                }
+            })
+            .catch(err => console.error("❌ Background prefetch skipped or failed:", err));
+    }, 2000); 
+  });
+
 </script>

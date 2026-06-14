@@ -56,12 +56,12 @@
                 <table class="data-table" id="analysisTable">
                     <thead>
                         <tr>
-                            <th>Age group <span class="sort-arrow" data-col="0">&#8964;</span></th>
-                            <th>Type of person <span class="sort-arrow" data-col="1">&#8964;</span></th>
-                            <th>Speed zone <span class="sort-arrow" data-col="2">&#8964;</span></th>
+                            <th>Age group</th>
+                            <th>Type of person</th>
+                            <th>Speed zone</th>
                             <th>Light condition</th>
-                            <th>Total people <span class="sort-arrow" data-col="3">&#8964;</span></th>
-                            <th>Injury rate <span class="sort-arrow" data-col="4">&#8964;</span></th>
+                            <th>Total people</th>
+                            <th>Injury rate</th>
                             <th class="col-above">Above average</th>
                             <th>Injury</th>
                         </tr>
@@ -72,8 +72,8 @@
                                 <td>Driver</td>
                                 <td>100</td>
                                 <td>Dawn</td>
-                                <td>6.4%</td>
                                 <td>50</td>
+                                <td>6.4%</td>
                                 <td class="above-avg positive">+2.1pp</td>
                                 <td>Fatal</td>
                             </tr>
@@ -82,8 +82,8 @@
                                 <td>Pedestrian</td>
                                 <td>50</td>
                                 <td>Dusk</td>
-                                <td>5.8%</td>
                                 <td>45</td>
+                                <td>5.8%</td>
                                 <td class="above-avg positive">+1.5pp</td>
                                 <td>Fatal</td>
                             </tr>
@@ -92,8 +92,8 @@
                                 <td>Passengers</td>
                                 <td>50</td>
                                 <td>Light</td>
-                                <td>3.9%</td>
                                 <td>60</td>
+                                <td>3.9%</td>
                                 <td class="above-avg negative">-0.5pp</td>
                                 <td>Fatal</td>
                             </tr>
@@ -259,6 +259,7 @@ document.getElementById("btnPopupCancel").addEventListener("click", () => {
 });
 
 // ── RENDER TABLE ──
+// ── RENDER TABLE ──
 function renderTable(data) {
     const tbody = document.getElementById("tableBody");
     if (!data.length) {
@@ -284,11 +285,38 @@ function renderTable(data) {
         </tr>
     `).join("");
 
-    document.getElementById("analysisPagination").innerHTML =
-        Array.from({ length: totalPages }, (_, i) => `
-            <button class="page-btn ${i + 1 === currentPage ? "active" : ""}"
-                onclick="goToPage(${i + 1})">${i + 1}</button>
-        `).join("");
+    // Clean sliding window pagination controls
+    let paginationHtml = '';
+    if (totalPages > 1) {
+        // Prev Button
+        paginationHtml += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">&laquo; Prev</button>`;
+        
+        // Always show page 1
+        paginationHtml += `<button class="page-btn ${currentPage === 1 ? 'active' : ''}" onclick="goToPage(1)">1</button>`;
+        
+        if (currentPage > 3) {
+            paginationHtml += `<span style="padding:0 5px; color:#aaa;">...</span>`;
+        }
+
+        // Show pages around the current active selection
+        for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+            paginationHtml += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages - 2) {
+            paginationHtml += `<span style="padding:0 5px; color:#aaa;">...</span>`;
+        }
+
+        // Always show last page
+        if (totalPages > 1) {
+            paginationHtml += `<button class="page-btn ${currentPage === totalPages ? 'active' : ''}" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+        }
+
+        // Next Button
+        paginationHtml += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">Next &raquo;</button>`;
+    }
+
+    document.getElementById("analysisPagination").innerHTML = paginationHtml;
 }
 
 // ── PAGINATION ──
@@ -347,14 +375,46 @@ document.querySelectorAll(".sort-arrow").forEach(arrow => {
 
 // ── LOAD ──
 async function loadAnalysis(filters) {
+    // 1. Turn on the browser's loading mouse cursor immediately
+    if (window.Loader && typeof window.Loader.show === 'function') {
+        window.Loader.show();
+    }
+
     try {
+        const hasFilters = filters && Object.keys(filters).length > 0;
+        const cachedData = window.sessionStorage.getItem('prefetchPeopleData');
+
+        // ── CACHE HIT TRACK ──
+        if (cachedData && !hasFilters) {
+            console.log("⚡ Loading instantly from background cache memory!");
+            const response = JSON.parse(cachedData);
+            
+            currentData = response.table;
+            currentPage = 1;
+            renderTable(response.table);
+            renderChart(response.chart);
+            
+            // IMPORTANT: Don't just 'return' naked if your page needs to run 
+            // any layout initialization hooks here.
+            return; 
+        }
+
+        // ── LIVE FALLBACK TRACK ──
+        console.log("No cache found or filters applied. Fetching fresh data from database...");
         const response = await API.peopleAnalysis(filters);
+        
         currentData = response.table;
         currentPage = 1;
         renderTable(response.table);
         renderChart(response.chart);
+        
     } catch (err) {
         console.error("Error loading analysis data:", err);
+    } finally {
+        // 2. Clear the loading mouse cursor when rendering is completely done
+        if (window.Loader && typeof window.Loader.hide === 'function') {
+            window.Loader.hide();
+        }
     }
 }
 
