@@ -309,20 +309,23 @@
 .person-icon {
     display: inline-block;
     margin: 1px;
+    width: 15px;
+    height: 15px;
 }
 
 .dot.fatal    { background: #e35336; }
 .dot.serious  { background: #f0b429; }
 .dot.other    { background: #ccd; }
 .dot.noinjury { background: #57b894; }
+.dot.all      { background: #f0e68c;}
 
 /* ── AGE ROWS ── */
 .age-rows {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    min-width: 200px;
-    max-width: 420px;
+    min-width: 400px;
+    max-width: 600px;
 }
 
 .age-row {
@@ -349,13 +352,14 @@
     display: flex;
     flex-wrap: wrap;
     gap: 2px;
-    max-width: 340px;
+    /*max-width: 340px;*/
 }
 
 .person-icon.fatal   { color: #e35336; }
 .person-icon.serious { color: #f0b429; }
 .person-icon.other   { color: #ccd; }
 .person-icon.none    { color: #57b894; }
+.person-icon.all     { color: #f0e68c !important; }
 
 /* ── TABLE SECTION ── */
 .table-section {

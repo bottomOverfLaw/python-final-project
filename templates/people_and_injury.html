@@ -65,6 +65,7 @@
                     <span class="dot serious"></span> SERIOUS
                     <span class="dot other"></span> OTHER INJURY
                     <span class="dot noinjury"></span> NO INJURY
+                    <span class="dot all"></span> ALL
                 </div>
                 <div class="age-rows">
                     <div class="age-row">
@@ -202,6 +203,7 @@ const COLOURS = {
     serious: "#f0b429",
     other:   "#ccd",
     none:    "#57b894",
+    all:     "#f0e68c",
 };
 
 const colourMap = {
@@ -209,6 +211,7 @@ const colourMap = {
     "Serious injury": "#f0b429",
     "Other injury":   "#ccd",
     "Not injured":    "#57b894",
+    "All":            "#f0e68c",
 };
 
 const PAGE_SIZE = 20;
@@ -283,14 +286,14 @@ document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-chi
 
 document.querySelectorAll(".dashboard-section:nth-child(2) .btn-apply").forEach(btn => {
     btn.addEventListener("click", () => {
-        document.getElementById("filterPanelS2").classList.remove("open");  // ← close
+        document.getElementById("filterPanelS2").classList.remove("open");  
         loadSection2();
     });
 });
 document.querySelectorAll(".dashboard-section:nth-child(2) .btn-cancel").forEach(btn => {
     btn.addEventListener("click", () => {
         btn.closest(".filter-panel").querySelectorAll("input").forEach(cb => cb.checked = false);
-        document.getElementById("filterPanelS2").classList.remove("open");  // ← close
+        document.getElementById("filterPanelS2").classList.remove("open");
         updateFilterButtons();
         loadSection2();
     });
@@ -350,8 +353,9 @@ function renderGenderCharts(data) {
     const colourOrder = [
         { label: "Fatality",       color: "#e35336" },
         { label: "Serious injury", color: "#f0b429" },
-        { label: "Other injury",   color: "#ccd" },
+        { label: "Other injury",   color: "#ccd"    },
         { label: "Not injured",    color: "#57b894" },
+        { label: "All",            color: "#f0e68c" }, 
     ];
     document.getElementById("barLegend").innerHTML = colourOrder.map(c => `
         <div class="bar-legend-item">
@@ -362,7 +366,7 @@ function renderGenderCharts(data) {
 }
 
 // ── PICTOGRAM ──
-function buildIconGrid(gridId, data) {
+function buildIconGrid(gridId, data, selectedTypes) {
     const container = document.getElementById(gridId);
     if (!container) return;
     container.innerHTML = "";
@@ -374,14 +378,24 @@ function buildIconGrid(gridId, data) {
         none:    100 - (data.fatal || 0) - (data.serious || 0) - (data.other || 0)
     };
 
+    // if nothing or everything is selected, don't grey anything out
+    const showComparison = selectedTypes && selectedTypes.length > 0 && selectedTypes.length < 4;
+
     for (const [type, count] of Object.entries(counts)) {
+        const isSelected = !selectedTypes || selectedTypes.includes(type);
+
         for (let i = 0; i < count; i++) {
             const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             svg.setAttribute("viewBox", "0 0 24 24");
-            svg.setAttribute("width", "12");
-            svg.setAttribute("height", "12");
+            svg.setAttribute("width", "16");
+            svg.setAttribute("height", "16");
             svg.setAttribute("fill", COLOURS[type]);
             svg.classList.add("person-icon", type);
+
+            if (showComparison && !isSelected) {
+                svg.classList.add("not-selected");
+            }
+
             svg.innerHTML = `<circle cx="12" cy="5" r="3"/><path d="M12 10c-4 0-6 2-6 4v2h12v-2c0-2-2-4-6-4z"/>`;
             container.appendChild(svg);
         }
@@ -520,6 +534,10 @@ async function loadPictogram() {
 
         const pictoData = await API.pictogram(pictoAges, levels.length ? levels : null);
 
+        // map injury level IDs (1=fatal, 2=serious, 3=other, 4=no injury) to category names
+        const LEVEL_TO_TYPE = { 1: "fatal", 2: "serious", 3: "other", 4: "none" };
+        const selectedTypes = levels.map(l => LEVEL_TO_TYPE[l]).filter(Boolean);
+
         const ageRowsContainer = document.querySelector(".age-rows");
         ageRowsContainer.innerHTML = pictoAges.map(age => {
             const safeId = `grid-${age.replace(/[^a-z0-9]/gi, "")}`;
@@ -533,11 +551,12 @@ async function loadPictogram() {
 
         pictoAges.forEach(age => {
             const safeId = `grid-${age.replace(/[^a-z0-9]/gi, "")}`;
-            buildIconGrid(safeId, pictoData[age] || { fatal: 0, serious: 0, other: 0 });
+            buildIconGrid(safeId, pictoData[age] || { fatal: 0, serious: 0, other: 0 }, selectedTypes);
         });
 
-        document.querySelector(".chart-note").textContent =
-            `Each icon represents 1 person. Showing: ${pictoAges.join(", ")}`;
+        document.querySelector(".chart-note").textContent = selectedTypes.length
+            ? `Highlighted icons show selected injury types vs greyed-out unselected ones. Showing: ${pictoAges.join(", ")}`
+            : `Each icon represents 1 person. Showing: ${pictoAges.join(", ")}`;
 
     } catch (err) {
         console.error("Error loading pictogram:", err);
@@ -547,6 +566,8 @@ async function loadPictogram() {
 // ── LOAD SECTION 2 ──
 async function loadSection2() {
     try {
+        window.Loader.show(); // 1. Start mouse loader
+
         ejectedPage = 1;
         const sec2 = document.querySelector(".dashboard-section:nth-child(2)");
         const dropdowns = sec2.querySelectorAll(".filter-dropdown");
@@ -566,7 +587,10 @@ async function loadSection2() {
         renderTable(tableRows);
     } catch (err) {
         console.error("Error loading section 2:", err);
-    }
+    } finally{
+        // 2. Turn mouse back to normal
+        window.Loader.hide(); 
+    };
 }
 
 // ── INIT ──

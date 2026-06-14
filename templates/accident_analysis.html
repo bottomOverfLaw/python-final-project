@@ -337,6 +337,9 @@ function renderPie(pie) {
 
   // ── REFRESH — fetch filtered data ──
   function refresh() {
+    // 1. Turn mouse into a spinner
+    window.Loader.show();
+
     var qParams = {};
     if (currentPostcode) qParams.postcode = currentPostcode;
     activeFilters.light.forEach(function(v) { qParams.light = qParams.light || []; qParams.light.push(v); });
@@ -351,6 +354,10 @@ function renderPie(pie) {
       })
       .catch(function(err) {
         console.error('Failed to load accident analysis:', err);
+      })
+      .finally(function() {
+        // 2. Turn mouse back to normal
+        window.Loader.hide(); 
       });
   }
 
