@@ -207,15 +207,13 @@
     document.querySelector('.aa-table-wrap').after(wrap);
   }
 
-  // ── PIE CHART  ──
-function renderPie(pie) {
-    // 1. Limita i dati se ci sono troppe categorie (Massimo 10 fette + 1 fette "Other")
+  // ── PIE CHART ──
+  function renderPie(pie) {
     var maxSlices = 10;
     var finalLabels = [];
     var finalValues = [];
     var otherTotal = 0;
 
-    // Ordina i dati dal più grande al più piccolo per un grafico pulito
     var zipped = pie.labels.map((l, i) => ({ label: l, val: pie.values[i] }));
     zipped.sort((a, b) => b.val - a.val);
 
@@ -246,7 +244,7 @@ function renderPie(pie) {
     }
 
     if (pieChartInst) pieChartInst.destroy();
-    
+
     pieChartInst = new Chart(document.getElementById('pieChart'), {
         type: 'pie',
         data: {
@@ -262,9 +260,7 @@ function renderPie(pie) {
         options: {
             responsive: false,
             plugins: {
-                datalabels: {
-                    display: false 
-                },
+                datalabels: { display: false },
                 legend: { display: false },
                 tooltip: {
                     enabled: true,
@@ -278,8 +274,7 @@ function renderPie(pie) {
             }
         }
     });
-}
-
+  }
 
   // ── LINE CHART ──
   function renderLine(line) {
@@ -303,11 +298,7 @@ function renderPie(pie) {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        layout: {
-          padding: {
-            top: 30
-          }
-        },
+        layout: { padding: { top: 30 } },
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -335,9 +326,8 @@ function renderPie(pie) {
     });
   }
 
-  // ── REFRESH — fetch filtered data ──
+  // ── REFRESH ──
   function refresh() {
-    // 1. Turn mouse into a spinner
     window.Loader.show();
 
     var qParams = {};
@@ -356,8 +346,7 @@ function renderPie(pie) {
         console.error('Failed to load accident analysis:', err);
       })
       .finally(function() {
-        // 2. Turn mouse back to normal
-        window.Loader.hide(); 
+        window.Loader.hide();
       });
   }
 
@@ -400,7 +389,12 @@ function renderPie(pie) {
 
   // ── CANCEL ──
   document.getElementById('cancelFilter').addEventListener('click', function() {
+    document.querySelectorAll('.aa-filter-opts input:checked').forEach(function(cb) {
+      cb.checked = false;
+    });
+    activeFilters = { light: [], atmo: [], road: [] };
     document.getElementById('filterPanel').classList.remove('open');
+    refresh();
   });
 
   // ── POSTCODE SEARCH ──
