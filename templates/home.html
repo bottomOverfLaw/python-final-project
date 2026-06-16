@@ -57,14 +57,8 @@
       <div class="pie-wrap">
         <div class="pie-box">
           <canvas id="pieChart" width="260" height="260"></canvas>
-          <div class="pie-tooltip" id="pieTooltip">
-            <b id="tt-name"></b>
-            <span id="tt-pct"></span>
-          </div>
         </div>
-        <div class="pie-legend" id="pieLegend"></div>
       </div>
-      <p class="chart-axis-label">accidents by vehicle</p>
     </div>
 
   </div>
@@ -137,72 +131,36 @@
 
   /* ── Pie chart ── */
   function renderPieChart(by_vehicle) {
-    const segments = by_vehicle.labels.map((label, i) => ({
-      label,
-      value: by_vehicle.percentages[i],
-      color: COLORS[i % COLORS.length]
-    }));
-
-    const legendEl = document.getElementById('pieLegend');
-    legendEl.innerHTML = '';
-    segments.forEach(function(d) {
-      const item = document.createElement('div');
-      item.className = 'pie-legend-item';
-      item.innerHTML =
-        '<span class="pie-legend-sq" style="background:' + d.color + '"></span>' +
-        '<span class="pie-legend-lbl">' + d.label + '</span>' +
-        '<span class="pie-legend-val">' + d.value + '%</span>';
-      legendEl.appendChild(item);
-    });
-
-    const pieCanvas = document.getElementById('pieChart');
-    const tooltip   = document.getElementById('pieTooltip');
-    const ttName    = document.getElementById('tt-name');
-    const ttPct     = document.getElementById('tt-pct');
+    const total = by_vehicle.percentages.reduce((a, b) => a + b, 0);
 
     if (pieChartInstance) pieChartInstance.destroy();
 
-    pieChartInstance = new Chart(pieCanvas, {
+    pieChartInstance = new Chart(document.getElementById('pieChart'), {
       type: 'pie',
       data: {
-        labels: segments.map(d => d.label),
+        labels: by_vehicle.labels,
         datasets: [{
-          data:            segments.map(d => d.value),
-          backgroundColor: segments.map(d => d.color),
-          borderColor:     '#ffffff',
-          borderWidth:     2,
-          hoverOffset:     10
+          data: by_vehicle.percentages,
+          backgroundColor: by_vehicle.labels.map((_, i) => COLORS[i % COLORS.length]),
+          borderColor: '#ffffff',
+          borderWidth: 2,
+          hoverOffset: 10
         }]
       },
       options: {
         responsive: false,
         plugins: {
-          legend:  { display: false },
-          tooltip: { enabled: false },
-          datalabels: {
-            color: '#ffffff',
-            font:  { size: 12, weight: '500' },
-            formatter: function(val, ctx) {
-              return ctx.chart.data.labels[ctx.dataIndex];
-            },
-            textShadowBlur:  4,
-            textShadowColor: 'rgba(0,0,0,0.5)'
-          }
-        },
-        onHover: function(evt, els) {
-          if (els.length) {
-            const i = els[0].index;
-            ttName.textContent = segments[i].label;
-            ttPct.textContent  = segments[i].value + '% of total';
-            const pr = pieCanvas.parentElement.getBoundingClientRect();
-            tooltip.style.left    = (evt.native.clientX - pr.left + 14) + 'px';
-            tooltip.style.top     = (evt.native.clientY - pr.top  - 40) + 'px';
-            tooltip.style.opacity = '1';
-            pieCanvas.style.cursor = 'pointer';
-          } else {
-            tooltip.style.opacity  = '0';
-            pieCanvas.style.cursor = 'default';
-          }
+          legend: { display: false },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              label: function(ctx) {
+                const pct = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
+                return ctx.label + ': ' + pct + '% (' + ctx.parsed.toLocaleString() + ')';
+              }
+            }
+          },
+          datalabels: { display: false }
         }
       }
     });
@@ -259,25 +217,20 @@
       console.error('Failed to load home data:', err);
     });
 
-/* ── Background Prefetch (Protected Against Crash & Storage Limits) ── */
+  /* ── Background Prefetch ── */
   document.addEventListener("DOMContentLoaded", () => {
-    // Clear out any broken older cache files first
     window.sessionStorage.removeItem('prefetchPeopleData');
 
     setTimeout(() => {
         console.log("⚡ Quietly prefetching People Analysis data in the background...");
-        
-        // Query the API endpoint cleanly
-        fetch('/api/people-analysis') 
+        fetch('/api/people-analysis')
             .then(response => {
                 if (!response.ok) throw new Error("Server database response was not OK");
                 return response.json();
             })
             .then(data => {
-                // Double check we actually got structural data back
                 if (data && data.table) {
                     try {
-                        // Attempt to securely write payload to session space
                         window.sessionStorage.setItem('prefetchPeopleData', JSON.stringify(data));
                         console.log("✅ Success! People Analysis cached and ready for instant use.");
                     } catch (storageErr) {
@@ -286,7 +239,7 @@
                 }
             })
             .catch(err => console.error("❌ Background prefetch skipped or failed:", err));
-    }, 2000); 
+    }, 2000);
   });
 
 </script>
