@@ -23,7 +23,7 @@
     </button>
   </div>
 
-  <!-- Filter panel (toggled open/closed) -->
+  <!-- Filter panel -->
   <div class="aa-filter-panel" id="filterPanel">
     <div class="aa-filter-groups">
 
@@ -42,8 +42,28 @@
         <div class="aa-filter-opts" id="roadOpts"></div>
       </div>
 
+      <div class="aa-filter-group">
+        <div class="aa-filter-heading" id="yearHeading">Year range <span class="aa-arrow">▾</span></div>
+        <div class="aa-filter-opts" id="yearOpts">
+          <div class="aa-year-range">
+            <label class="aa-year-label">From
+              <select id="yearFrom" class="aa-year-select">
+                <option value="">Any</option>
+              </select>
+            </label>
+            <label class="aa-year-label">To
+              <select id="yearTo" class="aa-year-select">
+                <option value="">Any</option>
+              </select>
+            </label>
+          </div>
+          <div class="aa-exclude-label">Exclude years:</div>
+          <div id="yearExcludeOpts"></div>
+        </div>
+      </div>
+
     </div>
-    <div class="aa-filter-actions">
+    <div class="aa-filter-actions" id="filterActions" style="display:none;">
       <button class="aa-apply-btn" id="applyFilter">apply</button>
       <button class="aa-cancel-btn" id="cancelFilter">cancel</button>
     </div>
@@ -61,8 +81,8 @@
           <th>Atmospheric condition</th>
           <th>Date</th>
           <th>Time</th>
-          <th>Road type</th>
           <th>Road intersection</th>
+          <th>Road type</th>
           <th>People involved</th>
         </tr>
       </thead>
@@ -70,23 +90,20 @@
     </table>
   </div>
 
-  <!-- Charts: pie (left) + line (right) -->
+  <!-- Charts -->
   <div class="aa-charts-row">
-
     <div class="aa-chart-panel">
       <h3 class="aa-chart-title">Accident by road type</h3>
       <div class="aa-pie-box">
         <canvas id="pieChart"></canvas>
       </div>
     </div>
-
     <div class="aa-chart-panel">
       <h3 class="aa-chart-title">Accidents trend in the last years</h3>
       <div class="aa-line-wrap">
         <canvas id="lineChart"></canvas>
       </div>
     </div>
-
   </div>
 
 </div>
@@ -110,18 +127,69 @@
   var currentPage     = 1;
   var rowsPerPage     = 20;
 
+  // ── SHOW/HIDE FILTER ACTIONS ──
+  function updateFilterActions() {
+    var anyChecked = document.querySelectorAll('.aa-filter-opts input[type="checkbox"]:checked').length > 0;
+    var yearFrom   = document.getElementById('yearFrom').value;
+    var yearTo     = document.getElementById('yearTo').value;
+    var anyYear    = yearFrom !== '' || yearTo !== '';
+    document.getElementById('filterActions').style.display = (anyChecked || anyYear) ? 'flex' : 'none';
+  }
+
+  // ── UPDATE EXCLUDE CHECKBOXES BASED ON RANGE ──
+  function updateExcludeYears() {
+    var from = document.getElementById('yearFrom').value;
+    var to   = document.getElementById('yearTo').value;
+    document.querySelectorAll('.aa-year-exclude-lbl').forEach(function(lbl) {
+      var y = parseInt(lbl.querySelector('input').value);
+      var inRange = true;
+      if (from && y < parseInt(from)) inRange = false;
+      if (to   && y > parseInt(to))   inRange = false;
+      lbl.style.display = inRange ? 'flex' : 'none';
+      if (!inRange) lbl.querySelector('input').checked = false;
+    });
+  }
+
   // ── BUILD FILTER UI FROM API DATA ──
   function buildFilterUI(filterOptions) {
-    Object.keys(filterOptions).forEach(function(type) {
+    // Condition filters
+    ['light', 'atmo', 'road'].forEach(function(type) {
       var container = document.getElementById(type + 'Opts');
       container.innerHTML = '';
-      filterOptions[type].forEach(function(opt) {
+      (filterOptions[type] || []).forEach(function(opt) {
         var lbl = document.createElement('label');
         lbl.className = 'aa-check-label';
         lbl.innerHTML = '<input type="checkbox" value="' + opt + '" data-type="' + type + '"> ' + opt;
+        lbl.querySelector('input').addEventListener('change', updateFilterActions);
         container.appendChild(lbl);
       });
     });
+
+    // Year dropdowns
+    var years = filterOptions.years || [];
+    var fromSel = document.getElementById('yearFrom');
+    var toSel   = document.getElementById('yearTo');
+    years.forEach(function(y) {
+      var o1 = document.createElement('option');
+      o1.value = y; o1.textContent = y;
+      fromSel.appendChild(o1);
+      var o2 = document.createElement('option');
+      o2.value = y; o2.textContent = y;
+      toSel.appendChild(o2);
+    });
+    fromSel.addEventListener('change', function() { updateExcludeYears(); updateFilterActions(); });
+    toSel.addEventListener('change',   function() { updateExcludeYears(); updateFilterActions(); });
+
+    // Exclude year checkboxes
+    var excContainer = document.getElementById('yearExcludeOpts');
+    years.forEach(function(y) {
+      var lbl = document.createElement('label');
+      lbl.className = 'aa-check-label aa-year-exclude-lbl';
+      lbl.innerHTML = '<input type="checkbox" class="year-exclude-cb" value="' + y + '"> ' + y;
+      lbl.querySelector('input').addEventListener('change', updateFilterActions);
+      excContainer.appendChild(lbl);
+    });
+    updateExcludeYears();
   }
 
   // ── RENDER TABLE ──
@@ -155,8 +223,8 @@
         '<td>' + (r.atmo         || '—') + '</td>' +
         '<td>' + (r.date         || '—') + '</td>' +
         '<td>' + (r.time         || '—') + '</td>' +
-        '<td>' + (r.road_type    || '—') + '</td>' +
         '<td>' + (r.intersection || '—') + '</td>' +
+        '<td>' + (r.road_type    || '—') + '</td>' +
         '<td>' + (r.people       || '—') + '</td>';
       tbody.appendChild(tr);
     });
@@ -218,61 +286,51 @@
     zipped.sort((a, b) => b.val - a.val);
 
     zipped.forEach(function(item, idx) {
-        if (idx < maxSlices) {
-            finalLabels.push(item.label || 'Unknown');
-            finalValues.push(item.val);
-        } else {
-            otherTotal += item.val;
-        }
+      if (idx < maxSlices) {
+        finalLabels.push(item.label || 'Unknown');
+        finalValues.push(item.val);
+      } else {
+        otherTotal += item.val;
+      }
     });
 
     if (otherTotal > 0) {
-        finalLabels.push('Other');
-        finalValues.push(otherTotal);
+      finalLabels.push('Other');
+      finalValues.push(otherTotal);
     }
 
     var total = finalValues.reduce(function(a, b) { return a + b; }, 0);
-    var legendEl = document.getElementById('pieLegend');
-    if (legendEl) {
-        legendEl.innerHTML = '';
-        finalLabels.forEach(function(label, i) {
-            var item = document.createElement('div');
-            item.className = 'aa-pie-legend-item';
-            item.innerHTML = '<span class="aa-pie-dot" style="background:' + colors[i % colors.length] + '"></span>' + label;
-            legendEl.appendChild(item);
-        });
-    }
 
     if (pieChartInst) pieChartInst.destroy();
 
     pieChartInst = new Chart(document.getElementById('pieChart'), {
-        type: 'pie',
-        data: {
-            labels: finalLabels,
-            datasets: [{
-                data: finalValues,
-                backgroundColor: finalLabels.map(function(_, i) { return colors[i % colors.length]; }),
-                borderColor: '#fff',
-                borderWidth: 2,
-                hoverOffset: 10
-            }]
-        },
-        options: {
-            responsive: false,
-            plugins: {
-                datalabels: { display: false },
-                legend: { display: false },
-                tooltip: {
-                    enabled: true,
-                    callbacks: {
-                        label: function(ctx) {
-                            var pct = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
-                            return ctx.label + ': ' + pct + '% (' + ctx.parsed.toLocaleString() + ')';
-                        }
-                    }
-                }
+      type: 'pie',
+      data: {
+        labels: finalLabels,
+        datasets: [{
+          data: finalValues,
+          backgroundColor: finalLabels.map(function(_, i) { return colors[i % colors.length]; }),
+          borderColor: '#fff',
+          borderWidth: 2,
+          hoverOffset: 10
+        }]
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          datalabels: { display: false },
+          legend: { display: false },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              label: function(ctx) {
+                var pct = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
+                return ctx.label + ': ' + pct + '% (' + ctx.parsed.toLocaleString() + ')';
+              }
             }
+          }
         }
+      }
     });
   }
 
@@ -304,9 +362,7 @@
           tooltip: {
             enabled: true,
             callbacks: {
-              label: function(ctx) {
-                return 'Accidents: ' + ctx.parsed.y.toLocaleString();
-              }
+              label: function(ctx) { return 'Accidents: ' + ctx.parsed.y.toLocaleString(); }
             }
           },
           datalabels: {
@@ -335,6 +391,17 @@
     activeFilters.light.forEach(function(v) { qParams.light = qParams.light || []; qParams.light.push(v); });
     activeFilters.atmo.forEach(function(v)  { qParams.atmo  = qParams.atmo  || []; qParams.atmo.push(v);  });
     activeFilters.road.forEach(function(v)  { qParams.road  = qParams.road  || []; qParams.road.push(v);  });
+
+    var yearFrom = document.getElementById('yearFrom').value;
+    var yearTo   = document.getElementById('yearTo').value;
+    if (yearFrom) qParams.year_from = yearFrom;
+    if (yearTo)   qParams.year_to   = yearTo;
+
+    var excluded = [];
+    document.querySelectorAll('.year-exclude-cb:checked').forEach(function(cb) {
+      excluded.push(cb.value);
+    });
+    if (excluded.length) qParams.year_exclude = excluded;
 
     fetchJSON('/api/accident-analysis', qParams)
       .then(function(data) {
@@ -368,7 +435,7 @@
   });
 
   // ── COLLAPSIBLE CONDITION SECTIONS ──
-  ['light', 'atmo', 'road'].forEach(function(type) {
+  ['light', 'atmo', 'road', 'year'].forEach(function(type) {
     document.getElementById(type + 'Heading').addEventListener('click', function() {
       var opts  = document.getElementById(type + 'Opts');
       var arrow = this.querySelector('.aa-arrow');
@@ -380,7 +447,7 @@
   // ── APPLY FILTERS ──
   document.getElementById('applyFilter').addEventListener('click', function() {
     activeFilters = { light: [], atmo: [], road: [] };
-    document.querySelectorAll('.aa-filter-opts input:checked').forEach(function(cb) {
+    document.querySelectorAll('.aa-filter-opts input[data-type]:checked').forEach(function(cb) {
       activeFilters[cb.dataset.type].push(cb.value);
     });
     document.getElementById('filterPanel').classList.remove('open');
@@ -389,10 +456,14 @@
 
   // ── CANCEL ──
   document.getElementById('cancelFilter').addEventListener('click', function() {
-    document.querySelectorAll('.aa-filter-opts input:checked').forEach(function(cb) {
+    document.querySelectorAll('.aa-filter-opts input[type="checkbox"]:checked').forEach(function(cb) {
       cb.checked = false;
     });
+    document.getElementById('yearFrom').value = '';
+    document.getElementById('yearTo').value   = '';
+    updateExcludeYears();
     activeFilters = { light: [], atmo: [], road: [] };
+    document.getElementById('filterActions').style.display = 'none';
     document.getElementById('filterPanel').classList.remove('open');
     refresh();
   });

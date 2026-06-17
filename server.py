@@ -127,41 +127,48 @@ class RequestHandler(BaseHTTPRequestHandler):
                 "light": params.get("light", []),
             }.items() if v}
             table = people_analysis(filters)
-            
+
             chart_data = {}
             for r in table:
                 age = r["age"]
                 if age not in chart_data:
                     chart_data[age] = []
                 chart_data[age].append(r["injury_rate"])
-            chart = [{"age": age, "injury_rate": round(sum(rates)/len(rates), 2)} 
+            chart = [{"age": age, "injury_rate": round(sum(rates)/len(rates), 2)}
                     for age, rates in chart_data.items()]
-            
+
             self.send_json({"table": table, "chart": chart})
 
-        # --- FIX: Clean, Production Endpoint for Accident Analysis ---
         elif path == "/api/accident-analysis":
             try:
-                # Extract actual browser filter arrays safely
-                postcode_val = params.get("postcode", [None])[0]
-                light_vals = params.get("light", [])
-                atmo_vals = params.get("atmo", [])
-                road_vals = params.get("road", [])
+                postcode_val  = params.get("postcode",     [None])[0]
+                light_vals    = params.get("light",        [])
+                atmo_vals     = params.get("atmo",         [])
+                road_vals     = params.get("road",         [])
+                year_from_val = params.get("year_from",    [None])[0]
+                year_to_val   = params.get("year_to",      [None])[0]
+                year_excl     = params.get("year_exclude", [])
 
-                # Run database logic cleanly passing empty lists as None
                 data = get_accident_analysis(
-                    postcode=postcode_val if postcode_val != "" else None,
-                    light=light_vals if len(light_vals) > 0 else None,
-                    atmo=atmo_vals if len(atmo_vals) > 0 else None,
-                    road=road_vals if len(road_vals) > 0 else None
+                    postcode     = postcode_val  if postcode_val  else None,
+                    light        = light_vals    if light_vals    else None,
+                    atmo         = atmo_vals     if atmo_vals     else None,
+                    road         = road_vals     if road_vals     else None,
+                    year_from    = year_from_val if year_from_val else None,
+                    year_to      = year_to_val   if year_to_val   else None,
+                    year_exclude = year_excl     if year_excl     else None,
                 )
-                
-                # Directly send the response payload back to the frontend javascript
+
                 self.send_json(data)
 
             except Exception as e:
                 print(f"❌ API SERVER ERROR: {e}")
-                self.send_json({"error": str(e), "table": [], "pie": {"labels":[], "values":[]}, "line": {"labels":[], "values":[]}})
+                self.send_json({
+                    "error": str(e),
+                    "table": [],
+                    "pie":  {"labels": [], "values": []},
+                    "line": {"labels": [], "values": []}
+                })
 
         else:
             self.send_error(404, "Not found")
@@ -204,7 +211,6 @@ class RequestHandler(BaseHTTPRequestHandler):
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
-# ── FIX: Proper entry point initialization wrapper blocks ──
 if __name__ == "__main__":
     server_address = ("", 8000)
     httpd = ThreadedHTTPServer(server_address, RequestHandler)
