@@ -154,7 +154,7 @@
 
 .btn-apply {
     padding: 7px 10px;
-    background: #36afc8;
+    background: #3d35a0;
     color: white;
     border: none;
     border-radius: 6px;
@@ -163,7 +163,7 @@
     transition: background 0.15s;
 }
 
-.btn-apply:hover { background: #3d35a0; color: white; }
+.btn-apply:hover { background: #36afc8; color: white; }
 
 .btn-cancel {
     padding: 7px 7px;
@@ -315,9 +315,9 @@
 
 .dot.fatal    { background: #e35336; }
 .dot.serious  { background: #f0b429; }
-.dot.other    { background: #ccd; }
+.dot.other    { background: #c5d8ff; }
 .dot.noinjury { background: #57b894; }
-.dot.all      { background: #f0e68c;}
+.dot.all      { background: #576A8F;}
 
 /* ── AGE ROWS ── */
 .age-rows {

@@ -2,10 +2,9 @@
 <script src="../static/api.js"></script>
 <div class="page-wrapper">
 
-    <!-- ── SECTION 1: INJURY OUTCOME SUMMARY ── -->
+    <!-- ── SECTION 1: INJURY OUTCOME BY GENDER ── -->
     <section class="dashboard-section">
-        <h2 class="section-title">Injury outcome summary:</h2>
-
+        <h2 class="section-title">Injury outcome by gender:</h2>
         <div class="section-body">
 
             <!-- LEFT FILTER -->
@@ -22,12 +21,12 @@
                     <div class="filter-dropdown">
                         <button class="filter-toggle">Injury level <span>&#8964;</span></button>
                         <div class="filter-content">
-                            <div class="checkbox-group"></div>
+                            <div class="checkbox-group" id="injuryOptsS1"></div>
                         </div>
                     </div>
                     <div class="filter-buttons">
-                        <button class="btn-apply">apply</button>
-                        <button class="btn-cancel">cancel</button>
+                        <button class="btn-apply" id="btnApplyS1">apply</button>
+                        <button class="btn-cancel" id="btnCancelS1">cancel</button>
                     </div>
                 </div>
             </div>
@@ -57,6 +56,46 @@
                 <div class="bar-legend" id="barLegend"></div>
             </div>
 
+        </div>
+    </section>
+
+    <!-- ── SECTION 2: PICTOGRAM ── -->
+    <section class="dashboard-section">
+        <h2 class="section-title">Injury outcome by age group:</h2>
+        <div class="section-body">
+
+            <!-- LEFT FILTER -->
+            <div class="filter-panel">
+                <button class="aa-filter-btn" id="filterToggleS1Right">
+                    <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
+                        <line x1="3" y1="5"  x2="17" y2="5"  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <line x1="7" y1="15" x2="13" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                    Filter
+                </button>
+                <div class="aa-filter-panel" id="filterPanelS1Right">
+                    <div class="filter-group">
+                        <div class="filter-dropdown">
+                            <button class="filter-toggle">Injury level <span>&#8964;</span></button>
+                            <div class="filter-content">
+                                <div class="checkbox-group" id="injuryOptsS2"></div>
+                            </div>
+                        </div>
+                        <div class="filter-dropdown">
+                            <button class="filter-toggle">Age group <span>&#8964;</span></button>
+                            <div class="filter-content">
+                                <div class="checkbox-group" id="ageOptsS2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="btn-apply" id="btnApplyS2">apply</button>
+                        <button class="btn-cancel" id="btnCancelS2">cancel</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- PICTOGRAM -->
             <div class="pictogram-panel">
                 <p class="chart-note">Each icon represents 1 person. Each age group total = 100 people (average)</p>
@@ -83,49 +122,17 @@
                 </div>
             </div>
 
-            <!-- RIGHT FILTER -->
-            <div class="filter-panel">
-                <button class="aa-filter-btn" id="filterToggleS1Right">
-                    <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
-                        <line x1="3" y1="5"  x2="17" y2="5"  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                        <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                        <line x1="7" y1="15" x2="13" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                    </svg>
-                    Filter
-                </button>
-                <div class="aa-filter-panel" id="filterPanelS1Right">
-                    <div class="filter-group">
-                        <div class="filter-dropdown">
-                            <button class="filter-toggle">Injury level <span>&#8964;</span></button>
-                            <div class="filter-content">
-                                <div class="checkbox-group"></div>
-                            </div>
-                        </div>
-                        <div class="filter-dropdown">
-                            <button class="filter-toggle">Age group <span>&#8964;</span></button>
-                            <div class="filter-content">
-                                <div class="checkbox-group"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="filter-buttons">
-                        <button class="btn-apply">apply</button>
-                        <button class="btn-cancel">cancel</button>
-                    </div>
-                </div>
-            </div>
         </div>
     </section>
 
-    <!-- ── SECTION 2: EJECTED AND TAKEN TO HOSPITAL ── -->
+    <!-- ── SECTION 3: EJECTED AND TAKEN TO HOSPITAL ── -->
     <section class="dashboard-section">
         <h2 class="section-title">Ejected and taken to the hospital:</h2>
-
         <div class="section-body table-section">
 
             <!-- LEFT FILTER -->
             <div class="filter-panel">
-                <button class="aa-filter-btn" id="filterToggleS2">
+                <button class="aa-filter-btn" id="filterToggleS3">
                     <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
                         <line x1="3" y1="5"  x2="17" y2="5"  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                         <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -133,36 +140,36 @@
                     </svg>
                     Filter
                 </button>
-                <div class="aa-filter-panel" id="filterPanelS2">
+                <div class="aa-filter-panel" id="filterPanelS3">
                     <div class="filter-group">
                         <div class="filter-dropdown">
                             <button class="filter-toggle">Ejected <span>&#8964;</span></button>
                             <div class="filter-content">
-                                <div class="checkbox-group"></div>
+                                <div class="checkbox-group" id="ejectedOpts"></div>
                             </div>
                         </div>
                         <div class="filter-dropdown">
                             <button class="filter-toggle">Taken to the hospital <span>&#8964;</span></button>
                             <div class="filter-content">
-                                <div class="checkbox-group"></div>
+                                <div class="checkbox-group" id="hospitalOpts"></div>
                             </div>
                         </div>
                         <div class="filter-dropdown">
                             <button class="filter-toggle">Age group <span>&#8964;</span></button>
                             <div class="filter-content">
-                                <div class="checkbox-group"></div>
+                                <div class="checkbox-group" id="ageOptsS3"></div>
                             </div>
                         </div>
                         <div class="filter-dropdown">
                             <button class="filter-toggle">Type of person <span>&#8964;</span></button>
                             <div class="filter-content">
-                                <div class="checkbox-group"></div>
+                                <div class="checkbox-group" id="personOpts"></div>
                             </div>
                         </div>
                     </div>
                     <div class="filter-buttons">
-                        <button class="btn-apply">apply</button>
-                        <button class="btn-cancel">cancel</button>
+                        <button class="btn-apply" id="btnApplyS3">apply</button>
+                        <button class="btn-cancel" id="btnCancelS3">cancel</button>
                     </div>
                 </div>
             </div>
@@ -201,17 +208,15 @@ let chartUnknown = null;
 const COLOURS = {
     fatal:   "#e35336",
     serious: "#f0b429",
-    other:   "#ccd",
+    other:   "#c5d8ff",
     none:    "#57b894",
-    all:     "#f0e68c",
 };
 
 const colourMap = {
     "Fatality":       "#e35336",
     "Serious injury": "#f0b429",
-    "Other injury":   "#ccd",
+    "Other injury":   "#c5d8ff",
     "Not injured":    "#57b894",
-    "All":            "#f0e68c",
 };
 
 const PAGE_SIZE = 20;
@@ -225,8 +230,8 @@ document.getElementById("filterToggleS1").addEventListener("click", () => {
 document.getElementById("filterToggleS1Right").addEventListener("click", () => {
     document.getElementById("filterPanelS1Right").classList.toggle("open");
 });
-document.getElementById("filterToggleS2").addEventListener("click", () => {
-    document.getElementById("filterPanelS2").classList.toggle("open");
+document.getElementById("filterToggleS3").addEventListener("click", () => {
+    document.getElementById("filterPanelS3").classList.toggle("open");
 });
 
 // ── DROPDOWNS ──
@@ -253,50 +258,40 @@ function attachCheckboxListeners() {
 
 document.querySelectorAll(".filter-buttons").forEach(b => b.style.display = "none");
 
-// ── APPLY/CANCEL ──
-document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(1) .btn-apply").forEach(btn => {
-    btn.addEventListener("click", () => {
-        document.getElementById("filterPanelS1").classList.remove("open");  // ← close
-        loadBarCharts();
-    });
+// ── APPLY/CANCEL — S1 (bar charts) ──
+document.getElementById("btnApplyS1").addEventListener("click", () => {
+    document.getElementById("filterPanelS1").classList.remove("open");
+    loadBarCharts();
 });
-document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(1) .btn-cancel").forEach(btn => {
-    btn.addEventListener("click", () => {
-        btn.closest(".filter-panel").querySelectorAll("input").forEach(cb => cb.checked = false);
-        document.getElementById("filterPanelS1").classList.remove("open");  // ← close
-        updateFilterButtons();
-        loadBarCharts();
-    });
+document.getElementById("btnCancelS1").addEventListener("click", () => {
+    document.querySelectorAll("#filterPanelS1 input").forEach(cb => cb.checked = false);
+    document.getElementById("filterPanelS1").classList.remove("open");
+    updateFilterButtons();
+    loadBarCharts();
 });
 
-document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(4) .btn-apply").forEach(btn => {
-    btn.addEventListener("click", () => {
-        document.getElementById("filterPanelS1Right").classList.remove("open");  // ← close
-        loadPictogram();
-    });
+// ── APPLY/CANCEL — S2 (pictogram) ──
+document.getElementById("btnApplyS2").addEventListener("click", () => {
+    document.getElementById("filterPanelS1Right").classList.remove("open");
+    loadPictogram();
 });
-document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(4) .btn-cancel").forEach(btn => {
-    btn.addEventListener("click", () => {
-        btn.closest(".filter-panel").querySelectorAll("input").forEach(cb => cb.checked = false);
-        document.getElementById("filterPanelS1Right").classList.remove("open");  // ← close
-        updateFilterButtons();
-        loadPictogram();
-    });
+document.getElementById("btnCancelS2").addEventListener("click", () => {
+    document.querySelectorAll("#filterPanelS1Right input").forEach(cb => cb.checked = false);
+    document.getElementById("filterPanelS1Right").classList.remove("open");
+    updateFilterButtons();
+    loadPictogram();
 });
 
-document.querySelectorAll(".dashboard-section:nth-child(2) .btn-apply").forEach(btn => {
-    btn.addEventListener("click", () => {
-        document.getElementById("filterPanelS2").classList.remove("open");  
-        loadSection2();
-    });
+// ── APPLY/CANCEL — S3 (ejected table) ──
+document.getElementById("btnApplyS3").addEventListener("click", () => {
+    document.getElementById("filterPanelS3").classList.remove("open");
+    loadSection2();
 });
-document.querySelectorAll(".dashboard-section:nth-child(2) .btn-cancel").forEach(btn => {
-    btn.addEventListener("click", () => {
-        btn.closest(".filter-panel").querySelectorAll("input").forEach(cb => cb.checked = false);
-        document.getElementById("filterPanelS2").classList.remove("open");
-        updateFilterButtons();
-        loadSection2();
-    });
+document.getElementById("btnCancelS3").addEventListener("click", () => {
+    document.querySelectorAll("#filterPanelS3 input").forEach(cb => cb.checked = false);
+    document.getElementById("filterPanelS3").classList.remove("open");
+    updateFilterButtons();
+    loadSection2();
 });
 
 // ── RENDER 3 GENDER CHARTS ──
@@ -353,9 +348,8 @@ function renderGenderCharts(data) {
     const colourOrder = [
         { label: "Fatality",       color: "#e35336" },
         { label: "Serious injury", color: "#f0b429" },
-        { label: "Other injury",   color: "#ccd"    },
+        { label: "Other injury",   color: "#c5d8ff" },
         { label: "Not injured",    color: "#57b894" },
-        { label: "All",            color: "#f0e68c" }, 
     ];
     document.getElementById("barLegend").innerHTML = colourOrder.map(c => `
         <div class="bar-legend-item">
@@ -371,35 +365,51 @@ function buildIconGrid(gridId, data, selectedTypes) {
     if (!container) return;
     container.innerHTML = "";
 
+    const showComparison = selectedTypes && selectedTypes.length > 0 && selectedTypes.length < 4;
+
     const counts = {
         fatal:   data.fatal   || 0,
         serious: data.serious || 0,
         other:   data.other   || 0,
-        none:    100 - (data.fatal || 0) - (data.serious || 0) - (data.other || 0)
+        none:    data.none    || 0,
     };
 
-    // if nothing or everything is selected, don't grey anything out
-    const showComparison = selectedTypes && selectedTypes.length > 0 && selectedTypes.length < 4;
-
     for (const [type, count] of Object.entries(counts)) {
-        const isSelected = !selectedTypes || selectedTypes.includes(type);
-
+        const isSelected = !showComparison || selectedTypes.includes(type);
         for (let i = 0; i < count; i++) {
             const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             svg.setAttribute("viewBox", "0 0 24 24");
             svg.setAttribute("width", "16");
             svg.setAttribute("height", "16");
-            svg.setAttribute("fill", COLOURS[type]);
+            svg.setAttribute("fill", isSelected ? COLOURS[type] : "#576A8F");
             svg.classList.add("person-icon", type);
-
-            if (showComparison && !isSelected) {
-                svg.classList.add("not-selected");
-            }
-
             svg.innerHTML = `<circle cx="12" cy="5" r="3"/><path d="M12 10c-4 0-6 2-6 4v2h12v-2c0-2-2-4-6-4z"/>`;
             container.appendChild(svg);
         }
     }
+}
+
+// ── PAGINATION ──
+function renderPagination(totalPages, currentPage, onPageClick) {
+    if (totalPages <= 1) return "";
+    let html = '';
+    html += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="${onPageClick}(${currentPage - 1})">&#8592; Prev</button>`;
+    html += `<button class="page-btn ${currentPage === 1 ? 'active' : ''}" onclick="${onPageClick}(1)">1</button>`;
+    if (currentPage > 3) html += `<span style="padding:0 5px;color:#aaa;">...</span>`;
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+        html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="${onPageClick}(${i})">${i}</button>`;
+    }
+    if (currentPage < totalPages - 2) html += `<span style="padding:0 5px;color:#aaa;">...</span>`;
+    if (totalPages > 1) {
+        html += `<button class="page-btn ${currentPage === totalPages ? 'active' : ''}" onclick="${onPageClick}(${totalPages})">${totalPages}</button>`;
+    }
+    html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="${onPageClick}(${currentPage + 1})">Next &#8594;</button>`;
+    return html;
+}
+
+function goToEjectedPage(page) {
+    ejectedPage = page;
+    renderTable(ejectedData);
 }
 
 // ── EJECTED TABLE ──
@@ -428,22 +438,14 @@ function renderTable(rows) {
     `).join("");
 
     document.getElementById("ejectedPagination").innerHTML =
-        Array.from({ length: totalPages }, (_, i) => `
-            <button class="page-btn ${i + 1 === ejectedPage ? "active" : ""}"
-                onclick="goToEjectedPage(${i + 1})">${i + 1}</button>
-        `).join("");
-}
-
-function goToEjectedPage(page) {
-    ejectedPage = page;
-    renderTable(ejectedData);
+        renderPagination(totalPages, ejectedPage, "goToEjectedPage");
 }
 
 // ── SORT TABLE ──
 document.querySelectorAll(".sort-arrow").forEach((arrow, colIndex) => {
     let asc = true;
     arrow.addEventListener("click", () => {
-        const tbody = document.querySelector(".data-table tbody");
+        const tbody = document.getElementById("ejectedTableBody");
         const rows  = Array.from(tbody.querySelectorAll("tr"));
         const actualCol = colIndex + 4;
         rows.sort((a, b) => {
@@ -461,41 +463,36 @@ document.querySelectorAll(".sort-arrow").forEach((arrow, colIndex) => {
 async function loadFilterOptions() {
     const options = await API.filterOptions();
 
-    const sec1Left = document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(1) .checkbox-group");
-    sec1Left.forEach(group => {
-        group.innerHTML = options.injury_levels.map(o => `
+    // S1 — bar chart injury levels
+    document.getElementById("injuryOptsS1").innerHTML =
+        options.injury_levels.map(o => `
             <label><input type="checkbox" value="${o.id}"> ${o.label}</label>
         `).join("");
-    });
 
-    const sec1RightDropdowns = document.querySelectorAll(".dashboard-section:nth-child(1) .filter-panel:nth-child(4) .filter-dropdown");
-    if (sec1RightDropdowns[0]) {
-        sec1RightDropdowns[0].querySelector(".checkbox-group").innerHTML =
-            options.injury_levels.map(o => `
-                <label><input type="checkbox" value="${o.id}"> ${o.label}</label>
-            `).join("");
-    }
-    if (sec1RightDropdowns[1]) {
-        sec1RightDropdowns[1].querySelector(".checkbox-group").innerHTML =
-            options.age_groups.map(age => `
-                <label><input type="checkbox" value="${age}"> ${age}</label>
-            `).join("");
-    }
-
-    const sec2Dropdowns = document.querySelectorAll(".dashboard-section:nth-child(2) .filter-dropdown");
-    sec2Dropdowns[0].querySelector(".checkbox-group").innerHTML = `
-        <label><input type="checkbox" value="Y"> Yes</label>
-        <label><input type="checkbox" value="N"> No</label>
-    `;
-    sec2Dropdowns[1].querySelector(".checkbox-group").innerHTML = `
-        <label><input type="checkbox" value="Y"> Yes</label>
-        <label><input type="checkbox" value="N"> No</label>
-    `;
-    sec2Dropdowns[2].querySelector(".checkbox-group").innerHTML =
+    // S2 — pictogram injury levels + age groups
+    document.getElementById("injuryOptsS2").innerHTML =
+        options.injury_levels.map(o => `
+            <label><input type="checkbox" value="${o.id}"> ${o.label}</label>
+        `).join("");
+    document.getElementById("ageOptsS2").innerHTML =
         options.age_groups.map(age => `
             <label><input type="checkbox" value="${age}"> ${age}</label>
         `).join("");
-    sec2Dropdowns[3].querySelector(".checkbox-group").innerHTML =
+
+    // S3 — ejected table
+    document.getElementById("ejectedOpts").innerHTML = `
+        <label><input type="checkbox" value="Y"> Yes</label>
+        <label><input type="checkbox" value="N"> No</label>
+    `;
+    document.getElementById("hospitalOpts").innerHTML = `
+        <label><input type="checkbox" value="Y"> Yes</label>
+        <label><input type="checkbox" value="N"> No</label>
+    `;
+    document.getElementById("ageOptsS3").innerHTML =
+        options.age_groups.map(age => `
+            <label><input type="checkbox" value="${age}"> ${age}</label>
+        `).join("");
+    document.getElementById("personOpts").innerHTML =
         options.person_types.map(o => `
             <label><input type="checkbox" value="${o.id}"> ${o.label}</label>
         `).join("");
@@ -506,13 +503,9 @@ async function loadFilterOptions() {
 // ── LOAD BAR CHARTS ──
 async function loadBarCharts() {
     try {
-        const sec1Left = document.querySelector(".dashboard-section:nth-child(1) .filter-panel:nth-child(1)");
-        const checked  = [...sec1Left.querySelectorAll("input:checked")];
-        const levels   = checked
-            .filter(cb => !isNaN(cb.value) && cb.value !== "")
-            .map(cb => parseInt(cb.value));
-
-        const data = await API.injurySummaryBySex(levels.length ? levels : []);
+        const checked = [...document.querySelectorAll("#filterPanelS1 input:checked")];
+        const levels  = checked.map(cb => parseInt(cb.value));
+        const data    = await API.injurySummaryBySex(levels.length ? levels : []);
         renderGenderCharts(data);
     } catch (err) {
         console.error("Error loading bar charts:", err);
@@ -522,19 +515,14 @@ async function loadBarCharts() {
 // ── LOAD PICTOGRAM ──
 async function loadPictogram() {
     try {
-        const sec1Right = document.querySelector(".dashboard-section:nth-child(1) .filter-panel:nth-child(4)");
-        const dropdowns = sec1Right.querySelectorAll(".filter-dropdown");
-
-        const levels = [...dropdowns[0].querySelectorAll("input:checked")]
-            .filter(cb => !isNaN(cb.value) && cb.value !== "")
+        const levels = [...document.querySelectorAll("#injuryOptsS2 input:checked")]
             .map(cb => parseInt(cb.value));
-
-        const ages      = [...dropdowns[1].querySelectorAll("input:checked")].map(cb => cb.value);
+        const ages   = [...document.querySelectorAll("#ageOptsS2 input:checked")]
+            .map(cb => cb.value);
         const pictoAges = ages.length ? ages : ["16-17", "18-21", "70+"];
 
-        const pictoData = await API.pictogram(pictoAges, levels.length ? levels : null);
+        const pictoData = await API.pictogram(pictoAges, null);
 
-        // map injury level IDs (1=fatal, 2=serious, 3=other, 4=no injury) to category names
         const LEVEL_TO_TYPE = { 1: "fatal", 2: "serious", 3: "other", 4: "none" };
         const selectedTypes = levels.map(l => LEVEL_TO_TYPE[l]).filter(Boolean);
 
@@ -550,32 +538,28 @@ async function loadPictogram() {
         }).join("");
 
         pictoAges.forEach(age => {
-            const safeId = `grid-${age.replace(/[^a-z0-9]/gi, "")}`;
-            buildIconGrid(safeId, pictoData[age] || { fatal: 0, serious: 0, other: 0 }, selectedTypes);
+            const safeId  = `grid-${age.replace(/[^a-z0-9]/gi, "")}`;
+            const ageData = pictoData[age] || { fatal: 0, serious: 0, other: 0, none: 0 };
+            buildIconGrid(safeId, ageData, selectedTypes);
         });
 
         document.querySelector(".chart-note").textContent = selectedTypes.length
-            ? `Highlighted icons show selected injury types vs greyed-out unselected ones. Showing: ${pictoAges.join(", ")}`
-            : `Each icon represents 1 person. Showing: ${pictoAges.join(", ")}`;
+            ? `Coloured icons = selected injury types. Grey icons = rest of the 100-person population. Showing: ${pictoAges.join(", ")}`
+            : `Each icon represents 1 person. Each age group total = 100 people (average)`;
 
     } catch (err) {
         console.error("Error loading pictogram:", err);
     }
 }
 
-// ── LOAD SECTION 2 ──
+// ── LOAD SECTION 3 (ejected table) ──
 async function loadSection2() {
     try {
-        window.Loader.show(); // 1. Start mouse loader
-
         ejectedPage = 1;
-        const sec2 = document.querySelector(".dashboard-section:nth-child(2)");
-        const dropdowns = sec2.querySelectorAll(".filter-dropdown");
-
-        const ejected      = [...dropdowns[0].querySelectorAll("input:checked")].map(cb => cb.value);
-        const hospital     = [...dropdowns[1].querySelectorAll("input:checked")].map(cb => cb.value);
-        const age_groups   = [...dropdowns[2].querySelectorAll("input:checked")].map(cb => cb.value);
-        const person_types = [...dropdowns[3].querySelectorAll("input:checked")].map(cb => cb.value);
+        const ejected      = [...document.querySelectorAll("#ejectedOpts input:checked")].map(cb => cb.value);
+        const hospital     = [...document.querySelectorAll("#hospitalOpts input:checked")].map(cb => cb.value);
+        const age_groups   = [...document.querySelectorAll("#ageOptsS3 input:checked")].map(cb => cb.value);
+        const person_types = [...document.querySelectorAll("#personOpts input:checked")].map(cb => cb.value);
 
         const filters = {};
         if (ejected.length)      filters.ejected  = ejected;
@@ -586,11 +570,8 @@ async function loadSection2() {
         const tableRows = await API.ejectedTable(filters);
         renderTable(tableRows);
     } catch (err) {
-        console.error("Error loading section 2:", err);
-    } finally{
-        // 2. Turn mouse back to normal
-        window.Loader.hide(); 
-    };
+        console.error("Error loading section 3:", err);
+    }
 }
 
 // ── INIT ──

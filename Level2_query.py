@@ -77,40 +77,45 @@ def injury_summary_by_sex(injury_levels=None):
     return result
 
 def pictogram_data(age_groups=None, injury_levels=None):
-    """
-    Per-age-group % breakdown of fatal/serious/other.
-    Returns dict keyed by age group.
-    """
     target_ages = age_groups or ["16-17", "18-21", "70+"]
-    params = list(target_ages)
     ph     = ",".join("?" * len(target_ages))
+    params = list(target_ages)
 
-    inj_where = ""
-    if injury_levels:
-        ip = ",".join("?" * len(injury_levels))
-        inj_where = f"AND p.INJ_LEVEL IN ({ip})"
-        params += list(injury_levels)
-
+    # always query ALL injury levels for full 100-person population
     rows = query(f"""
         SELECT 
             CASE WHEN p.AGE_GROUP = '5-Dec' THEN '5-12' ELSE p.AGE_GROUP END AS AGE_GROUP,
             SUM(CASE WHEN p.INJ_LEVEL = 1 THEN 1 ELSE 0 END) AS fatal,
             SUM(CASE WHEN p.INJ_LEVEL = 2 THEN 1 ELSE 0 END) AS serious,
             SUM(CASE WHEN p.INJ_LEVEL = 3 THEN 1 ELSE 0 END) AS other,
+            SUM(CASE WHEN p.INJ_LEVEL = 4 THEN 1 ELSE 0 END) AS not_injured,
             COUNT(*) AS total
         FROM Person p
         WHERE p.AGE_GROUP IN ({ph})
-        {inj_where}
         GROUP BY AGE_GROUP
     """, params)
 
+    # map level IDs to category names for frontend comparison
+    LEVEL_TO_TYPE = {1: "fatal", 2: "serious", 3: "other", 4: "none"}
+    selected_types = (
+        [LEVEL_TO_TYPE[int(l)] for l in injury_levels if int(l) in LEVEL_TO_TYPE]
+        if injury_levels else []
+    )
+
     result = {}
     for r in rows:
-        total = r["total"] or 1
+        total       = r["total"] or 1
+        fatal       = round(r["fatal"]       / total * 100)
+        serious     = round(r["serious"]     / total * 100)
+        other       = round(r["other"]       / total * 100)
+        not_injured = round(r["not_injured"] / total * 100)
+        none        = 100 - fatal - serious - other - not_injured
         result[r["AGE_GROUP"]] = {
-            "fatal":   round(r["fatal"]   / total * 100),
-            "serious": round(r["serious"] / total * 100),
-            "other":   round(r["other"]   / total * 100),
+            "fatal":          fatal,
+            "serious":        serious,
+            "other":          other,
+            "none":           not_injured + none,
+            "selected_types": selected_types,
         }
     return result
 

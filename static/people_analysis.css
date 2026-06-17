@@ -132,7 +132,7 @@
 
 .btn-apply {
     padding: 7px 16px;
-    background: rgba(227, 83, 54, 0.5);
+    background: #3d35a0;
     color: white;
     border: none;
     border-radius: 6px;
@@ -141,7 +141,7 @@
     transition: background 0.15s;
 }
 
-.btn-apply:hover { background: #e35336; }
+.btn-apply:hover { background: #36afc8; }
 
 .btn-cancel {
     padding: 7px 16px;
@@ -256,9 +256,9 @@
 .page-btn:hover { background: #f0efea; }
 
 .page-btn.active {
-    background: rgba(227, 83, 54, 0.5);
+    background: #3d35a0;
     color: white;
-    border-color: #e35336;
+    border-color: #3d35a0;
 }
 
 /* ── BAR CHART ── */
