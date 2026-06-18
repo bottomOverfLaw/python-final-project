@@ -14,7 +14,7 @@ from Level2_query import injury_summary, injury_summary_by_sex, pictogram_data, 
     get_age_groups, get_injury_levels, get_road_user_types, get_light_conditions
 
 # ---- Level 3: People Analysis + Accident Analysis ----
-from Level3_query import people_analysis, people_analysis_chart, get_accident_analysis
+from Level3_query import people_analysis, get_accident_analysis
 
 MIME = {
     ".css" : "text/css", ".js" : "application/javascript",

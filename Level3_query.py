@@ -153,7 +153,6 @@ def people_analysis(filters=None):
     avg = sum(r["injury_rate"] for r in rows) / len(rows)
     for r in rows:
         if r["injury_id"] == 4:
-            # Non-injury entries explicitly evaluate to 0pp deviation as requested
             r["above"] = "0.0pp"
             r["above_class"] = "negative"
         else:
@@ -164,7 +163,7 @@ def people_analysis(filters=None):
     # Sort genuine risk directly to the top (highest threat percentages drops first)
     rows.sort(key=lambda x: x["injury_rate"], reverse=True)
     
-    # 🌟 FIX FOR server.py: Return the PURE LIST so the server script can process it without crashing!
+    # return the PURE LIST so the server script can process it without crashing!
     return rows
 
 

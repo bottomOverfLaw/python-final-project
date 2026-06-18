@@ -207,12 +207,6 @@
     background-color: #2a9ab5;
 }
 
-.sort-arrow {
-    cursor: pointer;
-    font-size: 12px;
-    margin-left: 4px;
-}
-
 .data-table td {
     padding: 10px 14px;
     text-align: center;
@@ -229,6 +223,25 @@
 
 .row-highlight:hover {
     background-color: #c5e5f0 !important;
+}
+
+.sort-header {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+.sort-header.sort-active {
+    color: #2e6d8e;
+}
+.sort-icon {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 0.8em;
+    opacity: 0.5;
+}
+.sort-header.sort-active .sort-icon {
+    opacity: 1;
+    color: #2e6d8e;
 }
 
 .above-avg { font-weight: 700; }

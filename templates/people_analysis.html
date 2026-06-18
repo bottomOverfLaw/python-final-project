@@ -77,18 +77,18 @@
             <div class="insight-banner" id="insightBanner"></div>
             <div class="table-wrapper">
                 <table class="data-table" id="analysisTable">
-                    <thead>
-                        <tr>
-                            <th>Age group</th>
-                            <th>Type of person</th>
-                            <th>Speed zone</th>
-                            <th>Light condition</th>
-                            <th>Total people</th>
-                            <th>Injury rate</th>
-                            <th class="col-above">Above average</th>
-                            <th>Injury</th>
-                        </tr>
-                    </thead>
+                <thead>
+                    <tr>
+                        <th>Age group</th>
+                        <th>Type of person</th>
+                        <th>Speed zone</th>
+                        <th>Light condition</th>
+                        <th class="sort-header" data-key="total">Total people <span>&#8964;</span></th>
+                        <th class="sort-header" data-key="injury_rate">Injury rate <span>&#8964;</span></th>
+                        <th class="sort-header col-above" data-key="above">Above average <span>&#8964;</span></th>
+                        <th>Injury</th>
+                    </tr>
+                </thead>
                     <tbody id="tableBody">
                             <tr>
                                 <td>18-21</td>
@@ -240,6 +240,40 @@ document.getElementById("btnApplyPA").addEventListener("click", () => {
         light: lightConds,
         type: personTypes,
         speed: speedZones
+    });
+});
+
+document.querySelectorAll(".sort-header").forEach(header => {
+    header.addEventListener("click", () => {
+        const key = header.dataset.key;
+        sortDirections[key] = !sortDirections[key];
+        const asc = sortDirections[key];
+
+        // Update all icons — reset others, set active
+        document.querySelectorAll(".sort-header").forEach(h => {
+            h.querySelector(".sort-icon").textContent = "⌄";
+            h.classList.remove("sort-active");
+        });
+        header.classList.add("sort-active");
+
+        currentData.sort((a, b) => {
+            let valA = a[key];
+            let valB = b[key];
+
+            if (key === "above") {
+                valA = parseFloat(String(a[key]).replace("pp", "").replace("+", ""));
+                valB = parseFloat(String(b[key]).replace("pp", "").replace("+", ""));
+            }
+
+            if (typeof valA === "number" && typeof valB === "number") {
+                return asc ? valA - valB : valB - valA;
+            }
+            return asc ? String(valA).localeCompare(String(valB)) : String(valB).localeCompare(String(valA));
+        });
+
+        currentPage = 1;
+        renderTable(currentData);
+        renderChart(currentData);
     });
 });
 
