@@ -40,6 +40,45 @@
     flex-wrap: nowrap;
 }
 
+/* ── SECTIONS ROW inside one card ── */
+.sections-row {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+}
+
+.section-half {
+    flex: 1;
+    min-width: 0;
+    padding: 0 16px;
+}
+
+.section-half:first-child {
+    padding-left: 0;
+}
+
+.section-half:last-child {
+    padding-right: 0;
+}
+
+/* ── VERTICAL DIVIDER ── */
+.section-divider {
+    width: 1px;
+    background: #e3c8b0;
+    align-self: stretch;
+    flex-shrink: 0;
+}
+
+/* ── SUBSECTION TITLES ── */
+.subsection-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #888;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+
 /* ── FILTER TOGGLE BUTTON ── */
 .aa-filter-btn {
     display: flex;
@@ -319,6 +358,30 @@
 .dot.noinjury { background: #57b894; }
 .dot.all      { background: #576A8F;}
 
+
+/* ── PICTOGRAM TOOLTIP ── */
+.picto-tooltip {
+    position: fixed;
+    background: rgba(30, 30, 30, 0.92);
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.6;
+    pointer-events: none;
+    display: none;
+    z-index: 9999;
+    max-width: 200px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.picto-tooltip strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 4px;
+    color: #F3E3D0;
+}
+
 /* ── AGE ROWS ── */
 .age-rows {
     display: flex;
@@ -438,3 +501,30 @@
     color: white;
     border-color: #3d35b0;
 }
+
+
+/* HOW TO READ THIS PAGE */
+.how-to-read {
+    background: #fff8f0;
+    border: 1px solid #e3c8b0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.how-to-close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.how-to-close:hover { color: #e35336; }

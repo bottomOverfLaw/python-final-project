@@ -1,129 +1,163 @@
 <link rel="stylesheet" href="../static/people_injury.css">
 <script src="../static/api.js"></script>
+
 <div class="page-wrapper">
 
-    <!-- ── SECTION 1: INJURY OUTCOME BY GENDER ── -->
-    <section class="dashboard-section">
-        <h2 class="section-title">Injury outcome by gender:</h2>
-        <div class="section-body">
+    <!-- HOW TO READ THIS -->
+    <div class="how-to-read" id="howToRead">
+        <button class="how-to-close" onclick="document.getElementById('howToRead').style.display='none'">✕</button>
+        <strong>How to read this charts:</strong>
+        The bar charts show how many people of each gender were involved in road accidents, 
+        broken down by injury severity. The pictogram shows injury distribution per 100 people 
+        in each age group — each icon represents one person.
+    </div>
 
-            <!-- LEFT FILTER -->
-            <div class="filter-panel">
-                <button class="aa-filter-btn" id="filterToggleS1">
-                    <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
-                        <line x1="3" y1="5"  x2="17" y2="5"  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                        <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                        <line x1="7" y1="15" x2="13" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                    </svg>
-                    Filter
-                </button>
-                <div class="aa-filter-panel" id="filterPanelS1">
-                    <div class="filter-dropdown">
-                        <button class="filter-toggle">Injury level <span>&#8964;</span></button>
-                        <div class="filter-content">
-                            <div class="checkbox-group" id="injuryOptsS1"></div>
-                        </div>
-                    </div>
-                    <div class="filter-buttons">
-                        <button class="btn-apply" id="btnApplyS1">apply</button>
-                        <button class="btn-cancel" id="btnCancelS1">cancel</button>
-                    </div>
-                </div>
-            </div>
+<!-- ── SECTIONS 1 & 2 SIDE BY SIDE ── -->
+<section class="dashboard-section">
+    <h2 class="section-title">Injury outcome summary:</h2>
+    <div class="sections-row">
 
-            <!-- 3 BAR CHARTS by gender -->
-            <div class="chart-container">
-                <div class="gender-charts">
-                    <div class="gender-chart-wrap">
-                        <p class="gender-label">Male</p>
-                        <div style="position:relative; width:140px; height:220px;">
-                            <canvas id="chartMale"></canvas>
-                        </div>
-                    </div>
-                    <div class="gender-chart-wrap">
-                        <p class="gender-label">Female</p>
-                        <div style="position:relative; width:140px; height:220px;">
-                            <canvas id="chartFemale"></canvas>
-                        </div>
-                    </div>
-                    <div class="gender-chart-wrap">
-                        <p class="gender-label">Unknown</p>
-                        <div style="position:relative; width:140px; height:220px;">
-                            <canvas id="chartUnknown"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="bar-legend" id="barLegend"></div>
-            </div>
+        <!-- SECTION 1: BY GENDER -->
+        <div class="section-half">
+            <h3 class="subsection-title">By gender</h3>
+            <div class="section-body">
 
-        </div>
-    </section>
-
-    <!-- ── SECTION 2: PICTOGRAM ── -->
-    <section class="dashboard-section">
-        <h2 class="section-title">Injury outcome by age group:</h2>
-        <div class="section-body">
-
-            <!-- LEFT FILTER -->
-            <div class="filter-panel">
-                <button class="aa-filter-btn" id="filterToggleS1Right">
-                    <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
-                        <line x1="3" y1="5"  x2="17" y2="5"  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                        <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                        <line x1="7" y1="15" x2="13" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                    </svg>
-                    Filter
-                </button>
-                <div class="aa-filter-panel" id="filterPanelS1Right">
-                    <div class="filter-group">
+                <!-- LEFT FILTER -->
+                <div class="filter-panel">
+                    <button class="aa-filter-btn" id="filterToggleS1">
+                        <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
+                            <line x1="3" y1="5"  x2="17" y2="5"  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            <line x1="7" y1="15" x2="13" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                        Filter
+                    </button>
+                    <div class="aa-filter-panel" id="filterPanelS1">
                         <div class="filter-dropdown">
                             <button class="filter-toggle">Injury level <span>&#8964;</span></button>
                             <div class="filter-content">
-                                <div class="checkbox-group" id="injuryOptsS2"></div>
+                                <div class="checkbox-group" id="injuryOptsS1"></div>
                             </div>
                         </div>
-                        <div class="filter-dropdown">
-                            <button class="filter-toggle">Age group <span>&#8964;</span></button>
-                            <div class="filter-content">
-                                <div class="checkbox-group" id="ageOptsS2"></div>
+                        <div class="filter-buttons">
+                            <button class="btn-apply" id="btnApplyS1">apply</button>
+                            <button class="btn-cancel" id="btnCancelS1">cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3 BAR CHARTS -->
+                <div class="chart-container">
+                    <div class="gender-charts">
+                        <div class="gender-chart-wrap">
+                            <p class="gender-label">Male</p>
+                            <div style="position:relative; width:140px; height:220px;">
+                                <canvas id="chartMale"></canvas>
+                            </div>
+                        </div>
+                        <div class="gender-chart-wrap">
+                            <p class="gender-label">Female</p>
+                            <div style="position:relative; width:140px; height:220px;">
+                                <canvas id="chartFemale"></canvas>
+                            </div>
+                        </div>
+                        <div class="gender-chart-wrap">
+                            <p class="gender-label">Unknown</p>
+                            <div style="position:relative; width:140px; height:220px;">
+                                <canvas id="chartUnknown"></canvas>
                             </div>
                         </div>
                     </div>
-                    <div class="filter-buttons">
-                        <button class="btn-apply" id="btnApplyS2">apply</button>
-                        <button class="btn-cancel" id="btnCancelS2">cancel</button>
-                    </div>
+                    <div class="bar-legend" id="barLegend"></div>
                 </div>
-            </div>
 
-            <!-- PICTOGRAM -->
-            <div class="pictogram-panel">
-                <p class="chart-note">Each icon represents 1 person. Each age group total = 100 people (average)</p>
-                <div class="pictogram-legend">
-                    <span class="dot fatal"></span> FATAL
-                    <span class="dot serious"></span> SERIOUS
-                    <span class="dot other"></span> OTHER INJURY
-                    <span class="dot noinjury"></span> NO INJURY
-                    <span class="dot all"></span> ALL
-                </div>
-                <div class="age-rows">
-                    <div class="age-row">
-                        <div class="age-label">16–17<br><small>(100 people)</small></div>
-                        <div class="icon-grid" id="grid-1617"></div>
-                    </div>
-                    <div class="age-row">
-                        <div class="age-label">18–21<br><small>(100 people)</small></div>
-                        <div class="icon-grid" id="grid-1821"></div>
-                    </div>
-                    <div class="age-row">
-                        <div class="age-label">70+<br><small>(100 people)</small></div>
-                        <div class="icon-grid" id="grid-70plus"></div>
-                    </div>
-                </div>
             </div>
-
         </div>
-    </section>
+
+        <!-- DIVIDER -->
+        <div class="section-divider"></div>
+
+        <!-- SECTION 2: BY AGE GROUP -->
+        <div class="section-half">
+            <h3 class="subsection-title">By age group</h3>
+            <div class="section-body">
+
+                <!-- LEFT FILTER -->
+                <div class="filter-panel">
+                    <button class="aa-filter-btn" id="filterToggleS1Right">
+                        <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
+                            <line x1="3" y1="5"  x2="17" y2="5"  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            <line x1="7" y1="15" x2="13" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                        Filter
+                    </button>
+                    <div class="aa-filter-panel" id="filterPanelS1Right">
+                        <div class="filter-group">
+                            <div class="filter-dropdown">
+                                <button class="filter-toggle">Injury level <span>&#8964;</span></button>
+                                <div class="filter-content">
+                                    <div class="checkbox-group" id="injuryOptsS2"></div>
+                                </div>
+                            </div>
+                            <div class="filter-dropdown">
+                                <button class="filter-toggle">Age group <span>&#8964;</span></button>
+                                <div class="filter-content">
+                                    <div class="checkbox-group" id="ageOptsS2"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-buttons">
+                            <button class="btn-apply" id="btnApplyS2">apply</button>
+                            <button class="btn-cancel" id="btnCancelS2">cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PICTOGRAM -->
+                <div class="pictogram-panel">
+                    <p class="chart-note">Each icon represents 1 person. Each age group total = 100 people (average)</p>
+                    <div class="pictogram-legend">
+                        <span class="dot fatal"></span> FATAL
+                        <span class="dot serious"></span> SERIOUS
+                        <span class="dot other"></span> OTHER INJURY
+                        <span class="dot noinjury"></span> NO INJURY
+                        <span class="dot all"></span> ALL
+                    </div>
+                    <div class="age-rows">
+                        <div class="age-row">
+                            <div class="age-label">16–17<br><small>(100 people)</small></div>
+                            <div class="icon-grid" id="grid-1617"></div>
+                        </div>
+                        <div class="age-row">
+                            <div class="age-label">18–21<br><small>(100 people)</small></div>
+                            <div class="icon-grid" id="grid-1821"></div>
+                        </div>
+                        <div class="age-row">
+                            <div class="age-label">70+<br><small>(100 people)</small></div>
+                            <div class="icon-grid" id="grid-70plus"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+    <div class="how-to-read" id="howToRead">
+        <button class="how-to-close" onclick="document.getElementById('howToRead').style.display='none'">✕</button>
+        <strong>How to read this table:</strong>
+        This table shows the percentage of people who were fatally injured among those 
+        who were ejected from their vehicle or taken to hospital after an accident. 
+        Each row represents a unique combination of ejection status, hospitalisation, 
+        age group and road user type. The <strong>% Fatality</strong> column shows 
+        what proportion of people in that group died as a result of the accident. 
+        Rows are ordered from highest to lowest fatality rate. Use the filter to 
+        focus on specific groups — for example, ejected pedestrians in a particular 
+        age range.
+    </div>
 
     <!-- ── SECTION 3: EJECTED AND TAKEN TO HOSPITAL ── -->
     <section class="dashboard-section">
@@ -194,6 +228,9 @@
         </div>
     </section>
 
+    <!-- PICTOGRAM TOOLTIP -->
+    <div class="picto-tooltip" id="pictoTooltip"></div>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -217,6 +254,13 @@ const colourMap = {
     "Serious injury": "#f0b429",
     "Other injury":   "#c5d8ff",
     "Not injured":    "#57b894",
+};
+
+const TYPE_LABEL = {
+    fatal:   "Fatality",
+    serious: "Serious injury",
+    other:   "Other injury",
+    none:    "No injury",
 };
 
 const PAGE_SIZE = 20;
@@ -258,7 +302,7 @@ function attachCheckboxListeners() {
 
 document.querySelectorAll(".filter-buttons").forEach(b => b.style.display = "none");
 
-// ── APPLY/CANCEL — S1 (bar charts) ──
+// ── APPLY/CANCEL S1 ──
 document.getElementById("btnApplyS1").addEventListener("click", () => {
     document.getElementById("filterPanelS1").classList.remove("open");
     loadBarCharts();
@@ -270,7 +314,7 @@ document.getElementById("btnCancelS1").addEventListener("click", () => {
     loadBarCharts();
 });
 
-// ── APPLY/CANCEL — S2 (pictogram) ──
+// ── APPLY/CANCEL S2 ──
 document.getElementById("btnApplyS2").addEventListener("click", () => {
     document.getElementById("filterPanelS1Right").classList.remove("open");
     loadPictogram();
@@ -282,16 +326,16 @@ document.getElementById("btnCancelS2").addEventListener("click", () => {
     loadPictogram();
 });
 
-// ── APPLY/CANCEL — S3 (ejected table) ──
+// ── APPLY/CANCEL S3 ──
 document.getElementById("btnApplyS3").addEventListener("click", () => {
     document.getElementById("filterPanelS3").classList.remove("open");
-    loadSection2();
+    loadSection3();
 });
 document.getElementById("btnCancelS3").addEventListener("click", () => {
     document.querySelectorAll("#filterPanelS3 input").forEach(cb => cb.checked = false);
     document.getElementById("filterPanelS3").classList.remove("open");
     updateFilterButtons();
-    loadSection2();
+    loadSection3();
 });
 
 // ── RENDER 3 GENDER CHARTS ──
@@ -345,13 +389,12 @@ function renderGenderCharts(data) {
     chartFemale  = makeSingleChart("chartFemale",  data.Female  || [], chartFemale);
     chartUnknown = makeSingleChart("chartUnknown", data.Unknown || [], chartUnknown);
 
-    const colourOrder = [
+    document.getElementById("barLegend").innerHTML = [
         { label: "Fatality",       color: "#e35336" },
         { label: "Serious injury", color: "#f0b429" },
         { label: "Other injury",   color: "#c5d8ff" },
         { label: "Not injured",    color: "#57b894" },
-    ];
-    document.getElementById("barLegend").innerHTML = colourOrder.map(c => `
+    ].map(c => `
         <div class="bar-legend-item">
             <span class="bar-legend-sq" style="background:${c.color}"></span>
             ${c.label}
@@ -360,7 +403,9 @@ function renderGenderCharts(data) {
 }
 
 // ── PICTOGRAM ──
-function buildIconGrid(gridId, data, selectedTypes) {
+const tooltip = document.getElementById("pictoTooltip");
+
+function buildIconGrid(gridId, data, selectedTypes, ageLabel) {
     const container = document.getElementById(gridId);
     if (!container) return;
     container.innerHTML = "";
@@ -384,6 +429,24 @@ function buildIconGrid(gridId, data, selectedTypes) {
             svg.setAttribute("fill", isSelected ? COLOURS[type] : "#576A8F");
             svg.classList.add("person-icon", type);
             svg.innerHTML = `<circle cx="12" cy="5" r="3"/><path d="M12 10c-4 0-6 2-6 4v2h12v-2c0-2-2-4-6-4z"/>`;
+
+            svg.addEventListener("mouseenter", () => {
+                tooltip.innerHTML = `
+                    <strong>Age group: ${ageLabel}</strong>
+                    ${TYPE_LABEL[type]}<br>
+                    ${count} out of 100 people<br>
+                    (${count}%)
+                `;
+                tooltip.style.display = "block";
+            });
+            svg.addEventListener("mousemove", (e) => {
+                tooltip.style.left = (e.clientX + 14) + "px";
+                tooltip.style.top  = (e.clientY - 10) + "px";
+            });
+            svg.addEventListener("mouseleave", () => {
+                tooltip.style.display = "none";
+            });
+
             container.appendChild(svg);
         }
     }
@@ -463,23 +526,21 @@ document.querySelectorAll(".sort-arrow").forEach((arrow, colIndex) => {
 async function loadFilterOptions() {
     const options = await API.filterOptions();
 
-    // S1 — bar chart injury levels
     document.getElementById("injuryOptsS1").innerHTML =
         options.injury_levels.map(o => `
             <label><input type="checkbox" value="${o.id}"> ${o.label}</label>
         `).join("");
 
-    // S2 — pictogram injury levels + age groups
     document.getElementById("injuryOptsS2").innerHTML =
         options.injury_levels.map(o => `
             <label><input type="checkbox" value="${o.id}"> ${o.label}</label>
         `).join("");
+
     document.getElementById("ageOptsS2").innerHTML =
         options.age_groups.map(age => `
             <label><input type="checkbox" value="${age}"> ${age}</label>
         `).join("");
 
-    // S3 — ejected table
     document.getElementById("ejectedOpts").innerHTML = `
         <label><input type="checkbox" value="Y"> Yes</label>
         <label><input type="checkbox" value="N"> No</label>
@@ -503,9 +564,9 @@ async function loadFilterOptions() {
 // ── LOAD BAR CHARTS ──
 async function loadBarCharts() {
     try {
-        const checked = [...document.querySelectorAll("#filterPanelS1 input:checked")];
-        const levels  = checked.map(cb => parseInt(cb.value));
-        const data    = await API.injurySummaryBySex(levels.length ? levels : []);
+        const levels = [...document.querySelectorAll("#injuryOptsS1 input:checked")]
+            .map(cb => parseInt(cb.value));
+        const data = await API.injurySummaryBySex(levels.length ? levels : []);
         renderGenderCharts(data);
     } catch (err) {
         console.error("Error loading bar charts:", err);
@@ -540,7 +601,7 @@ async function loadPictogram() {
         pictoAges.forEach(age => {
             const safeId  = `grid-${age.replace(/[^a-z0-9]/gi, "")}`;
             const ageData = pictoData[age] || { fatal: 0, serious: 0, other: 0, none: 0 };
-            buildIconGrid(safeId, ageData, selectedTypes);
+            buildIconGrid(safeId, ageData, selectedTypes, age);
         });
 
         document.querySelector(".chart-note").textContent = selectedTypes.length
@@ -552,8 +613,8 @@ async function loadPictogram() {
     }
 }
 
-// ── LOAD SECTION 3 (ejected table) ──
-async function loadSection2() {
+// ── LOAD SECTION 3 ──
+async function loadSection3() {
     try {
         ejectedPage = 1;
         const ejected      = [...document.querySelectorAll("#ejectedOpts input:checked")].map(cb => cb.value);
@@ -578,6 +639,6 @@ async function loadSection2() {
 loadFilterOptions().then(() => {
     loadBarCharts();
     loadPictogram();
-    loadSection2();
+    loadSection3();
 });
 </script>
