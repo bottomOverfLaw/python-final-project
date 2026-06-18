@@ -32,6 +32,7 @@ def people_analysis(filters=None):
     ]
     params = []
 
+    # Safely convert query params from server.py to proper types
     if "level" in filters and filters["level"]:
         levels = filters["level"] if isinstance(filters["level"], list) else [filters["level"]]
         ph = ",".join("?" * len(levels))
@@ -50,8 +51,21 @@ def people_analysis(filters=None):
         where_clauses.append(f"a.LIGHT_CONDITION IN ({ph})")
         params += [int(v) for v in lights]
 
+    if "type" in filters and filters["type"]:
+        types = filters["type"] if isinstance(filters["type"], list) else [filters["type"]]
+        ph = ",".join("?" * len(types))
+        where_clauses.append(f"p.ROAD_USER_TYPE IN ({ph})")
+        params += [int(v) for v in types]
+
+    if "speed" in filters and filters["speed"]:
+        speeds = filters["speed"] if isinstance(filters["speed"], list) else [filters["speed"]]
+        ph = ",".join("?" * len(speeds))
+        where_clauses.append(f"a.SPEED_ZONE IN ({ph})")
+        params += [int(v) for v in speeds]
+
     where = "WHERE " + " AND ".join(where_clauses)
 
+    # 1. Direct fetch using query wrapper (assumes query function is globally accessible in Level3_query)
     raw_rows = query(f"""
         SELECT
             CASE WHEN p.AGE_GROUP = '5-Dec' THEN '5-12' ELSE p.AGE_GROUP END AS age,
@@ -67,41 +81,58 @@ def people_analysis(filters=None):
     if not raw_rows:
         return []
 
+    # 2. Count demographic group populations and separate fatalities
     env_counts = {}
+    fatal_counts = {}
     split_counts = {}
 
     for r in raw_rows:
         env_key = (r["age"], r["person_type_id"], r["speed_zone"], r["light_id"])
         split_key = (r["age"], r["person_type_id"], r["speed_zone"], r["light_id"], r["injury_id"])
+        
         env_counts[env_key] = env_counts.get(env_key, 0) + 1
         split_counts[split_key] = split_counts.get(split_key, 0) + 1
+        
+        if r["injury_id"] == 1: 
+            fatal_counts[env_key] = fatal_counts.get(env_key, 0) + 1
 
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-
-    cur.execute("SELECT ROAD_USER_TYPE, ROAD_USER_TYPE_DESC FROM Road_User")
-    ru_map = {r["ROAD_USER_TYPE"]: r["ROAD_USER_TYPE_DESC"] for r in cur.fetchall()}
-
-    cur.execute("SELECT COND_ID, COND_NAME FROM Light_Condition")
-    lc_map = {r["COND_ID"]: r["COND_NAME"] for r in cur.fetchall()}
+    # 3. Lookup mapping descriptions safely using the query wrapper
+    try:
+        ru_data = query("SELECT ROAD_USER_TYPE, ROAD_USER_TYPE_DESC FROM Road_User")
+        ru_map = {r["ROAD_USER_TYPE"]: r["ROAD_USER_TYPE_DESC"] for r in ru_data}
+    except Exception:
+        ru_map = {}
 
     try:
-        cur.execute("SELECT INJ_LEVEL, INJ_LEVEL_DESC FROM Injury_Level")
-        inj_map = {r["INJ_LEVEL"]: r["INJ_LEVEL_DESC"].replace("-", " ") for r in cur.fetchall()}
-    except sqlite3.OperationalError:
+        lc_data = query("SELECT COND_ID, COND_NAME FROM Light_Condition")
+        lc_map = {r["COND_ID"]: r["COND_NAME"] for r in lc_data}
+    except Exception:
+        lc_map = {}
+
+    try:
+        inj_data = query("SELECT INJ_LEVEL, INJ_LEVEL_DESC FROM Injury_Level")
+        inj_map = {r["INJ_LEVEL"]: r["INJ_LEVEL_DESC"].replace("-", " ") for r in inj_data}
+    except Exception:
         inj_map = {1: "Fatal", 2: "Serious Injury", 3: "Other Injury", 4: "Non Injury"}
 
-    conn.close()
-
+    # 4. Process individual table rows
     rows = []
-    for split_key, sub_total in split_counts.items():
+    for split_key, split_total in split_counts.items():
         age, pt_id, sz, l_id, inj_id = split_key
         env_key = (age, pt_id, sz, l_id)
         env_total = env_counts[env_key]
-        if env_total <= 10:
+        
+        # Enforce the rule (> 50 total records in this cohort)
+        if env_total <= 50:
             continue
-        rate = round((100.0 * sub_total) / env_total, 2)
+            
+        # If the row is an uninjured category ("Non Injury"), its threat rate calculation should reflect actual group fatalities (0%).
+        if inj_id == 4:
+            rate = 0.0
+        else:
+            fatality_count = fatal_counts.get(env_key, 0)
+            rate = round((100.0 * fatality_count) / env_total, 2)
+        
         rows.append({
             "age": age,
             "person_type_id": pt_id,
@@ -112,24 +143,28 @@ def people_analysis(filters=None):
             "injury_id": inj_id,
             "injury": inj_map.get(inj_id, f"Injury Level {inj_id}"),
             "injury_rate": rate,
-            "total": sub_total
+            "total": env_total  
         })
 
     if not rows:
         return []
 
+    # 5. Calculate clean deviations based on true threat percentages
     avg = sum(r["injury_rate"] for r in rows) / len(rows)
     for r in rows:
-        if "injury" in r:
-            r["injury"] = r["injury"].replace("-", " ")
-        diff = round(r["injury_rate"] - avg, 1)
-        r["above"] = f"+{diff}pp" if diff >= 0 else f"{diff}pp"
-        if "Non Injury" in r["injury"]:
-            r["above_class"] = "negative" if diff >= 0 else "positive"
+        if r["injury_id"] == 4:
+            # Non-injury entries explicitly evaluate to 0pp deviation as requested
+            r["above"] = "0.0pp"
+            r["above_class"] = "negative"
         else:
+            diff = round(r["injury_rate"] - avg, 1)
+            r["above"] = f"+{diff}pp" if diff >= 0 else f"{diff}pp"
             r["above_class"] = "positive" if diff >= 0 else "negative"
 
+    # Sort genuine risk directly to the top (highest threat percentages drops first)
     rows.sort(key=lambda x: x["injury_rate"], reverse=True)
+    
+    # 🌟 FIX FOR server.py: Return the PURE LIST so the server script can process it without crashing!
     return rows
 
 

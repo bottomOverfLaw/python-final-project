@@ -125,6 +125,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 "level": params.get("level", []),
                 "age":   params.get("age", []),
                 "light": params.get("light", []),
+                "type":  params.get("type", []), 
+                "speed": params.get("speed", []),
             }.items() if v}
             table = people_analysis(filters)
 
