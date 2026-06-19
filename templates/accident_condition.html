@@ -62,6 +62,13 @@
 
     <!-- Right panel: chart title + canvas -->
     <div class="ac-right">
+
+      <!-- Summary banner -->
+      <div class="ac-summary-banner" id="summaryBanner">
+        <p class="ac-summary-text" id="summaryText"></p>
+        <button class="ac-summary-close" id="summaryClose">&times;</button>
+      </div>
+
       <h3 class="ac-chart-title" id="chartTitle">Accident by road condition:</h3>
       <div class="ac-chart-wrap">
         <canvas id="conditionChart"></canvas>
@@ -95,15 +102,23 @@
   const COLORS = ['#534AB7', '#1D9E75', '#D85A30', '#185FA5', '#9B8DD4',
                   '#E8A838', '#2BB5A0', '#C74B8A'];
 
+  const CONDITION_LABELS = {
+    road:    'road condition',
+    weather: 'weather condition',
+    light:   'light condition'
+  };
+
   let currentCondition = 'road';
   let currentPostcode  = '';
   let chartInstance    = null;
+  let summaryDismissed = false;
 
   function refresh() {
     API.accidentConditions(currentCondition, currentPostcode)
       .then(function(data) {
         updateChart(data);
         updateTable(data);
+        updateSummary(data);
       })
       .catch(function(err) {
         console.error('Failed to load condition data:', err);
@@ -170,6 +185,48 @@
     });
   }
 
+  function updateSummary(data) {
+    const banner = document.getElementById('summaryBanner');
+    const textEl = document.getElementById('summaryText');
+
+    if (summaryDismissed) {
+      banner.style.display = 'none';
+      return;
+    }
+
+    if (!data.chart.labels.length) {
+      banner.style.display = 'none';
+      return;
+    }
+
+    const labels = data.chart.labels;
+    const values = data.chart.values;
+    const total  = values.reduce((a, b) => a + b, 0);
+
+    let maxIdx = 0;
+    for (let i = 1; i < values.length; i++) {
+      if (values[i] > values[maxIdx]) maxIdx = i;
+    }
+    const topLabel = labels[maxIdx];
+    const topValue = values[maxIdx];
+    const topPct   = total > 0 ? Math.round((topValue / total) * 100) : 0;
+
+    const conditionName = CONDITION_LABELS[currentCondition] || currentCondition;
+    const locationText  = currentPostcode
+      ? 'in postcode <span class="ac-summary-highlight">' + currentPostcode + '</span>'
+      : 'across all postcodes';
+
+    textEl.innerHTML =
+      '<strong>Summary:</strong> ' + locationText + ', there are ' +
+      '<span class="ac-summary-highlight">' + total.toLocaleString() + '</span> recorded accidents by ' +
+      conditionName + '. The most common condition is ' +
+      '<span class="ac-summary-highlight">' + topLabel + '</span> with ' +
+      '<span class="ac-summary-highlight">' + topValue.toLocaleString() + '</span> accidents ' +
+      '(<span class="ac-summary-highlight">' + topPct + '%</span> of the total).';
+
+    banner.style.display = 'flex';
+  }
+
   /* Icon switching — only affects active condition, both chart and table update */
   document.querySelectorAll('.ac-icon').forEach(function(el) {
     el.addEventListener('click', function() {
@@ -185,9 +242,18 @@
     if (e.key === 'Enter') {
       currentPostcode = this.value.trim();
       API.accidentConditions(currentCondition, currentPostcode)
-        .then(function(data) { updateChart(data); })
+        .then(function(data) {
+          updateChart(data);
+          updateSummary(data);
+        })
         .catch(function(err) { console.error('Failed to load postcode data:', err); });
     }
+  });
+
+  /* Dismiss summary banner */
+  document.getElementById('summaryClose').addEventListener('click', function() {
+    summaryDismissed = true;
+    document.getElementById('summaryBanner').style.display = 'none';
   });
 
   /* Initial load */

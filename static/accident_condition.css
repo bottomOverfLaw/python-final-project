@@ -102,6 +102,46 @@
     padding: 20px;
 }
 
+/* Summary banner */
+.ac-summary-banner {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    background: #fdf2ec;
+    border: 1px solid #f0d9c8;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+}
+
+.ac-summary-text {
+    font-size: 13px;
+    color: #444;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.ac-summary-highlight {
+    color: #534AB7;
+    font-weight: 700;
+}
+
+.ac-summary-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #888;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+    flex-shrink: 0;
+}
+
+.ac-summary-close:hover {
+    color: #444;
+}
+
 .ac-chart-title {
     font-size: 15px;
     font-weight: 600;

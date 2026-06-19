@@ -94,12 +94,20 @@
   <div class="aa-charts-row">
     <div class="aa-chart-panel">
       <h3 class="aa-chart-title">Accident by road type</h3>
+      <div class="aa-summary-banner" id="pieSummaryBanner">
+        <p class="aa-summary-text" id="pieSummaryText"></p>
+        <button class="aa-summary-close" id="pieSummaryClose">&times;</button>
+      </div>
       <div class="aa-pie-box">
         <canvas id="pieChart"></canvas>
       </div>
     </div>
     <div class="aa-chart-panel">
       <h3 class="aa-chart-title">Accidents trend in the last years</h3>
+      <div class="aa-summary-banner" id="lineSummaryBanner">
+        <p class="aa-summary-text" id="lineSummaryText"></p>
+        <button class="aa-summary-close" id="lineSummaryClose">&times;</button>
+      </div>
       <div class="aa-line-wrap">
         <canvas id="lineChart"></canvas>
       </div>
@@ -126,6 +134,8 @@
   var allRows         = [];
   var currentPage     = 1;
   var rowsPerPage     = 20;
+  var pieSummaryDismissed  = false;
+  var lineSummaryDismissed = false;
 
   // ── SHOW/HIDE FILTER ACTIONS ──
   function updateFilterActions() {
@@ -152,7 +162,6 @@
 
   // ── BUILD FILTER UI FROM API DATA ──
   function buildFilterUI(filterOptions) {
-    // Condition filters
     ['light', 'atmo', 'road'].forEach(function(type) {
       var container = document.getElementById(type + 'Opts');
       container.innerHTML = '';
@@ -165,7 +174,6 @@
       });
     });
 
-    // Year dropdowns
     var years = filterOptions.years || [];
     var fromSel = document.getElementById('yearFrom');
     var toSel   = document.getElementById('yearTo');
@@ -180,7 +188,6 @@
     fromSel.addEventListener('change', function() { updateExcludeYears(); updateFilterActions(); });
     toSel.addEventListener('change',   function() { updateExcludeYears(); updateFilterActions(); });
 
-    // Exclude year checkboxes
     var excContainer = document.getElementById('yearExcludeOpts');
     years.forEach(function(y) {
       var lbl = document.createElement('label');
@@ -275,6 +282,29 @@
     document.querySelector('.aa-table-wrap').after(wrap);
   }
 
+  // ── BUILD FILTER DESCRIPTION TEXT ──
+  function buildFilterDescription() {
+    var parts = [];
+    if (currentPostcode) parts.push('postcode <span class="aa-summary-highlight">' + currentPostcode + '</span>');
+    if (activeFilters.light.length) parts.push('light condition <span class="aa-summary-highlight">' + activeFilters.light.join(', ') + '</span>');
+    if (activeFilters.atmo.length)  parts.push('atmospheric condition <span class="aa-summary-highlight">' + activeFilters.atmo.join(', ') + '</span>');
+    if (activeFilters.road.length)  parts.push('road condition <span class="aa-summary-highlight">' + activeFilters.road.join(', ') + '</span>');
+
+    var yearFrom = document.getElementById('yearFrom').value;
+    var yearTo   = document.getElementById('yearTo').value;
+    var excluded = [];
+    document.querySelectorAll('.year-exclude-cb:checked').forEach(function(cb) { excluded.push(cb.value); });
+
+    if (yearFrom || yearTo) {
+      var rangeText = 'years <span class="aa-summary-highlight">' + (yearFrom || 'earliest') + '–' + (yearTo || 'latest') + '</span>';
+      if (excluded.length) rangeText += ' excluding <span class="aa-summary-highlight">' + excluded.join(', ') + '</span>';
+      parts.push(rangeText);
+    }
+
+    if (!parts.length) return 'across all postcodes, conditions, and years';
+    return 'filtered by ' + parts.join(', ');
+  }
+
   // ── PIE CHART ──
   function renderPie(pie) {
     var maxSlices = 10;
@@ -332,6 +362,36 @@
         }
       }
     });
+
+    updatePieSummary(finalLabels, finalValues, total);
+  }
+
+  function updatePieSummary(labels, values, total) {
+    var banner = document.getElementById('pieSummaryBanner');
+    var textEl = document.getElementById('pieSummaryText');
+
+    if (pieSummaryDismissed || !labels.length) {
+      banner.style.display = 'none';
+      return;
+    }
+
+    var maxIdx = 0;
+    for (var i = 1; i < values.length; i++) {
+      if (values[i] > values[maxIdx]) maxIdx = i;
+    }
+    var topLabel = labels[maxIdx];
+    var topValue = values[maxIdx];
+    var topPct   = total > 0 ? Math.round((topValue / total) * 100) : 0;
+    var filterDesc = buildFilterDescription();
+
+    textEl.innerHTML =
+      '<strong>Summary:</strong> ' + filterDesc + ', there are ' +
+      '<span class="aa-summary-highlight">' + total.toLocaleString() + '</span> total accidents by road type. ' +
+      'The most common is <span class="aa-summary-highlight">' + topLabel + '</span> with ' +
+      '<span class="aa-summary-highlight">' + topValue.toLocaleString() + '</span> accidents ' +
+      '(<span class="aa-summary-highlight">' + topPct + '%</span> of the total).';
+
+    banner.style.display = 'flex';
   }
 
   // ── LINE CHART ──
@@ -380,6 +440,58 @@
         }
       }
     });
+
+    updateLineSummary(line.labels, line.values);
+  }
+
+  function updateLineSummary(labels, values) {
+    var banner = document.getElementById('lineSummaryBanner');
+    var textEl = document.getElementById('lineSummaryText');
+
+    if (lineSummaryDismissed || !labels.length) {
+      banner.style.display = 'none';
+      return;
+    }
+
+    var total = values.reduce(function(a, b) { return a + b; }, 0);
+
+    var maxIdx = 0, minIdx = 0;
+    for (var i = 1; i < values.length; i++) {
+      if (values[i] > values[maxIdx]) maxIdx = i;
+      if (values[i] < values[minIdx]) minIdx = i;
+    }
+    var peakYear  = labels[maxIdx];
+    var peakValue = values[maxIdx];
+    var lowYear   = labels[minIdx];
+    var lowValue  = values[minIdx];
+
+    var trendText = '';
+    if (values.length >= 2) {
+      var first = values[0];
+      var last  = values[values.length - 1];
+      if (last > first) {
+        trendText = 'Overall accidents have <span class="aa-summary-highlight">increased</span> from ' +
+          first.toLocaleString() + ' in ' + labels[0] + ' to ' + last.toLocaleString() + ' in ' + labels[labels.length - 1] + '.';
+      } else if (last < first) {
+        trendText = 'Overall accidents have <span class="aa-summary-highlight">decreased</span> from ' +
+          first.toLocaleString() + ' in ' + labels[0] + ' to ' + last.toLocaleString() + ' in ' + labels[labels.length - 1] + '.';
+      } else {
+        trendText = 'Accidents have remained roughly stable across the selected years.';
+      }
+    }
+
+    var filterDesc = buildFilterDescription();
+
+    textEl.innerHTML =
+      '<strong>Summary:</strong> ' + filterDesc + ', there are ' +
+      '<span class="aa-summary-highlight">' + total.toLocaleString() + '</span> total accidents recorded over ' +
+      '<span class="aa-summary-highlight">' + labels.length + '</span> year(s). The peak year is ' +
+      '<span class="aa-summary-highlight">' + peakYear + '</span> with ' +
+      '<span class="aa-summary-highlight">' + peakValue.toLocaleString() + '</span> accidents, and the lowest is ' +
+      '<span class="aa-summary-highlight">' + lowYear + '</span> with ' +
+      '<span class="aa-summary-highlight">' + lowValue.toLocaleString() + '</span>. ' + trendText;
+
+    banner.style.display = 'flex';
   }
 
   // ── REFRESH ──
@@ -474,5 +586,15 @@
       currentPostcode = this.value.trim();
       refresh();
     }
+  });
+
+  // ── DISMISS SUMMARY BANNERS ──
+  document.getElementById('pieSummaryClose').addEventListener('click', function() {
+    pieSummaryDismissed = true;
+    document.getElementById('pieSummaryBanner').style.display = 'none';
+  });
+  document.getElementById('lineSummaryClose').addEventListener('click', function() {
+    lineSummaryDismissed = true;
+    document.getElementById('lineSummaryBanner').style.display = 'none';
   });
 </script>
