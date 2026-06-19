@@ -38,7 +38,7 @@ ul {
 
 /* NAVBAR ITEMS */
 ul li {
-    margin: 0;          /* fixed: was "margin: 15" which is invalid, needs a unit */
+    margin: 0;       
 }
 
 /* NAVBAR LINKS */
