@@ -122,8 +122,8 @@ def people_analysis(filters=None):
         env_key = (age, pt_id, sz, l_id)
         env_total = env_counts[env_key]
         
-        # Enforce the rule (> 50 total records in this cohort)
-        if env_total <= 50:
+        # Enforce the rule (> 10 total records in this cohort)
+        if env_total <= 10:
             continue
             
         # If the row is an uninjured category ("Non Injury"), its threat rate calculation should reflect actual group fatalities (0%).
@@ -163,7 +163,7 @@ def people_analysis(filters=None):
     # Sort genuine risk directly to the top (highest threat percentages drops first)
     rows.sort(key=lambda x: x["injury_rate"], reverse=True)
     
-    # return the PURE LIST so the server script can process it without crashing!
+    # return the PURE LIST so the server script can process it without crashing
     return rows
 
 
