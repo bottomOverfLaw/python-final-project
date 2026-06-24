@@ -152,6 +152,8 @@ def people_analysis(filters=None):
             r["above"] = f"+{diff}pp" if diff >= 0 else f"{diff}pp"
             r["above_class"] = "positive" if diff >= 0 else "negative"
 
+    # Sort rows by injury_rate descending (highest risk first) — default table order.
+    # JS handles any re-sorting the user triggers client-side, no DB round-trip needed.
     rows.sort(key=lambda x: x["injury_rate"], reverse=True)
 
     return rows
