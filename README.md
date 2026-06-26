@@ -54,7 +54,6 @@ CrashLens is designed around two user personas:
 ### Prerequisites
 
 - Python 3.x
-- SQLite database file (not included in this repository due to size constraints — see below)
 
 ### Setup
 
@@ -64,15 +63,12 @@ CrashLens is designed around two user personas:
    cd <repo-folder>
    ```
 
-2. **Add the database file:**
-   The SQLite `.db` file is not included in this repository due to the 100MB GitHub Classroom limit. Place the database file in the project root as instructed by your course materials.
-
-3. **Run the server:**
+2. **Run the server:**
    ```bash
    python server.py
    ```
 
-4. **Open in your browser:**
+3. **Open in your browser:**
    ```
    http://localhost:8000
    ```
