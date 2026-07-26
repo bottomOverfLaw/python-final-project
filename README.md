@@ -6,12 +6,18 @@ An interactive data dashboard for exploring Victorian road accident statistics. 
 
 ## 👥 Team
 
-| Name | Student ID |
-|------|------------|
-| Laura | S4257196 |
-| Ayan Goel | S4252762 |
+| Name |
+|------|
+| Laura Albrile | 
+| Ayan Goel | 
 
 **Team:** team36
+
+---
+
+## 📄 License
+
+This project was created for academic purposes at RMIT University. Not for commercial use.
 
 ---
 
@@ -98,9 +104,3 @@ CrashLens is designed around two user personas:
 
 - All filter state is managed client-side; filter options are loaded via `/api/filter-options`.
 - Age group labels have been normalised (e.g. `5-Dec` → `5-12`) via `CASE WHEN` logic in SQL queries.
-
----
-
-## 📄 License
-
-This project was created for academic purposes at RMIT University. Not for commercial use.
